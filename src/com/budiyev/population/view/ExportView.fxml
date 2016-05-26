@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.budiyev.population.controller.ExportController">
+<children>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Label text="%export_column_separator" />
+            <ChoiceBox fx:id="mColumnSeparatorChoiceBox" prefWidth="150.0" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Label text="%export_decimal_separator" />
+            <ChoiceBox fx:id="mDecimalSeparatorChoiceBox" prefWidth="150.0" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Label text="%export_line_separator" />
+            <ChoiceBox fx:id="mLineSeparatorChoiceBox" prefWidth="150.0" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Label text="%export_encoding" />
+            <ChoiceBox fx:id="mEncodingChoiceBox" prefWidth="150.0" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#restoreDefaults" text="%default" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="mSaveButton" mnemonicParsing="false" onAction="#save" text="%save" />
+            <Button mnemonicParsing="false" onAction="#close" text="%close" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+   </padding>
+</VBox>

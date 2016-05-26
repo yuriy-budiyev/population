@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.budiyev.population.controller.PrimaryController">
+    <children>
+        <MenuBar VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="%task">
+                    <items>
+                        <MenuItem fx:id="mClearMenuItem" mnemonicParsing="false" onAction="#clearTask" text="%clear" />
+                        <MenuItem fx:id="mOpenMenuItem" mnemonicParsing="false" onAction="#openTask" text="%open" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="mSaveMenuItem" mnemonicParsing="false" onAction="#saveTask" text="%save" />
+                        <MenuItem fx:id="mSaveAsMenuItem" mnemonicParsing="false" onAction="#saveTaskAs" text="%save_as" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="mQuitMenuItem" mnemonicParsing="false" onAction="#quit" text="%quit" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="%help">
+                    <items>
+                        <MenuItem fx:id="mAboutMenuItem" mnemonicParsing="false" onAction="#about" text="%about" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <tabs>
+                <Tab text="%states">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addState" text="%add" />
+                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeState" text="%remove" />
+                                    </children>
+                                </HBox>
+                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateUp" text="%move_up" />
+                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateDown" text="%move_down" />
+                                    </children>
+                                </HBox>
+                                <TableView fx:id="mStatesTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="49.0">
+                                    <columns>
+                                        <TableColumn fx:id="mStatesTableNameColumn" prefWidth="150.0" sortable="false" text="%state_name" />
+                                        <TableColumn fx:id="mStatesTableCountColumn" prefWidth="150.0" sortable="false" text="%state_count" />
+                                        <TableColumn fx:id="mStatesTableDescriptionColumn" prefWidth="400.0" sortable="false" text="%description" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="%transitions">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addTransition" text="%add" />
+                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeTransition" text="%remove" />
+                                    </children>
+                                </HBox>
+                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionUp" text="%move_up" />
+                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionDown" text="%move_down" />
+                                    </children>
+                                </HBox>
+                                <TableView fx:id="mTransitionsTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="49.0">
+                                    <columns>
+                                        <TableColumn fx:id="mTransitionsTableSourceStateColumn" prefWidth="75.0" sortable="false" text="%transition_source_state" />
+                                        <TableColumn fx:id="mTransitionsTableSourceCoefficientColumn" prefWidth="45.0" sortable="false" text="%transition_source_coefficient" />
+                                        <TableColumn fx:id="mTransitionsTableSourceDelayColumn" prefWidth="45.0" sortable="false" text="%transition_source_delay" />
+                                        <TableColumn fx:id="mTransitionsTableOperandStateColumn" prefWidth="75.0" sortable="false" text="%transition_operand_state" />
+                                        <TableColumn fx:id="mTransitionsTableOperandCoefficientColumn" prefWidth="45.0" sortable="false" text="%transition_operand_coefficient" />
+                                        <TableColumn fx:id="mTransitionsTableOperandDelayColumn" prefWidth="45.0" sortable="false" text="%transition_operand_delay" />
+                                        <TableColumn fx:id="mTransitionsTableResultStateColumn" prefWidth="75.0" sortable="false" text="%transition_result_state" />
+                                        <TableColumn fx:id="mTransitionsTableResultCoefficientColumn" prefWidth="45.0" sortable="false" text="%transition_result_coefficient" />
+                                        <TableColumn fx:id="mTransitionsTableProbabilityColumn" prefWidth="90.0" sortable="false" text="%transition_probability" />
+                                        <TableColumn fx:id="mTransitionsTableTypeColumn" prefWidth="75.0" sortable="false" text="%transition_type" />
+                                        <TableColumn fx:id="mTransitionsTableModeColumn" prefWidth="75.0" sortable="false" text="%transition_mode" />
+                                        <TableColumn fx:id="mTransitionsTableDescriptionColumn" prefWidth="150.0" sortable="false" text="%description" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="%calculations">
+                    <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="8.0" prefWidth="0.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label fx:id="mStartPointLabel" text="%start_point" />
+                                                <TextField fx:id="mStartPointField" onAction="#calculate" text="0" />
+                                                <Label fx:id="mStepsCountLabel" text="%steps_count" />
+                                                <TextField fx:id="mStepsCountField" onAction="#calculate" text="0" />
+                                                <Button fx:id="mCalculateButton" mnemonicParsing="false" onAction="#calculate" text="%calculate" textOverrun="CLIP" />
+                                                <ProgressBar fx:id="mCalculationProgressBar" maxWidth="+Infinity" prefWidth="25.0" progress="0.0" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <CheckBox fx:id="mHigherAccuracy" mnemonicParsing="false" text="%higher_accuracy" />
+                                                <CheckBox fx:id="mAllowNegativeNumbers" mnemonicParsing="false" text="%allow_negative_values" />
+                                                <CheckBox fx:id="mResultsOnChart" mnemonicParsing="false" selected="true" text="%results_on_chart" />
+                                                <CheckBox fx:id="mResultsInTable" mnemonicParsing="false" selected="true" text="%results_in_table" />
+                                            </children>
+                                            <padding>
+                                                <Insets top="10.0" />
+                                            </padding>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                <TabPane layoutY="68.0" prefHeight="395.0" prefWidth="870.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="66.0">
+                                    <tabs>
+                                        <Tab text="%result_chart">
+                                            <content>
+                                                <AnchorPane fx:id="mResultsChartContainer">
+                                                    <children>
+                                                        <LineChart fx:id="mResultsChart" layoutX="14.0" layoutY="14.0" legendSide="RIGHT" prefHeight="311.0" prefWidth="860.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
+                                                            <xAxis>
+                                                                <NumberAxis side="BOTTOM" />
+                                                            </xAxis>
+                                                            <yAxis>
+                                                                <NumberAxis side="LEFT" />
+                                                            </yAxis>
+                                                        </LineChart>
+                                                    </children>
+                                                </AnchorPane>
+                                            </content>
+                                        </Tab>
+                                        <Tab text="%result_chart_settings">
+                                            <content>
+                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                    <children>
+                                                        <TableView fx:id="mChartSettingsTable" editable="true" layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0">
+                                                            <columns>
+                                                                <TableColumn fx:id="mChartSettingsTableVisibilityColumn" prefWidth="100.0" sortable="false" text="%visibility" />
+                                                                <TableColumn fx:id="mChartSettingsTableNameColumn" prefWidth="150.0" sortable="false" text="%state_name" />
+                                                                <TableColumn fx:id="mChartSettingsTableColorColumn" prefWidth="125.0" sortable="false" text="%color" />
+                                                                <TableColumn fx:id="mChartSettingsTableDashColumn" prefWidth="125.0" sortable="false" text="%dash" />
+                                                                <TableColumn fx:id="mChartSettingsTableThicknessColumn" prefWidth="125.0" sortable="false" text="%thickness" />
+                                                            </columns>
+                                                        </TableView>
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                                            <children>
+                                                                <Button fx:id="mClearResultsChartButton" mnemonicParsing="false" onAction="#clearResultsChart" text="%clear" />
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </AnchorPane>
+                                            </content>
+                                        </Tab>
+                                        <Tab text="%result_table">
+                                            <content>
+                                                <AnchorPane>
+                                                    <children>
+                                                        <TableView fx:id="mResultsTable" layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
+                                                        <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="329.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                                            <children>
+                                                                <Button fx:id="mClearResultsTableButton" mnemonicParsing="false" onAction="#clearResultsTable" text="%clear" />
+                                                                <Button fx:id="mExportResultsButton" mnemonicParsing="false" onAction="#exportResults" text="%export" />
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </AnchorPane>
+                                            </content>
+                                        </Tab>
+                                    </tabs>
+                                </TabPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</VBox>
