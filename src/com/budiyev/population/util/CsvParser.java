@@ -37,7 +37,6 @@ public final class CsvParser {
     private static final String QUOTE_STRING = "\"";
     private static final String DOUBLE_QUOTE_STRING = "\"\"";
     private static final char QUOTE = '\"';
-    private static final char CR = '\r';
     private static final char LF = '\n';
 
     private CsvParser() {
