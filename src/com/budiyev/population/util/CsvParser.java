@@ -129,9 +129,7 @@ public final class CsvParser {
                     row.append(current);
                 }
             }
-            if (row.length() != 0) {
-                mRows.add(new Row(row.toString(), separator));
-            }
+            mRows.add(new Row(row.toString(), separator));
         }
 
         private Table(InputStream table, char separator, String charset) {
@@ -157,9 +155,7 @@ public final class CsvParser {
                         row.append(current);
                     }
                 }
-                if (row.length() != 0) {
-                    mRows.add(new Row(row.toString(), separator));
-                }
+                mRows.add(new Row(row.toString(), separator));
             } catch (IOException ignored) {
             }
         }
