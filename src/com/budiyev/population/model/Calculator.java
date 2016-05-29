@@ -34,27 +34,63 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
 public class Calculator {
+    /**
+     * Количество десяничных знаков после разделителя в вещественных числах
+     * в режиме повышенной точности
+     */
     public static final int SCALE = 384;
 
     private Calculator() {
     }
 
+    /**
+     * Преобразование int в BigDecimal
+     *
+     * @param u исходное значение типа int
+     * @return результат типа BigDecimal
+     */
     private static BigDecimal decimalValue(int u) {
         return new BigDecimal(u);
     }
 
+    /**
+     * Преобразование long в BigDecimal
+     *
+     * @param u исходное значение типа long
+     * @return результат типа BigDecimal
+     */
     private static BigDecimal decimalValue(long u) {
         return new BigDecimal(u);
     }
 
+    /**
+     * Преобразование double в BigDecimal
+     *
+     * @param u исходное значение типа double
+     * @return результат типа BigDecimal
+     */
     private static BigDecimal decimalValue(double u) {
         return new BigDecimal(u);
     }
 
+    /**
+     * Преобразование BigDecimal в double
+     *
+     * @param u исходное значение типа BigDecimal
+     * @return результат
+     */
     private static double doubleValue(BigDecimal u) {
         return u.doubleValue();
     }
 
+    /**
+     * Вероятностный факториал.
+     * Нахождение факториала вещественного числа как математическое ожидание
+     * от факториалов двух соседних целых.
+     *
+     * @param u исходное значение
+     * @return результат
+     */
     private static double probabilisticFactorial(double u) {
         double result = 1;
         double r = u % 1;
@@ -72,6 +108,15 @@ public class Calculator {
         return result;
     }
 
+    /**
+     * Вероятностный факториал.
+     * Нахождение факториала вещественного числа как математическое ожидание
+     * от факториалов двух соседних целых.
+     *
+     * @param u     исходное значение
+     * @param scale количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal probabilisticFactorialBig(double u, int scale) {
         BigDecimal result = BigDecimal.ONE;
         double r = u % 1;
@@ -95,6 +140,14 @@ public class Calculator {
         return probabilisticFactorialBig(u, SCALE);
     }
 
+    /**
+     * Деление
+     *
+     * @param u     делимое
+     * @param v     делитель
+     * @param scale количество знаков в дробной части результата
+     * @return частное
+     */
     private static BigDecimal divide(BigDecimal u, BigDecimal v, int scale) {
         return u.divide(v, scale, RoundingMode.HALF_EVEN);
     }
@@ -103,6 +156,14 @@ public class Calculator {
         return divide(u, v, SCALE);
     }
 
+    /**
+     * Умножение
+     *
+     * @param u     множитель
+     * @param v     множитель
+     * @param scale количество знаков в дробной части результата
+     * @return произведение
+     */
     private static BigDecimal multiply(BigDecimal u, BigDecimal v, int scale) {
         return u.multiply(v).setScale(scale, RoundingMode.HALF_EVEN);
     }
@@ -111,6 +172,14 @@ public class Calculator {
         return multiply(u, v, SCALE);
     }
 
+    /**
+     * Возведение в целочисленную степень
+     *
+     * @param u        основание
+     * @param exponent показатель
+     * @param scale    количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal power(BigDecimal u, long exponent, int scale) {
         if (exponent < 0) {
             return BigDecimal.ONE.divide(power(u, -exponent, scale), scale, RoundingMode.HALF_EVEN);
@@ -125,6 +194,14 @@ public class Calculator {
         return p;
     }
 
+    /**
+     * Возведение в вещественную степень
+     *
+     * @param u        основание
+     * @param exponent показатель
+     * @param scale    количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal power(BigDecimal u, double exponent, int scale) {
         if (exponent % 1 == 0 && exponent <= Long.MAX_VALUE) {
             return power(u, (long) exponent, scale);
@@ -136,6 +213,14 @@ public class Calculator {
         return power(u, exponent, SCALE);
     }
 
+    /**
+     * Нахождение целочисленного корня
+     *
+     * @param u     исходное значение
+     * @param index степень корня
+     * @param scale количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal root(BigDecimal u, long index, int scale) {
         int s = scale + 1;
         BigDecimal a = u;
@@ -158,6 +243,13 @@ public class Calculator {
         return u;
     }
 
+    /**
+     * Возведение числа Эйлера в указанную степень
+     *
+     * @param u     исходное значение
+     * @param scale количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal exponent(BigDecimal u, int scale) {
         if (u.signum() == 0) {
             return BigDecimal.ONE;
@@ -198,6 +290,13 @@ public class Calculator {
         return d;
     }
 
+    /**
+     * Нахождение натурального логарифма от указанного значения
+     *
+     * @param u     исходное значение
+     * @param scale количество знаков в дробной части результата
+     * @return результат
+     */
     private static BigDecimal naturalLogarithm(BigDecimal u, int scale) {
         int a = u.toString().length() - u.scale() - 1;
         if (a < 3) {
@@ -225,6 +324,13 @@ public class Calculator {
         return u.setScale(scale, RoundingMode.HALF_EVEN);
     }
 
+    /**
+     * Поиск позиции состояния
+     *
+     * @param id       идентификатор состояния
+     * @param stateIds список идентификаторов
+     * @return позиция состояния
+     */
     private static int findState(int id, int[] stateIds) {
         if (id == State.EXTERNAL) {
             return State.EXTERNAL;
@@ -237,6 +343,13 @@ public class Calculator {
         return -1;
     }
 
+    /**
+     * Применение задержки
+     *
+     * @param step  шаг
+     * @param delay задержка
+     * @return шаг с задержкой
+     */
     private static int delay(int step, int delay) {
         if (step > delay) {
             return step - delay;
@@ -245,6 +358,14 @@ public class Calculator {
         }
     }
 
+    /**
+     * Интерполяция позиций в указанных границах
+     *
+     * @param start      начало
+     * @param end        конец
+     * @param resultSize резмер результата
+     * @return результат
+     */
     public static int[] interpolateIndexes(int start, int end, int resultSize) {
         int[] array = new int[resultSize];
         for (int i = 0; i < resultSize; ++i) {
@@ -253,10 +374,16 @@ public class Calculator {
         return array;
     }
 
+    /**
+     * Линейная интерполяция
+     */
     public static double interpolate(double u, double v, double f) {
         return u * (1D - f) + v * f;
     }
 
+    /**
+     * Применение степенного коэффициента
+     */
     private static double applyCoefficientPower(double u, double coefficient) {
         if (coefficient <= 1) {
             return u;
@@ -264,6 +391,9 @@ public class Calculator {
         return Math.pow(u, coefficient) / probabilisticFactorial(coefficient);
     }
 
+    /**
+     * Применение линейного коэффициента
+     */
     private static double applyCoefficientLinear(double u, double coefficient) {
         if (coefficient <= 1) {
             return u;
@@ -271,10 +401,16 @@ public class Calculator {
         return u / coefficient;
     }
 
+    /**
+     * Внешнее соснояние или нет
+     */
     private static boolean isStateExternal(int stateId) {
         return stateId == State.EXTERNAL;
     }
 
+    /**
+     * Применение степенного коэффициента
+     */
     private static BigDecimal applyCoefficientPower(BigDecimal u, double coefficient) {
         if (coefficient <= 1) {
             return u;
@@ -282,6 +418,9 @@ public class Calculator {
         return divide(power(u, coefficient), probabilisticFactorialBig(coefficient));
     }
 
+    /**
+     * Применение линейного коэффициента
+     */
     private static BigDecimal applyCoefficientLinear(BigDecimal u, double coefficient) {
         if (coefficient <= 1) {
             return u;
@@ -289,6 +428,9 @@ public class Calculator {
         return divide(u, decimalValue(coefficient));
     }
 
+    /**
+     * Применение основных операций перехода
+     */
     private static BigDecimal applyTransitionCommon(BigDecimal u, BigDecimal operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
@@ -301,6 +443,9 @@ public class Calculator {
         return u;
     }
 
+    /**
+     * Применение основных операций перехода
+     */
     private static double applyTransitionCommon(double u, double operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
@@ -313,6 +458,9 @@ public class Calculator {
         return u;
     }
 
+    /**
+     * Вычисления с обычной точностью
+     */
     private static void calculateInternal(List<State> initialStates, List<Transition> transitions,
             int stepsCount, int startPoint, boolean allowNegative, ResultCallback resultCallback,
             ProgressCallback progressCallback) {
@@ -475,6 +623,9 @@ public class Calculator {
         }
     }
 
+    /**
+     * Вычисления с повышенной точностью
+     */
     private static void calculateInternalHigherAccuracy(List<State> initialStates,
             List<Transition> transitions, int stepsCount, int startPoint, boolean allowNegative,
             ResultCallback resultCallback, ProgressCallback progressCallback) {
@@ -669,6 +820,18 @@ public class Calculator {
         }
     }
 
+    /**
+     * Вычислить (асинхронно)
+     *
+     * @param initialStates    начальные состояния
+     * @param transitions      переходы
+     * @param stepsCount       количество шагов
+     * @param startPoint       начало отсчёта
+     * @param higherAccuracy   повышенная точность
+     * @param allowNegative    разрешить отрицательные значания
+     * @param resultCallback   обратный вызов результата
+     * @param progressCallback обратный вызов прогресса вычислений
+     */
     public static void calculate(List<State> initialStates, List<Transition> transitions,
             int stepsCount, int startPoint, boolean higherAccuracy, boolean allowNegative,
             ResultCallback resultCallback, ProgressCallback progressCallback) {
@@ -681,6 +844,17 @@ public class Calculator {
         thread.start();
     }
 
+    /**
+     * Вычислить
+     *
+     * @param initialStates  начальные состояния
+     * @param transitions    переходы
+     * @param stepsCount     количество шагов
+     * @param startPoint     начало отсчёта
+     * @param higherAccuracy повышенная точность
+     * @param allowNegative  разрешить отрицательные значания
+     * @return результат
+     */
     public static Results calculate(List<State> initialStates, List<Transition> transitions,
             int stepsCount, int startPoint, boolean higherAccuracy, boolean allowNegative) {
         Results[] resultsHolder = new Results[1];
@@ -833,10 +1007,20 @@ public class Calculator {
     }
 
     public interface ResultCallback {
+        /**
+         * Вызывается при завершении вычислений
+         *
+         * @param results результаты
+         */
         void onResult(Results results);
     }
 
     public interface ProgressCallback {
+        /**
+         * Вызывается при обновлении прогресса вычислений
+         *
+         * @param progress прогресс (0 - 1)
+         */
         void onProgressUpdate(double progress);
     }
 }
