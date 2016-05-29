@@ -26,10 +26,10 @@ import javafx.beans.property.StringProperty;
 
 public class Transition {
     private final IntegerProperty mSourceState;
-    private final IntegerProperty mSourceCoefficient;
+    private final DoubleProperty mSourceCoefficient;
     private final IntegerProperty mSourceDelay;
     private final IntegerProperty mOperandState;
-    private final IntegerProperty mOperandCoefficient;
+    private final DoubleProperty mOperandCoefficient;
     private final IntegerProperty mOperandDelay;
     private final IntegerProperty mResultState;
     private final DoubleProperty mResultCoefficient;
@@ -40,10 +40,10 @@ public class Transition {
 
     public Transition() {
         mSourceState = new SimpleIntegerProperty();
-        mSourceCoefficient = new SimpleIntegerProperty(1);
+        mSourceCoefficient = new SimpleDoubleProperty(1);
         mSourceDelay = new SimpleIntegerProperty();
         mOperandState = new SimpleIntegerProperty();
-        mOperandCoefficient = new SimpleIntegerProperty(1);
+        mOperandCoefficient = new SimpleDoubleProperty(1);
         mOperandDelay = new SimpleIntegerProperty();
         mResultState = new SimpleIntegerProperty();
         mResultCoefficient = new SimpleDoubleProperty(1);
@@ -57,10 +57,10 @@ public class Transition {
             int operandCoefficient, int operandDelay, int resultState, int resultCoefficient,
             double probability, int type, int mode, String description) {
         mSourceState = new SimpleIntegerProperty(sourceState);
-        mSourceCoefficient = new SimpleIntegerProperty(sourceCoefficient);
+        mSourceCoefficient = new SimpleDoubleProperty(sourceCoefficient);
         mSourceDelay = new SimpleIntegerProperty(sourceDelay);
         mOperandState = new SimpleIntegerProperty(operandState);
-        mOperandCoefficient = new SimpleIntegerProperty(operandCoefficient);
+        mOperandCoefficient = new SimpleDoubleProperty(operandCoefficient);
         mOperandDelay = new SimpleIntegerProperty(operandDelay);
         mResultState = new SimpleIntegerProperty(resultState);
         mResultCoefficient = new SimpleDoubleProperty(resultCoefficient);
@@ -82,15 +82,15 @@ public class Transition {
         mSourceState.set(sourceState);
     }
 
-    public int getSourceCoefficient() {
+    public double getSourceCoefficient() {
         return mSourceCoefficient.get();
     }
 
-    public IntegerProperty sourceCoefficientProperty() {
+    public DoubleProperty sourceCoefficientProperty() {
         return mSourceCoefficient;
     }
 
-    public void setSourceCoefficient(int sourceCoefficient) {
+    public void setSourceCoefficient(double sourceCoefficient) {
         mSourceCoefficient.set(sourceCoefficient);
     }
 
@@ -118,15 +118,15 @@ public class Transition {
         mOperandState.set(operandState);
     }
 
-    public int getOperandCoefficient() {
+    public double getOperandCoefficient() {
         return mOperandCoefficient.get();
     }
 
-    public IntegerProperty operandCoefficientProperty() {
+    public DoubleProperty operandCoefficientProperty() {
         return mOperandCoefficient;
     }
 
-    public void setOperandCoefficient(int operandCoefficient) {
+    public void setOperandCoefficient(double operandCoefficient) {
         mOperandCoefficient.set(operandCoefficient);
     }
 
@@ -163,7 +163,7 @@ public class Transition {
     }
 
     public void setResultCoefficient(double resultCoefficient) {
-        this.mResultCoefficient.set(resultCoefficient);
+        mResultCoefficient.set(resultCoefficient);
     }
 
     public double getProbability() {

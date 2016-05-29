@@ -41,7 +41,7 @@ import javafx.stage.StageStyle;
 
 public final class Utils {
     public static final String DECIMAL_FORMAT_COMMON =
-            "#." + createRepeatingString('#', Double.MAX_EXPONENT);
+            "#." + createRepeatingString('#', Calculator.SCALE);
     public static final String DECIMAL_FORMAT_RESULTS_TABLE = "#.###############";
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =

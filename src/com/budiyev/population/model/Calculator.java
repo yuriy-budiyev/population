@@ -20,6 +20,7 @@ package com.budiyev.population.model;
 import com.budiyev.population.util.Utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,74 +34,194 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
 public class Calculator {
+    public static final int SCALE = 384;
+
     private Calculator() {
     }
 
-    private static BigDecimal scale(BigDecimal value) {
-        return value.setScale(Double.MAX_EXPONENT, BigDecimal.ROUND_HALF_EVEN);
+    private static BigDecimal decimalValue(int u) {
+        return new BigDecimal(u);
     }
 
-    private static BigDecimal decimalValue(double value) {
-        return scale(new BigDecimal(value));
+    private static BigDecimal decimalValue(long u) {
+        return new BigDecimal(u);
     }
 
-    private static BigDecimal decimalValue(int value) {
-        return scale(new BigDecimal(value));
+    private static BigDecimal decimalValue(double u) {
+        return new BigDecimal(u);
     }
 
-    private static double doubleValue(BigDecimal value) {
-        return Double.valueOf(value.toString());
+    private static double doubleValue(BigDecimal u) {
+        return u.doubleValue();
     }
 
-    private static BigDecimal divide(BigDecimal a, BigDecimal b) {
-        return a.divide(b, Double.MAX_EXPONENT, BigDecimal.ROUND_HALF_EVEN);
-    }
-
-    private static BigDecimal multiply(BigDecimal a, BigDecimal b) {
-        return scale(a.multiply(b));
-    }
-
-    private static BigDecimal add(BigDecimal a, BigDecimal b) {
-        return a.add(b);
-    }
-
-    private static BigDecimal subtract(BigDecimal a, BigDecimal b) {
-        return a.subtract(b);
-    }
-
-    private static BigDecimal power(BigDecimal value, int power) {
-        if (power <= 1) {
-            return value;
-        }
-        BigDecimal result = value;
-        for (int i = 2; i <= power; i++) {
-            result = multiply(result, value);
-        }
-        return result;
-    }
-
-    private static int compare(BigDecimal a, BigDecimal b) {
-        return a.compareTo(b);
-    }
-
-    private static BigDecimal minimum(BigDecimal a, BigDecimal b) {
-        return a.min(b);
-    }
-
-    private static double factorial(int value) {
+    private static double probabilisticFactorial(double u) {
         double result = 1;
-        for (int i = 2; i <= value; i++) {
-            result *= i;
+        double r = u % 1;
+        if (r > 0) {
+            double v = Math.floor(u);
+            for (double i = 2; i <= v; i++) {
+                result *= i;
+            }
+            result = result * (1 - r) + result * (v + 1) * r;
+        } else {
+            for (double i = 2; i <= u; i++) {
+                result *= i;
+            }
         }
         return result;
     }
 
-    private static BigDecimal factorialDecimal(int value) {
-        BigDecimal result = decimalValue(1);
-        for (int i = 2; i <= value; i++) {
-            result = multiply(result, decimalValue(i));
+    private static BigDecimal probabilisticFactorialBig(double u, int scale) {
+        BigDecimal result = BigDecimal.ONE;
+        double r = u % 1;
+        if (r > 0) {
+            double v = Math.floor(u);
+            for (double i = 2; i <= v; i++) {
+                result = result.multiply(new BigDecimal(i));
+            }
+            result = result.multiply(BigDecimal.ONE.subtract(new BigDecimal(r)))
+                    .add(result.multiply(new BigDecimal(v + 1)).multiply(new BigDecimal(r)));
+        } else {
+            for (double i = 2; i <= u; i++) {
+                result = result.multiply(new BigDecimal(i));
+            }
         }
-        return result;
+        return result.setScale(scale, RoundingMode.HALF_EVEN);
+    }
+
+    private static BigDecimal probabilisticFactorialBig(double u) {
+        return probabilisticFactorialBig(u, SCALE);
+    }
+
+    private static BigDecimal divide(BigDecimal u, BigDecimal v, int scale) {
+        return u.divide(v, scale, RoundingMode.HALF_EVEN);
+    }
+
+    private static BigDecimal divide(BigDecimal u, BigDecimal v) {
+        return divide(u, v, SCALE);
+    }
+
+    private static BigDecimal multiply(BigDecimal u, BigDecimal v, int scale) {
+        return u.multiply(v).setScale(scale, RoundingMode.HALF_EVEN);
+    }
+
+    private static BigDecimal multiply(BigDecimal u, BigDecimal v) {
+        return multiply(u, v, SCALE);
+    }
+
+    private static BigDecimal power(BigDecimal u, long exponent, int scale) {
+        if (exponent < 0) {
+            return BigDecimal.ONE.divide(power(u, -exponent, scale), scale, RoundingMode.HALF_EVEN);
+        }
+        BigDecimal p = BigDecimal.ONE;
+        for (; exponent > 0; exponent >>= 1) {
+            if ((exponent & 1) == 1) {
+                p = p.multiply(u).setScale(scale, RoundingMode.HALF_EVEN);
+            }
+            u = u.multiply(u).setScale(scale, RoundingMode.HALF_EVEN);
+        }
+        return p;
+    }
+
+    private static BigDecimal power(BigDecimal u, double exponent, int scale) {
+        if (exponent % 1 == 0 && exponent <= Long.MAX_VALUE) {
+            return power(u, (long) exponent, scale);
+        }
+        return exponent(decimalValue(exponent).multiply(naturalLogarithm(u, scale)), scale);
+    }
+
+    private static BigDecimal power(BigDecimal u, double exponent) {
+        return power(u, exponent, SCALE);
+    }
+
+    private static BigDecimal root(BigDecimal u, long index, int scale) {
+        int s = scale + 1;
+        BigDecimal a = u;
+        BigDecimal b = decimalValue(index);
+        BigDecimal c = decimalValue(index - 1);
+        BigDecimal d = decimalValue(5).movePointLeft(s);
+        BigDecimal e;
+        u = divide(u, b, scale);
+        for (; ; ) {
+            BigDecimal f = power(u, index - 1, s);
+            BigDecimal g = multiply(u, f, s);
+            BigDecimal h = a.add(c.multiply(g)).setScale(s, RoundingMode.HALF_EVEN);
+            BigDecimal l = multiply(b, f, s);
+            e = u;
+            u = h.divide(l, s, BigDecimal.ROUND_DOWN);
+            if (u.subtract(e).abs().compareTo(d) <= 0) {
+                break;
+            }
+        }
+        return u;
+    }
+
+    private static BigDecimal exponent(BigDecimal u, int scale) {
+        if (u.signum() == 0) {
+            return BigDecimal.ONE;
+        } else if (u.signum() == -1) {
+            return divide(BigDecimal.ONE, exponent(u.negate(), scale));
+        }
+        BigDecimal a = u.setScale(0, BigDecimal.ROUND_DOWN);
+        if (a.signum() == 0) {
+            return exponent2(u, scale);
+        }
+        BigDecimal b = u.subtract(a);
+        BigDecimal c = BigDecimal.ONE.add(divide(b, a, scale));
+        BigDecimal d = exponent2(c, scale);
+        BigDecimal e = decimalValue(Long.MAX_VALUE);
+        BigDecimal f = BigDecimal.ONE;
+        for (; a.compareTo(e) >= 0; ) {
+            f = multiply(f, power(d, Long.MAX_VALUE, scale), scale);
+            a = a.subtract(e);
+        }
+        return multiply(f, power(d, a.longValue(), scale), scale);
+    }
+
+    private static BigDecimal exponent2(BigDecimal u, int scale) {
+        BigDecimal a = BigDecimal.ONE;
+        BigDecimal b = u;
+        BigDecimal c;
+        BigDecimal d = u.add(BigDecimal.ONE);
+        for (int i = 2; ; i++) {
+            b = multiply(b, u, scale);
+            a = a.multiply(BigDecimal.valueOf(i));
+            BigDecimal e = divide(b, a, scale);
+            c = d;
+            d = d.add(e);
+            if (d.compareTo(c) == 0) {
+                break;
+            }
+        }
+        return d;
+    }
+
+    private static BigDecimal naturalLogarithm(BigDecimal u, int scale) {
+        int a = u.toString().length() - u.scale() - 1;
+        if (a < 3) {
+            return naturalLogarithm2(u, scale);
+        } else {
+            BigDecimal b = root(u, a, scale);
+            BigDecimal c = naturalLogarithm2(b, scale);
+            return multiply(decimalValue(a), c, scale);
+        }
+    }
+
+    private static BigDecimal naturalLogarithm2(BigDecimal u, int scale) {
+        int s = scale + 1;
+        BigDecimal a = u;
+        BigDecimal b;
+        BigDecimal c = decimalValue(5).movePointLeft(s);
+        for (; ; ) {
+            BigDecimal d = exponent(u, s);
+            b = d.subtract(a).divide(d, s, BigDecimal.ROUND_DOWN);
+            u = u.subtract(b);
+            if (b.compareTo(c) <= 0) {
+                break;
+            }
+        }
+        return u.setScale(scale, RoundingMode.HALF_EVEN);
     }
 
     private static int findState(int id, int[] stateIds) {
@@ -123,28 +244,6 @@ public class Calculator {
         }
     }
 
-    private static void updateProgress(double[] oldProgress, int step, int stepsCount,
-            double threshold, ProgressCallback progressCallback) {
-        if (progressCallback != null) {
-            final double progress;
-            boolean needUpdate;
-            if (step == 0 || stepsCount == 0) {
-                progress = 0;
-                needUpdate = true;
-            } else if (step == stepsCount - 1 || stepsCount == 1) {
-                progress = 1;
-                needUpdate = true;
-            } else {
-                progress = (double) step / (double) (stepsCount - 1);
-                needUpdate = progress - oldProgress[0] > threshold;
-            }
-            if (needUpdate) {
-                oldProgress[0] = progress;
-                progressCallback.onProgressUpdate(progress);
-            }
-        }
-    }
-
     public static int[] interpolateIndexes(int start, int end, int resultSize) {
         int[] array = new int[resultSize];
         for (int i = 0; i < resultSize; ++i) {
@@ -153,64 +252,64 @@ public class Calculator {
         return array;
     }
 
-    public static double interpolate(double a, double b, double f) {
-        return a * (1D - f) + b * f;
+    public static double interpolate(double u, double v, double f) {
+        return u * (1D - f) + v * f;
     }
 
-    private static double applyCoefficientPower(double value, int coefficient) {
+    private static double applyCoefficientPower(double u, double coefficient) {
         if (coefficient <= 1) {
-            return value;
+            return u;
         }
-        return Math.pow(value, coefficient) / factorial(coefficient);
+        return Math.pow(u, coefficient) / probabilisticFactorial(coefficient);
     }
 
-    private static double applyCoefficientLinear(double value, int coefficient) {
+    private static double applyCoefficientLinear(double u, double coefficient) {
         if (coefficient <= 1) {
-            return value;
+            return u;
         }
-        return value / coefficient;
+        return u / coefficient;
     }
 
     private static boolean isStateExternal(int stateId) {
         return stateId == State.EXTERNAL;
     }
 
-    private static BigDecimal applyCoefficientPower(BigDecimal value, int coefficient) {
+    private static BigDecimal applyCoefficientPower(BigDecimal u, double coefficient) {
         if (coefficient <= 1) {
-            return value;
+            return u;
         }
-        return divide(power(value, coefficient), factorialDecimal(coefficient));
+        return divide(power(u, coefficient), probabilisticFactorialBig(coefficient));
     }
 
-    private static BigDecimal applyCoefficientLinear(BigDecimal value, int coefficient) {
+    private static BigDecimal applyCoefficientLinear(BigDecimal u, double coefficient) {
         if (coefficient <= 1) {
-            return value;
+            return u;
         }
-        return divide(value, decimalValue(coefficient));
+        return divide(u, decimalValue(coefficient));
     }
 
-    private static BigDecimal applyTransitionCommon(BigDecimal value, BigDecimal operandDensity,
+    private static BigDecimal applyTransitionCommon(BigDecimal u, BigDecimal operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
-            value = subtract(operandDensity, value);
+            u = operandDensity.subtract(u);
         }
-        value = multiply(value, decimalValue(transition.probability));
+        u = multiply(u, decimalValue(transition.probability));
         if (transition.mode == TransitionMode.RESIDUAL) {
-            value = subtract(operandDensity, value);
+            u = operandDensity.subtract(u);
         }
-        return value;
+        return u;
     }
 
-    private static double applyTransitionCommon(double value, double operandDensity,
+    private static double applyTransitionCommon(double u, double operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
-            value = operandDensity - value;
+            u = operandDensity - u;
         }
-        value *= transition.probability;
+        u *= transition.probability;
         if (transition.mode == TransitionMode.RESIDUAL) {
-            value = operandDensity - value;
+            u = operandDensity - u;
         }
-        return value;
+        return u;
     }
 
     private static void calculateInternal(List<State> initialStates, List<Transition> transitions,
@@ -400,7 +499,7 @@ public class Calculator {
             for (int state = 0; state < statesCount; state++) {
                 double count = states[step - 1][state];
                 states[step][state] = count;
-                totalCount = add(totalCount, decimalValue(count));
+                totalCount = totalCount.add(decimalValue(count));
             }
             for (TransitionValues transition : transitionsInternal) {
                 int sourceState = findState(transition.sourceState, stateIds);
@@ -422,7 +521,7 @@ public class Calculator {
                                 transition.operandCoefficient);
                         value = multiply(operandDensity, decimalValue(transition.probability));
                         if (transition.mode == TransitionMode.RESIDUAL) {
-                            value = subtract(operandDensity, value);
+                            value = operandDensity.subtract(value);
                         }
                     } else if (operandExternal) {
                         value = multiply(applyCoefficientLinear(
@@ -436,11 +535,11 @@ public class Calculator {
                         BigDecimal operandDensity = applyCoefficientLinear(
                                 decimalValue(states[operandIndex][operandState]),
                                 transition.operandCoefficient);
-                        value = applyTransitionCommon(minimum(sourceDensity, operandDensity),
+                        value = applyTransitionCommon(sourceDensity.min(operandDensity),
                                 operandDensity, transition);
                     }
                 } else if (transition.type == TransitionType.SOLUTE) {
-                    if (compare(totalCount, decimalValue(0)) > 0) {
+                    if (totalCount.compareTo(BigDecimal.ZERO) > 0) {
                         if (sourceExternal) {
                             BigDecimal operandDensity = applyCoefficientPower(
                                     decimalValue(states[operandIndex][operandState]),
@@ -479,7 +578,7 @@ public class Calculator {
                 } else if (transition.type == TransitionType.BLEND) {
                     if (sourceExternal) {
                         BigDecimal operandCount = decimalValue(states[operandIndex][operandState]);
-                        if (compare(operandCount, decimalValue(0)) > 0) {
+                        if (operandCount.compareTo(BigDecimal.ZERO) > 0) {
                             BigDecimal operandDensity = applyCoefficientPower(operandCount,
                                     transition.operandCoefficient);
                             value = operandDensity;
@@ -491,7 +590,7 @@ public class Calculator {
                         }
                     } else if (operandExternal) {
                         BigDecimal sourceCount = decimalValue(states[sourceIndex][sourceState]);
-                        if (compare(sourceCount, decimalValue(0)) > 0) {
+                        if (sourceCount.compareTo(BigDecimal.ZERO) > 0) {
                             value = applyCoefficientPower(sourceCount,
                                     transition.sourceCoefficient);
                             if (transition.sourceCoefficient > 1) {
@@ -503,8 +602,8 @@ public class Calculator {
                     } else {
                         BigDecimal sourceCount = decimalValue(states[sourceIndex][sourceState]);
                         BigDecimal operandCount = decimalValue(states[operandIndex][operandState]);
-                        BigDecimal sum = add(sourceCount, operandCount);
-                        if (compare(sum, decimalValue(0)) > 0) {
+                        BigDecimal sum = sourceCount.add(operandCount);
+                        if (sum.compareTo(BigDecimal.ZERO) > 0) {
                             BigDecimal sourceDensity = applyCoefficientPower(sourceCount,
                                     transition.sourceCoefficient);
                             BigDecimal operandDensity = applyCoefficientPower(operandCount,
@@ -519,23 +618,22 @@ public class Calculator {
                 if (transition.mode == TransitionMode.REMOVING) {
                     if (sourceState != operandState && !sourceExternal) {
                         states[step][sourceState] = doubleValue(
-                                subtract(decimalValue(states[step][sourceState]), value));
+                                decimalValue(states[step][sourceState]).subtract(value));
                         if (!allowNegative && states[step][sourceState] < 0) {
                             states[step][sourceState] = 0;
                         }
                     }
                 }
                 if (!resultExternal) {
-                    states[step][resultState] = doubleValue(
-                            add(decimalValue(states[step][resultState]),
-                                    multiply(value, decimalValue(transition.resultCoefficient))));
+                    states[step][resultState] = doubleValue(decimalValue(states[step][resultState])
+                            .add(multiply(value, decimalValue(transition.resultCoefficient))));
                     if (!allowNegative && states[step][resultState] < 0) {
                         states[step][resultState] = 0;
                     }
                 }
                 if (transition.mode != TransitionMode.RETAINING && !operandExternal) {
                     states[step][operandState] =
-                            doubleValue(subtract(decimalValue(states[step][operandState]), value));
+                            doubleValue(decimalValue(states[step][operandState]).subtract(value));
                     if (!allowNegative && states[step][operandState] < 0) {
                         states[step][operandState] = 0;
                     }
@@ -545,6 +643,28 @@ public class Calculator {
         }
         if (resultCallback != null) {
             resultCallback.onResult(new Results(startPoint, states, stateNames));
+        }
+    }
+
+    private static void updateProgress(double[] oldProgress, int step, int stepsCount,
+            double threshold, ProgressCallback progressCallback) {
+        if (progressCallback != null) {
+            final double progress;
+            boolean needUpdate;
+            if (step == 0 || stepsCount == 0) {
+                progress = 0;
+                needUpdate = true;
+            } else if (step == stepsCount - 1 || stepsCount == 1) {
+                progress = 1;
+                needUpdate = true;
+            } else {
+                progress = (double) step / (double) (stepsCount - 1);
+                needUpdate = progress - oldProgress[0] > threshold;
+            }
+            if (needUpdate) {
+                oldProgress[0] = progress;
+                progressCallback.onProgressUpdate(progress);
+            }
         }
     }
 
@@ -605,10 +725,10 @@ public class Calculator {
 
     public static class TransitionValues {
         public final int sourceState; // Состояние - источник
-        public final int sourceCoefficient; // Коэффициент источника
+        public final double sourceCoefficient; // Коэффициент источника
         public final int sourceDelay; // Задержка источника
         public final int operandState; // Состояние - операнд
-        public final int operandCoefficient; // Коэффициент операнда
+        public final double operandCoefficient; // Коэффициент операнда
         public final int operandDelay; // Задержка операнда
         public final int resultState; // Состояние - результат
         public final double resultCoefficient; // Коэффициент результата
