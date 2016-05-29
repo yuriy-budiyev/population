@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
@@ -155,7 +156,8 @@ public class PrimaryController extends AbstractController {
                 Utils.refreshList(mTransitions);
             }
         });
-        mStatesTableCountColumn.setCellFactory(doubleCell(0, Utils.DECIMAL_FORMAT_COMMON));
+        mStatesTableCountColumn
+                .setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
         mStatesTableCountColumn.setCellValueFactory(param -> param.getValue().countProperty());
         mStatesTableCountColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
@@ -207,7 +209,7 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableSourceCoefficientColumn
-                .setCellFactory(doubleCell(1, Utils.DECIMAL_FORMAT_COMMON));
+                .setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableSourceCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().sourceCoefficientProperty());
         mTransitionsTableSourceCoefficientColumn.setOnEditCommit(event -> {
@@ -217,7 +219,7 @@ public class PrimaryController extends AbstractController {
                         .setSourceCoefficient(value.doubleValue());
             }
         });
-        mTransitionsTableSourceDelayColumn.setCellFactory(integerCell(0));
+        mTransitionsTableSourceDelayColumn.setCellFactory(integerCell(x -> x >= 0, 0));
         mTransitionsTableSourceDelayColumn
                 .setCellValueFactory(param -> param.getValue().sourceDelayProperty());
         mTransitionsTableSourceDelayColumn.setOnEditCommit(event -> {
@@ -238,7 +240,7 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableOperandCoefficientColumn
-                .setCellFactory(doubleCell(1, Utils.DECIMAL_FORMAT_COMMON));
+                .setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableOperandCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().operandCoefficientProperty());
         mTransitionsTableOperandCoefficientColumn.setOnEditCommit(event -> {
@@ -248,7 +250,7 @@ public class PrimaryController extends AbstractController {
                         .setOperandCoefficient(value.doubleValue());
             }
         });
-        mTransitionsTableOperandDelayColumn.setCellFactory(integerCell(0));
+        mTransitionsTableOperandDelayColumn.setCellFactory(integerCell(x -> x >= 0, 0));
         mTransitionsTableOperandDelayColumn
                 .setCellValueFactory(param -> param.getValue().operandDelayProperty());
         mTransitionsTableOperandDelayColumn.setOnEditCommit(event -> {
@@ -269,7 +271,7 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableResultCoefficientColumn
-                .setCellFactory(doubleCell(1, Utils.DECIMAL_FORMAT_COMMON));
+                .setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableResultCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().resultCoefficientProperty());
         mTransitionsTableResultCoefficientColumn.setOnEditCommit(event -> {
@@ -280,7 +282,7 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableProbabilityColumn
-                .setCellFactory(doubleCell(0, Utils.DECIMAL_FORMAT_COMMON));
+                .setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableProbabilityColumn
                 .setCellValueFactory(param -> param.getValue().probabilityProperty());
         mTransitionsTableProbabilityColumn.setOnEditCommit(event -> {
@@ -409,7 +411,7 @@ public class PrimaryController extends AbstractController {
     private void initializeResultsTable() {
         mResultsTableNumberColumn = new TableColumn<>();
         mResultsTableNumberColumn.setText(getString("step"));
-        mResultsTableNumberColumn.setCellFactory(integerCell(0));
+        mResultsTableNumberColumn.setCellFactory(integerCell(x -> true, 0));
         mResultsTableNumberColumn.setSortable(false);
         mResultsTableNumberColumn.setEditable(false);
     }
@@ -589,7 +591,7 @@ public class PrimaryController extends AbstractController {
     }
 
     private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> integerCell(
-            int defaultValue) {
+            Predicate<Integer> validator, int defaultValue) {
         return TextFieldTableCell.forTableColumn(new StringConverter<Number>() {
             @Override
             public String toString(Number object) {
@@ -602,7 +604,12 @@ public class PrimaryController extends AbstractController {
             @Override
             public Number fromString(String string) {
                 try {
-                    return Integer.valueOf(string);
+                    int value = Integer.valueOf(string);
+                    if (validator.test(value)) {
+                        return value;
+                    } else {
+                        return defaultValue;
+                    }
                 } catch (NumberFormatException e) {
                     return defaultValue;
                 }
@@ -611,7 +618,7 @@ public class PrimaryController extends AbstractController {
     }
 
     private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> doubleCell(
-            double defaultValue, String format) {
+            Predicate<Double> validator, double defaultValue, String format) {
         DecimalFormat formatter = new DecimalFormat(format);
         return TextFieldTableCell.forTableColumn(new StringConverter<Number>() {
             @Override
@@ -625,7 +632,12 @@ public class PrimaryController extends AbstractController {
             @Override
             public Number fromString(String string) {
                 try {
-                    return NumberFormat.getInstance().parse(string).doubleValue();
+                    double value = NumberFormat.getInstance().parse(string).doubleValue();
+                    if (validator.test(value)) {
+                        return value;
+                    } else {
+                        return defaultValue;
+                    }
                 } catch (NumberFormatException | ParseException | NullPointerException e) {
                     return defaultValue;
                 }
@@ -889,7 +901,8 @@ public class PrimaryController extends AbstractController {
             for (int j = 0; j < headers.size(); j++) {
                 TableColumn<ArrayList<Calculator.Result>, Number> valueColumn = new TableColumn<>();
                 valueColumn.setText(headers.get(j));
-                valueColumn.setCellFactory(doubleCell(0, Utils.DECIMAL_FORMAT_RESULTS_TABLE));
+                valueColumn.setCellFactory(
+                        doubleCell(x -> true, 0, Utils.DECIMAL_FORMAT_RESULTS_TABLE));
                 valueColumn.setPrefWidth(125);
                 final int resultIndex = i;
                 final int stateIndex = j;

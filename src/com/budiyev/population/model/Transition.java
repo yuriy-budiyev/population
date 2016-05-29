@@ -53,8 +53,8 @@ public class Transition {
         mDescription = new SimpleStringProperty("");
     }
 
-    public Transition(int sourceState, int sourceCoefficient, int sourceDelay, int operandState,
-            int operandCoefficient, int operandDelay, int resultState, int resultCoefficient,
+    public Transition(int sourceState, double sourceCoefficient, int sourceDelay, int operandState,
+            double operandCoefficient, int operandDelay, int resultState, double resultCoefficient,
             double probability, int type, int mode, String description) {
         mSourceState = new SimpleIntegerProperty(sourceState);
         mSourceCoefficient = new SimpleDoubleProperty(sourceCoefficient);

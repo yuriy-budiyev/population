@@ -129,10 +129,10 @@ public final class TaskParser {
             }
             if (readingTransitions) {
                 transitions.add(new Transition(Integer.valueOf(row.cell(0)),
-                        Integer.valueOf(row.cell(1)), Integer.valueOf(row.cell(2)),
-                        Integer.valueOf(row.cell(3)), Integer.valueOf(row.cell(4)),
+                        Double.valueOf(row.cell(1)), Integer.valueOf(row.cell(2)),
+                        Integer.valueOf(row.cell(3)), Double.valueOf(row.cell(4)),
                         Integer.valueOf(row.cell(5)), Integer.valueOf(row.cell(6)),
-                        Integer.valueOf(row.cell(7)), Double.valueOf(row.cell(8)),
+                        Double.valueOf(row.cell(7)), Double.valueOf(row.cell(8)),
                         Integer.valueOf(row.cell(9)), Integer.valueOf(row.cell(10)), row.cell(11)));
             }
         }
