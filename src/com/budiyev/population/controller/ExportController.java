@@ -196,5 +196,4 @@ public class ExportController extends AbstractExportController {
     public void close() {
         getStage().close();
     }
-
 }

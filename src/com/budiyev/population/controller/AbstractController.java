@@ -68,4 +68,3 @@ public abstract class AbstractController implements Initializable {
 
     public abstract void initialize();
 }
-
