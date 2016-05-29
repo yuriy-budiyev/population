@@ -964,12 +964,12 @@ public class Calculator {
             return mTableData;
         }
 
-        public ArrayList<XYChart.Series<Number, Number>> getChartData(boolean clearReference) {
-            ArrayList<XYChart.Series<Number, Number>> chartData = mChartData;
-            if (clearReference) {
-                mChartData = null;
-            }
-            return chartData;
+        public ArrayList<XYChart.Series<Number, Number>> getChartData() {
+            return mChartData;
+        }
+
+        public void clearChartData() {
+            mChartData = null;
         }
     }
 

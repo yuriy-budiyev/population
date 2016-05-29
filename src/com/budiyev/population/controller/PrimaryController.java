@@ -967,7 +967,7 @@ public class PrimaryController extends AbstractController {
             int colorsCount = ChartSeries.Color.ARRAY.length - 8;
             int dashesCount = ChartSeries.Dash.ARRAY.length;
             int thicknessesCount = ChartSeries.Thickness.ARRAY.length;
-            ArrayList<XYChart.Series<Number, Number>> chart = results.getChartData(true);
+            ArrayList<XYChart.Series<Number, Number>> chart = results.getChartData();
             for (XYChart.Series<Number, Number> series : chart) {
                 int size = mResultsChartData.size();
                 int color = size % colorsCount;
@@ -987,6 +987,7 @@ public class PrimaryController extends AbstractController {
             mResultsTableData.add(results);
             refreshResultsTable();
         }
+        results.clearChartData();
     }
 
     @Override
