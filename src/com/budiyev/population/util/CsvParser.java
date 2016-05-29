@@ -37,7 +37,6 @@ public final class CsvParser {
     private static final String QUOTE_STRING = "\"";
     private static final String DOUBLE_QUOTE_STRING = "\"\"";
     private static final char QUOTE = '\"';
-    private static final char CR = '\r';
     private static final char LF = '\n';
 
     private CsvParser() {
@@ -129,9 +128,7 @@ public final class CsvParser {
                     row.append(current);
                 }
             }
-            if (row.length() != 0) {
-                mRows.add(new Row(row.toString(), separator));
-            }
+            mRows.add(new Row(row.toString(), separator));
         }
 
         private Table(InputStream table, char separator, String charset) {
@@ -157,9 +154,7 @@ public final class CsvParser {
                         row.append(current);
                     }
                 }
-                if (row.length() != 0) {
-                    mRows.add(new Row(row.toString(), separator));
-                }
+                mRows.add(new Row(row.toString(), separator));
             } catch (IOException ignored) {
             }
         }
