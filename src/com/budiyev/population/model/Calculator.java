@@ -149,7 +149,7 @@ public class Calculator {
             BigDecimal h = a.add(c.multiply(g)).setScale(s, RoundingMode.HALF_EVEN);
             BigDecimal l = multiply(b, f, s);
             e = u;
-            u = h.divide(l, s, BigDecimal.ROUND_DOWN);
+            u = h.divide(l, s, RoundingMode.DOWN);
             if (u.subtract(e).abs().compareTo(d) <= 0) {
                 break;
             }
@@ -163,7 +163,7 @@ public class Calculator {
         } else if (u.signum() == -1) {
             return divide(BigDecimal.ONE, exponent(u.negate(), scale));
         }
-        BigDecimal a = u.setScale(0, BigDecimal.ROUND_DOWN);
+        BigDecimal a = u.setScale(0, RoundingMode.DOWN);
         if (a.signum() == 0) {
             return exponent2(u, scale);
         }
@@ -215,7 +215,7 @@ public class Calculator {
         BigDecimal c = decimalValue(5).movePointLeft(s);
         for (; ; ) {
             BigDecimal d = exponent(u, s);
-            b = d.subtract(a).divide(d, s, BigDecimal.ROUND_DOWN);
+            b = d.subtract(a).divide(d, s, RoundingMode.DOWN);
             u = u.subtract(b);
             if (b.compareTo(c) <= 0) {
                 break;
