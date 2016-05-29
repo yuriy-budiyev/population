@@ -604,17 +604,17 @@ public class Calculator {
     }
 
     public static class TransitionValues {
-        public int sourceState; // Состояние - источник
-        public int sourceCoefficient; // Коэффициент источника
-        public int sourceDelay; // Задержка источника
-        public int operandState; // Состояние - операнд
-        public int operandCoefficient; // Коэффициент операнда
-        public int operandDelay; // Задержка операнда
-        public int resultState; // Состояние - результат
-        public int resultCoefficient; // Коэффициент результата
-        public double probability; // Вероятность перехода
-        public int type; // Тип перехода
-        public int mode; // Вид перехода
+        public final int sourceState; // Состояние - источник
+        public final int sourceCoefficient; // Коэффициент источника
+        public final int sourceDelay; // Задержка источника
+        public final int operandState; // Состояние - операнд
+        public final int operandCoefficient; // Коэффициент операнда
+        public final int operandDelay; // Задержка операнда
+        public final int resultState; // Состояние - результат
+        public final double resultCoefficient; // Коэффициент результата
+        public final double probability; // Вероятность перехода
+        public final int type; // Тип перехода
+        public final int mode; // Вид перехода
 
         private TransitionValues(Transition transition) {
             sourceCoefficient = transition.getSourceCoefficient();

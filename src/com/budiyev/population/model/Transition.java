@@ -32,7 +32,7 @@ public class Transition {
     private final IntegerProperty mOperandCoefficient;
     private final IntegerProperty mOperandDelay;
     private final IntegerProperty mResultState;
-    private final IntegerProperty mResultCoefficient;
+    private final DoubleProperty mResultCoefficient;
     private final DoubleProperty mProbability;
     private final IntegerProperty mType;
     private final IntegerProperty mMode;
@@ -46,7 +46,7 @@ public class Transition {
         mOperandCoefficient = new SimpleIntegerProperty(1);
         mOperandDelay = new SimpleIntegerProperty();
         mResultState = new SimpleIntegerProperty();
-        mResultCoefficient = new SimpleIntegerProperty(1);
+        mResultCoefficient = new SimpleDoubleProperty(1);
         mProbability = new SimpleDoubleProperty();
         mType = new SimpleIntegerProperty();
         mMode = new SimpleIntegerProperty();
@@ -63,7 +63,7 @@ public class Transition {
         mOperandCoefficient = new SimpleIntegerProperty(operandCoefficient);
         mOperandDelay = new SimpleIntegerProperty(operandDelay);
         mResultState = new SimpleIntegerProperty(resultState);
-        mResultCoefficient = new SimpleIntegerProperty(resultCoefficient);
+        mResultCoefficient = new SimpleDoubleProperty(resultCoefficient);
         mProbability = new SimpleDoubleProperty(probability);
         mType = new SimpleIntegerProperty(type);
         mMode = new SimpleIntegerProperty(mode);
@@ -154,16 +154,16 @@ public class Transition {
         mResultState.set(resultState);
     }
 
-    public int getResultCoefficient() {
+    public double getResultCoefficient() {
         return mResultCoefficient.get();
     }
 
-    public IntegerProperty resultCoefficientProperty() {
+    public DoubleProperty resultCoefficientProperty() {
         return mResultCoefficient;
     }
 
-    public void setResultCoefficient(int resultCoefficient) {
-        mResultCoefficient.set(resultCoefficient);
+    public void setResultCoefficient(double resultCoefficient) {
+        this.mResultCoefficient.set(resultCoefficient);
     }
 
     public double getProbability() {

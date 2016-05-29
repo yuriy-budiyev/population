@@ -161,7 +161,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setCount((double) value);
+                        .setCount(value.doubleValue());
             }
         });
         mStatesTableDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -203,7 +203,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setSourceState((int) value);
+                        .setSourceState(value.intValue());
             }
         });
         mTransitionsTableSourceCoefficientColumn.setCellFactory(integerCell(1));
@@ -213,7 +213,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setSourceCoefficient((int) value);
+                        .setSourceCoefficient(value.intValue());
             }
         });
         mTransitionsTableSourceDelayColumn.setCellFactory(integerCell(0));
@@ -223,7 +223,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setSourceDelay((int) value);
+                        .setSourceDelay(value.intValue());
             }
         });
         mTransitionsTableOperandStateColumn.setCellFactory(stateCell());
@@ -233,7 +233,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setOperandState((int) value);
+                        .setOperandState(value.intValue());
             }
         });
         mTransitionsTableOperandCoefficientColumn.setCellFactory(integerCell(1));
@@ -243,7 +243,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setOperandCoefficient((int) value);
+                        .setOperandCoefficient(value.intValue());
             }
         });
         mTransitionsTableOperandDelayColumn.setCellFactory(integerCell(0));
@@ -253,7 +253,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setOperandDelay((int) value);
+                        .setOperandDelay(value.intValue());
             }
         });
         mTransitionsTableResultStateColumn.setCellFactory(stateCell());
@@ -263,17 +263,18 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setResultState((int) value);
+                        .setResultState(value.intValue());
             }
         });
-        mTransitionsTableResultCoefficientColumn.setCellFactory(integerCell(1));
+        mTransitionsTableResultCoefficientColumn
+                .setCellFactory(doubleCell(1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableResultCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().resultCoefficientProperty());
         mTransitionsTableResultCoefficientColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setResultCoefficient((int) value);
+                        .setResultCoefficient(value.doubleValue());
             }
         });
         mTransitionsTableProbabilityColumn
@@ -284,7 +285,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setProbability((double) value);
+                        .setProbability(value.doubleValue());
             }
         });
         mTransitionsTableTypeColumn.setCellFactory(typeCell());
@@ -293,7 +294,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setType((int) value);
+                        .setType(value.intValue());
             }
         });
         mTransitionsTableModeColumn.setCellFactory(modeCell());
@@ -302,7 +303,7 @@ public class PrimaryController extends AbstractController {
             Number value = event.getNewValue();
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setMode((int) value);
+                        .setMode(value.intValue());
             }
         });
         mTransitionsTableDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
