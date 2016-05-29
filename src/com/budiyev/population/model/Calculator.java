@@ -78,13 +78,14 @@ public class Calculator {
         if (r > 0) {
             double v = Math.floor(u);
             for (double i = 2; i <= v; i++) {
-                result = result.multiply(new BigDecimal(i));
+                result = result.multiply(decimalValue(i));
             }
-            result = result.multiply(BigDecimal.ONE.subtract(new BigDecimal(r)))
-                    .add(result.multiply(new BigDecimal(v + 1)).multiply(new BigDecimal(r)));
+            result = result.multiply(BigDecimal.ONE.subtract(decimalValue(r)))
+                    .add(result.multiply(decimalValue(v).add(BigDecimal.ONE))
+                            .multiply(decimalValue(r)));
         } else {
             for (double i = 2; i <= u; i++) {
-                result = result.multiply(new BigDecimal(i));
+                result = result.multiply(decimalValue(i));
             }
         }
         return result.setScale(scale, RoundingMode.HALF_EVEN);
