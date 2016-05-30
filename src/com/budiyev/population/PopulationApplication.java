@@ -17,9 +17,9 @@
  */
 package com.budiyev.population;
 
-import com.budiyev.population.controller.AbstractAboutController;
-import com.budiyev.population.controller.AbstractController;
-import com.budiyev.population.controller.AbstractExportController;
+import com.budiyev.population.controller.base.AbstractAboutController;
+import com.budiyev.population.controller.base.AbstractController;
+import com.budiyev.population.controller.base.AbstractExportController;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.State;
 import com.budiyev.population.model.Transition;

@@ -17,6 +17,7 @@
  */
 package com.budiyev.population.controller;
 
+import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.ChartSeries;
 import com.budiyev.population.model.State;

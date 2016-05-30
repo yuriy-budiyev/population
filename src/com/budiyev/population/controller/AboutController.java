@@ -17,6 +17,8 @@
  */
 package com.budiyev.population.controller;
 
+import com.budiyev.population.controller.base.AbstractAboutController;
+
 import javafx.scene.image.ImageView;
 
 public class AboutController extends AbstractAboutController {

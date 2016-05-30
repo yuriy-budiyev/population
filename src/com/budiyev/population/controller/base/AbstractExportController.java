@@ -15,18 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package com.budiyev.population.controller;
+package com.budiyev.population.controller.base;
 
-import javafx.scene.image.Image;
+import com.budiyev.population.model.Calculator;
 
-public abstract class AbstractAboutController extends AbstractController {
-    private Image mImage;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-    public Image getImage() {
-        return mImage;
+public abstract class AbstractExportController extends AbstractController {
+    private ArrayList<Calculator.Results> mResults;
+    private HashMap<String, String> mTaskSettings;
+
+    public ArrayList<Calculator.Results> getResults() {
+        return mResults;
     }
 
-    public final void setImage(Image image) {
-        mImage = image;
+    public final void setResults(ArrayList<Calculator.Results> results) {
+        mResults = results;
+    }
+
+    public HashMap<String, String> getTaskSettings() {
+        return mTaskSettings;
+    }
+
+    public final void setTaskSettings(HashMap<String, String> taskSettings) {
+        mTaskSettings = taskSettings;
     }
 }
