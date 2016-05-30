@@ -336,7 +336,6 @@ public class PrimaryController extends AbstractController {
             if (value != null) {
                 event.getTableView().getItems().get(event.getTablePosition().getRow())
                         .setName(value);
-                refreshResultsChart();
             }
         });
         mChartSettingsTableColorColumn

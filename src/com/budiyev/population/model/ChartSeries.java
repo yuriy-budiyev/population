@@ -55,6 +55,12 @@ public class ChartSeries {
         mColor = new SimpleIntegerProperty(color);
         mDash = new SimpleIntegerProperty(dash);
         mThickness = new SimpleIntegerProperty(thickness);
+        mData.nameProperty().addListener((observable, oldValue, newValue) -> {
+            Label legendLabel = mLegendLabel;
+            if (legendLabel != null) {
+                legendLabel.setText(newValue);
+            }
+        });
     }
 
     private String buildStyle() {
