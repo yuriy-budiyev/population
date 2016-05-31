@@ -737,7 +737,7 @@ public class Calculator {
                         } else if (sourceState == operandState) {
                             BigDecimal density = applyCoefficientPower(
                                     decimalValue(states[sourceIndex][sourceState]),
-                                    transition.sourceCoefficient);
+                                    transition.sourceCoefficient + transition.operandCoefficient);
                             value = divide(density, power(totalCount,
                                     transition.sourceCoefficient + transition.operandCoefficient -
                                     1));
