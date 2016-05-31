@@ -515,7 +515,7 @@ public class Calculator {
                                 transition.sourceCoefficient) * transition.probability;
                     } else if (sourceState == operandState) {
                         double density = applyCoefficientLinear(states[sourceIndex][sourceState],
-                                transition.sourceCoefficient + transition.operandCoefficient);
+                                transition.sourceCoefficient + transition.operandCoefficient - 1);
                         value = applyTransitionCommon(density, density, transition);
                     } else {
                         double sourceDensity =
@@ -698,6 +698,11 @@ public class Calculator {
                                 decimalValue(states[sourceIndex][sourceState]),
                                 transition.sourceCoefficient),
                                 decimalValue(transition.probability));
+                    } else if (sourceState == operandState) {
+                        BigDecimal density = applyCoefficientLinear(
+                                decimalValue(states[sourceIndex][sourceState]),
+                                transition.sourceCoefficient + transition.operandCoefficient - 1);
+                        value = applyTransitionCommon(density, density, transition);
                     } else {
                         BigDecimal sourceDensity = applyCoefficientLinear(
                                 decimalValue(states[sourceIndex][sourceState]),
@@ -729,6 +734,14 @@ public class Calculator {
                                         power(totalCount, transition.sourceCoefficient - 1));
                             }
                             value = multiply(value, decimalValue(transition.probability));
+                        } else if (sourceState == operandState) {
+                            BigDecimal density = applyCoefficientPower(
+                                    decimalValue(states[sourceIndex][sourceState]),
+                                    transition.sourceCoefficient);
+                            value = divide(density, power(totalCount,
+                                    transition.sourceCoefficient + transition.operandCoefficient -
+                                    1));
+                            value = applyTransitionCommon(value, density, transition);
                         } else {
                             BigDecimal sourceDensity = applyCoefficientPower(
                                     decimalValue(states[sourceIndex][sourceState]),
@@ -739,9 +752,6 @@ public class Calculator {
                             value = divide(multiply(sourceDensity, operandDensity),
                                     power(totalCount, transition.sourceCoefficient +
                                                       transition.operandCoefficient - 1));
-                            if (sourceState == operandState) {
-                                value = divide(value, decimalValue(2));
-                            }
                             value = applyTransitionCommon(value, operandDensity, transition);
                         }
                     }
@@ -768,6 +778,16 @@ public class Calculator {
                                         power(sourceCount, transition.sourceCoefficient - 1));
                             }
                             value = multiply(value, decimalValue(transition.probability));
+                        }
+                    } else if (sourceState == operandState) {
+                        BigDecimal count = decimalValue(states[sourceIndex][sourceState]);
+                        if (count.compareTo(BigDecimal.ZERO) > 0) {
+                            BigDecimal density = applyCoefficientPower(count,
+                                    transition.sourceCoefficient + transition.operandCoefficient);
+                            value = divide(density, power(count,
+                                    transition.sourceCoefficient + transition.operandCoefficient -
+                                    1));
+                            value = applyTransitionCommon(value, density, transition);
                         }
                     } else {
                         BigDecimal sourceCount = decimalValue(states[sourceIndex][sourceState]);
