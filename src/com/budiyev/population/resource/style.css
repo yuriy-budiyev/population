@@ -5,7 +5,7 @@
     -fx-stroke-width: 1;
 }
 .axis {
-    -fx-tick-label-font-size: 12;
+    -fx-tick-label-font-size: 14;
 }
 .scroll-pane {
     -fx-background-color: transparent;

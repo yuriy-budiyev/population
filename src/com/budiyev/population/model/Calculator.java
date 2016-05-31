@@ -513,6 +513,10 @@ public class Calculator {
                     } else if (operandExternal) {
                         value = applyCoefficientLinear(states[sourceIndex][sourceState],
                                 transition.sourceCoefficient) * transition.probability;
+                    } else if (sourceState == operandState) {
+                        double density = applyCoefficientLinear(states[sourceIndex][sourceState],
+                                transition.sourceCoefficient + transition.operandCoefficient);
+                        value = applyTransitionCommon(density, density, transition);
                     } else {
                         double sourceDensity =
                                 applyCoefficientLinear(states[sourceIndex][sourceState],
@@ -541,6 +545,13 @@ public class Calculator {
                                 value /= Math.pow(totalCount, transition.sourceCoefficient - 1);
                             }
                             value *= transition.probability;
+                        } else if (sourceState == operandState) {
+                            double density = applyCoefficientPower(states[sourceIndex][sourceState],
+                                    transition.sourceCoefficient + transition.operandCoefficient);
+                            value = density / Math.pow(totalCount,
+                                    transition.sourceCoefficient + transition.operandCoefficient -
+                                    1);
+                            value = applyTransitionCommon(value, density, transition);
                         } else {
                             double sourceDensity =
                                     applyCoefficientPower(states[sourceIndex][sourceState],
@@ -551,9 +562,6 @@ public class Calculator {
                             value = sourceDensity * operandDensity / Math.pow(totalCount,
                                     transition.sourceCoefficient + transition.operandCoefficient -
                                     1);
-                            if (sourceState == operandState) {
-                                value /= 2;
-                            }
                             value = applyTransitionCommon(value, operandDensity, transition);
                         }
                     }
@@ -578,6 +586,16 @@ public class Calculator {
                                 value /= Math.pow(sourceCount, transition.sourceCoefficient - 1);
                             }
                             value *= transition.probability;
+                        }
+                    } else if (sourceState == operandState) {
+                        double count = states[sourceIndex][sourceState];
+                        if (count > 0) {
+                            double density = applyCoefficientPower(count,
+                                    transition.sourceCoefficient + transition.operandCoefficient);
+                            value = density / Math.pow(count,
+                                    transition.sourceCoefficient + transition.operandCoefficient -
+                                    1);
+                            value = applyTransitionCommon(value, density, transition);
                         }
                     } else {
                         double sourceCount = states[sourceIndex][sourceState];
