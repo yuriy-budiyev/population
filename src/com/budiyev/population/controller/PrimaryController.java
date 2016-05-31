@@ -903,7 +903,7 @@ public class PrimaryController extends AbstractController {
                 valueColumn.setText(headers.get(j));
                 valueColumn.setCellFactory(
                         doubleCell(x -> true, 0, Utils.DECIMAL_FORMAT_RESULTS_TABLE));
-                valueColumn.setPrefWidth(125);
+                valueColumn.setPrefWidth(100);
                 final int resultIndex = i;
                 final int stateIndex = j;
                 valueColumn.setCellValueFactory(param -> {
