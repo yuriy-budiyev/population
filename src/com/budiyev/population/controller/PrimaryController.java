@@ -131,7 +131,6 @@ public class PrimaryController extends AbstractController {
     public CheckBox mAllowNegativeNumbers;
     public CheckBox mResultsOnChart;
     public CheckBox mResultsInTable;
-    private TableColumn<ArrayList<Calculator.Result>, Number> mResultsTableNumberColumn;
 
     private void initializeStatesTable() {
         mStatesIdList.add(State.EXTERNAL);
@@ -406,14 +405,6 @@ public class PrimaryController extends AbstractController {
         });
         mChartSettingsTable.setPlaceholder(new Rectangle());
         mChartSettingsTable.setItems(mResultsChartData);
-    }
-
-    private void initializeResultsTable() {
-        mResultsTableNumberColumn = new TableColumn<>();
-        mResultsTableNumberColumn.setText(getString("step"));
-        mResultsTableNumberColumn.setCellFactory(integerCell(x -> true, 0));
-        mResultsTableNumberColumn.setSortable(false);
-        mResultsTableNumberColumn.setEditable(false);
     }
 
     private void initializeResultsChart() {
@@ -886,7 +877,12 @@ public class PrimaryController extends AbstractController {
         int selectedStep = getResultsTableSelectedStep();
         mResultsTable.getItems().clear();
         mResultsTable.getColumns().clear();
-        mResultsTableNumberColumn.setCellValueFactory(param -> {
+        TableColumn<ArrayList<Calculator.Result>, Number> numberColumn = new TableColumn<>();
+        numberColumn.setText(getString("step"));
+        numberColumn.setCellFactory(integerCell(x -> true, 0));
+        numberColumn.setSortable(false);
+        numberColumn.setEditable(false);
+        numberColumn.setCellValueFactory(param -> {
             ArrayList<Calculator.Result> results = param.getValue();
             for (Calculator.Result result : results) {
                 if (result != null) {
@@ -895,7 +891,7 @@ public class PrimaryController extends AbstractController {
             }
             return null;
         });
-        mResultsTable.getColumns().add(mResultsTableNumberColumn);
+        mResultsTable.getColumns().add(numberColumn);
         for (int i = 0; i < mResultsTableData.size(); i++) {
             ArrayList<String> headers = mResultsTableData.get(i).getDataNames();
             for (int j = 0; j < headers.size(); j++) {
@@ -1006,7 +1002,6 @@ public class PrimaryController extends AbstractController {
         initializeStatesTable();
         initializeTransitionsTable();
         initializeChartSettingsTable();
-        initializeResultsTable();
         initializeResultsChart();
         mCalculationProgressBar.setVisible(false);
         mResultsTable.setPlaceholder(new Rectangle());
