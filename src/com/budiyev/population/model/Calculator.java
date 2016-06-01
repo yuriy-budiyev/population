@@ -89,6 +89,7 @@ public class Calculator {
             mExecutor = Executors
                     .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), runnable -> {
                         Thread thread = new Thread(runnable, "Population transition thread");
+                        thread.setUncaughtExceptionHandler(Utils.UNCAUGHT_EXCEPTION_HANDLER);
                         thread.setDaemon(true);
                         return thread;
                     });
@@ -854,7 +855,7 @@ public class Calculator {
             }
             if (mTransition.mode == TransitionMode.REMOVING) {
                 if (sourceState != operandState && !sourceExternal) {
-                    decrementState(mStep, sourceState, value);
+                    decrementState(mStep, sourceState, value * mTransition.sourceCoefficient);
                     checkStateNegativeness(mStep, sourceState);
                 }
             }
@@ -863,7 +864,7 @@ public class Calculator {
                 checkStateNegativeness(mStep, resultState);
             }
             if (mTransition.mode != TransitionMode.RETAINING && !operandExternal) {
-                decrementState(mStep, operandState, value);
+                decrementState(mStep, operandState, value * mTransition.operandCoefficient);
                 checkStateNegativeness(mStep, operandState);
             }
         }
@@ -1018,7 +1019,8 @@ public class Calculator {
             }
             if (mTransition.mode == TransitionMode.REMOVING) {
                 if (sourceState != operandState && !sourceExternal) {
-                    decrementState(mStep, sourceState, value);
+                    decrementState(mStep, sourceState,
+                            multiply(value, decimalValue(mTransition.sourceCoefficient)));
                     checkStateNegativeness(mStep, sourceState);
                 }
             }
@@ -1028,7 +1030,8 @@ public class Calculator {
                 checkStateNegativeness(mStep, resultState);
             }
             if (mTransition.mode != TransitionMode.RETAINING && !operandExternal) {
-                decrementState(mStep, operandState, value);
+                decrementState(mStep, operandState,
+                        multiply(value, decimalValue(mTransition.operandCoefficient)));
                 checkStateNegativeness(mStep, operandState);
             }
         }
