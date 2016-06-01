@@ -297,7 +297,7 @@ public final class PopulationApplication extends Application {
         String encoding = settings.get(TaskParser.Settings.ENCODING);
         Calculator.Results results = Calculator
                 .calculateSync(initialStates, transitions, startPoint, stepsCount, higherAccuracy,
-                        allowNegative, parallel);
+                        allowNegative, parallel, true, false);
         Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
                 encoding, resources);
     }

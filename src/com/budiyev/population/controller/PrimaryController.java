@@ -989,7 +989,6 @@ public class PrimaryController extends AbstractController {
             mResultsTableData.add(results);
             refreshResultsTable();
         }
-        results.clearChartData();
     }
 
     @Override
@@ -1048,7 +1047,8 @@ public class PrimaryController extends AbstractController {
         mCalculationProgressBar.setVisible(true);
         Calculator.calculateAsync(mStates, mTransitions, startPoint, stepsCount,
                 mHigherAccuracy.isSelected(), mAllowNegativeNumbers.isSelected(),
-                mParallel.isSelected(), results -> Platform.runLater(() -> {
+                mParallel.isSelected(), mResultsInTable.isSelected(), mResultsOnChart.isSelected(),
+                results -> Platform.runLater(() -> {
                     publishResults(results);
                     mCalculationProgressBar.setVisible(false);
                     mStartPointLabel.setDisable(false);

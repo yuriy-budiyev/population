@@ -58,10 +58,13 @@ public class Calculator {
     private final ProgressCallback mProgressCallback;
     private final boolean mHigherAccuracy;
     private final boolean mParallel;
+    private final boolean mPrepareResultsTableData;
+    private final boolean mPrepareResultsChartData;
     private double mProgress;
 
     private Calculator(List<State> initialStates, List<Transition> transitions, int startPoint,
             int stepsCount, boolean allowNegative, boolean higherAccuracy, boolean parallel,
+            boolean prepareResultsTableData, boolean prepareResultsChartData,
             ResultCallback resultCallback, ProgressCallback progressCallback) {
         mStepsCount = stepsCount;
         mStartPoint = startPoint;
@@ -69,6 +72,8 @@ public class Calculator {
         mAllowNegative = allowNegative;
         mHigherAccuracy = higherAccuracy;
         mParallel = parallel;
+        mPrepareResultsTableData = prepareResultsTableData;
+        mPrepareResultsChartData = prepareResultsChartData;
         mResultCallback = resultCallback;
         mProgressCallback = progressCallback;
         mStates = new double[mStepsCount][mStatesCount];
@@ -220,7 +225,8 @@ public class Calculator {
             }
             updateProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
         }
-        return new Results(mStartPoint, mStates, mStateNames);
+        return new Results(mStartPoint, mStates, mStateNames, mPrepareResultsTableData,
+                mPrepareResultsChartData);
     }
 
     /**
@@ -256,7 +262,8 @@ public class Calculator {
 
             updateProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
         }
-        return new Results(mStartPoint, mStates, mStateNames);
+        return new Results(mStartPoint, mStates, mStateNames, mPrepareResultsTableData,
+                mPrepareResultsChartData);
     }
 
     public Results calculateSync() {
@@ -684,40 +691,47 @@ public class Calculator {
     /**
      * Вычислить (синхронно)
      *
-     * @param initialStates  начальные состояния
-     * @param transitions    переходы
-     * @param startPoint     начало отсчёта
-     * @param stepsCount     количество шагов
-     * @param higherAccuracy повышенная точность
-     * @param parallel       вычислять переходы параллельно
-     * @param allowNegative  разрешить отрицательные значания
+     * @param initialStates           начальные состояния
+     * @param transitions             переходы
+     * @param startPoint              начало отсчёта
+     * @param stepsCount              количество шагов
+     * @param higherAccuracy          повышенная точность
+     * @param allowNegative           разрешить отрицательные значания
+     * @param parallel                вычислять переходы параллельно
+     * @param prepareResultsTableData подготовить результат для вывода в табличном виде
+     * @param prepareResultsChartData подготовить результат для вывода в графическом виде
      * @return результаты вычислений
      */
     public static Results calculateSync(List<State> initialStates, List<Transition> transitions,
             int startPoint, int stepsCount, boolean higherAccuracy, boolean allowNegative,
-            boolean parallel) {
+            boolean parallel, boolean prepareResultsTableData, boolean prepareResultsChartData) {
         return new Calculator(initialStates, transitions, startPoint, stepsCount, allowNegative,
-                higherAccuracy, parallel, null, null).calculateSync();
+                higherAccuracy, parallel, prepareResultsTableData, prepareResultsChartData, null,
+                null).calculateSync();
     }
 
     /**
      * Вычислить (асинхронно)
      *
-     * @param initialStates    начальные состояния
-     * @param transitions      переходы
-     * @param startPoint       начало отсчёта
-     * @param stepsCount       количество шагов
-     * @param higherAccuracy   повышенная точность
-     * @param parallel         вычислять переходы параллельно
-     * @param allowNegative    разрешить отрицательные значания
-     * @param resultCallback   обратный вызов результата
-     * @param progressCallback обратный вызов прогресса вычислений
+     * @param initialStates           начальные состояния
+     * @param transitions             переходы
+     * @param startPoint              начало отсчёта
+     * @param stepsCount              количество шагов
+     * @param higherAccuracy          повышенная точность
+     * @param allowNegative           разрешить отрицательные значания
+     * @param parallel                вычислять переходы параллельно
+     * @param prepareResultsTableData подготовить результат для вывода в табличном виде
+     * @param prepareResultsChartData подготовить результат для вывода в графическом виде
+     * @param resultCallback          обратный вызов результата
+     * @param progressCallback        обратный вызов прогресса вычислений
      */
     public static void calculateAsync(List<State> initialStates, List<Transition> transitions,
             int startPoint, int stepsCount, boolean higherAccuracy, boolean allowNegative,
-            boolean parallel, ResultCallback resultCallback, ProgressCallback progressCallback) {
+            boolean parallel, boolean prepareResultsTableData, boolean prepareResultsChartData,
+            ResultCallback resultCallback, ProgressCallback progressCallback) {
         new Calculator(initialStates, transitions, startPoint, stepsCount, allowNegative,
-                higherAccuracy, parallel, resultCallback, progressCallback).calculateAsync();
+                higherAccuracy, parallel, prepareResultsTableData, prepareResultsChartData,
+                resultCallback, progressCallback).calculateAsync();
     }
 
     private class TransitionActionNormalAccuracy implements Runnable {
@@ -854,7 +868,7 @@ public class Calculator {
                 }
             }
             if (mTransition.mode == TransitionMode.REMOVING) {
-                if (sourceState != operandState && !sourceExternal) {
+                if (!sourceExternal) {
                     decrementState(mStep, sourceState, value * mTransition.sourceCoefficient);
                     checkStateNegativeness(mStep, sourceState);
                 }
@@ -1018,7 +1032,7 @@ public class Calculator {
                 }
             }
             if (mTransition.mode == TransitionMode.REMOVING) {
-                if (sourceState != operandState && !sourceExternal) {
+                if (!sourceExternal) {
                     decrementState(mStep, sourceState,
                             multiply(value, decimalValue(mTransition.sourceCoefficient)));
                     checkStateNegativeness(mStep, sourceState);
@@ -1069,25 +1083,35 @@ public class Calculator {
         private final int mStartPoint;
         private final ArrayList<String> mDataNames;
         private final ArrayList<Result> mTableData;
-        private ArrayList<XYChart.Series<Number, Number>> mChartData;
+        private final ArrayList<XYChart.Series<Number, Number>> mChartData;
 
-        private Results(int startPoint, double[][] states, String[] stateNames) {
+        private Results(int startPoint, double[][] states, String[] stateNames,
+                boolean prepareResultsTableData, boolean prepareResultsChartData) {
             mStartPoint = startPoint;
             mDataNames = new ArrayList<>(stateNames.length);
             Collections.addAll(mDataNames, stateNames);
-            mTableData = new ArrayList<>(states.length);
-            for (int i = 0; i < states.length; i++) {
-                mTableData.add(new Result(states[i], i + mStartPoint));
-            }
-            mChartData = new ArrayList<>(stateNames.length);
-            for (int i = 0; i < stateNames.length; i++) {
-                ObservableList<XYChart.Data<Number, Number>> data =
-                        FXCollections.observableList(new ArrayList<>(states.length));
-                for (int j = 0; j < states.length; j++) {
-                    data.add(new XYChart.Data<>(j + mStartPoint, states[j][i]));
+            if (prepareResultsTableData) {
+                mTableData = new ArrayList<>(states.length);
+                for (int i = 0; i < states.length; i++) {
+                    mTableData.add(new Result(states[i], i + mStartPoint));
                 }
-                XYChart.Series<Number, Number> series = new XYChart.Series<>(stateNames[i], data);
-                mChartData.add(series);
+            } else {
+                mTableData = null;
+            }
+            if (prepareResultsChartData) {
+                mChartData = new ArrayList<>(stateNames.length);
+                for (int i = 0; i < stateNames.length; i++) {
+                    ObservableList<XYChart.Data<Number, Number>> data =
+                            FXCollections.observableList(new ArrayList<>(states.length));
+                    for (int j = 0; j < states.length; j++) {
+                        data.add(new XYChart.Data<>(j + mStartPoint, states[j][i]));
+                    }
+                    XYChart.Series<Number, Number> series =
+                            new XYChart.Series<>(stateNames[i], data);
+                    mChartData.add(series);
+                }
+            } else {
+                mChartData = null;
             }
         }
 
@@ -1105,10 +1129,6 @@ public class Calculator {
 
         public ArrayList<XYChart.Series<Number, Number>> getChartData() {
             return mChartData;
-        }
-
-        public void clearChartData() {
-            mChartData = null;
         }
     }
 
