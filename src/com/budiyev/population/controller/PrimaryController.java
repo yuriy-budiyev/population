@@ -127,6 +127,7 @@ public class PrimaryController extends AbstractController {
     public Button mClearResultsChartButton;
     public Button mClearResultsTableButton;
     public Button mExportResultsButton;
+    public CheckBox mParallel;
     public CheckBox mHigherAccuracy;
     public CheckBox mAllowNegativeNumbers;
     public CheckBox mResultsOnChart;
@@ -674,6 +675,7 @@ public class PrimaryController extends AbstractController {
         }
         mTaskSettings.put(TaskParser.Settings.START_POINT, String.valueOf(startPoint));
         mTaskSettings.put(TaskParser.Settings.STEPS_COUNT, String.valueOf(stepsCount));
+        mTaskSettings.put(TaskParser.Settings.PARALLEL, String.valueOf(mParallel.isSelected()));
         mTaskSettings.put(TaskParser.Settings.HIGHER_ACCURACY,
                 String.valueOf(mHigherAccuracy.isSelected()));
         mTaskSettings.put(TaskParser.Settings.ALLOW_NEGATIVE,
@@ -688,6 +690,9 @@ public class PrimaryController extends AbstractController {
         }
         if (settings.containsKey(TaskParser.Settings.STEPS_COUNT)) {
             mStepsCountField.setText(settings.get(TaskParser.Settings.STEPS_COUNT));
+        }
+        if (settings.containsKey(TaskParser.Settings.PARALLEL)) {
+            mParallel.setSelected(Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL)));
         }
         if (settings.containsKey(TaskParser.Settings.HIGHER_ACCURACY)) {
             mHigherAccuracy.setSelected(
@@ -1033,15 +1038,16 @@ public class PrimaryController extends AbstractController {
         mClearResultsChartButton.setDisable(true);
         mClearResultsTableButton.setDisable(true);
         mExportResultsButton.setDisable(true);
+        mParallel.setDisable(true);
         mHigherAccuracy.setDisable(true);
         mAllowNegativeNumbers.setDisable(true);
         mResultsOnChart.setDisable(true);
         mResultsInTable.setDisable(true);
         mCalculationProgressBar.setProgress(0);
         mCalculationProgressBar.setVisible(true);
-        Calculator.calculate(mStates, mTransitions, stepsCount, startPoint,
+        Calculator.calculateAsync(mStates, mTransitions, startPoint, stepsCount,
                 mHigherAccuracy.isSelected(), mAllowNegativeNumbers.isSelected(),
-                results -> Platform.runLater(() -> {
+                mParallel.isSelected(), results -> Platform.runLater(() -> {
                     publishResults(results);
                     mCalculationProgressBar.setVisible(false);
                     mStartPointLabel.setDisable(false);
@@ -1052,6 +1058,7 @@ public class PrimaryController extends AbstractController {
                     mClearResultsChartButton.setDisable(false);
                     mClearResultsTableButton.setDisable(false);
                     mExportResultsButton.setDisable(false);
+                    mParallel.setDisable(false);
                     mHigherAccuracy.setDisable(false);
                     mAllowNegativeNumbers.setDisable(false);
                     mResultsOnChart.setDisable(false);

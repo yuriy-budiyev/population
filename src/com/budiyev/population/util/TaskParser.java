@@ -104,6 +104,9 @@ public final class TaskParser {
             } else if (Objects.equals(row.cell(0), Settings.STEPS_COUNT)) {
                 settings.put(Settings.STEPS_COUNT, row.cell(1));
                 continue;
+            } else if (Objects.equals(row.cell(0), Settings.PARALLEL)) {
+                settings.put(Settings.PARALLEL, row.cell(1));
+                continue;
             } else if (Objects.equals(row.cell(0), Settings.HIGHER_ACCURACY)) {
                 settings.put(Settings.HIGHER_ACCURACY, row.cell(1));
                 continue;
@@ -141,6 +144,7 @@ public final class TaskParser {
     public static final class Settings {
         public static final String START_POINT = "StartPoint";
         public static final String STEPS_COUNT = "StepsCount";
+        public static final String PARALLEL = "Parallel";
         public static final String HIGHER_ACCURACY = "HigherAccuracy";
         public static final String ALLOW_NEGATIVE = "AllowNegative";
         public static final String COLUMN_SEPARATOR = "ColumnSeparator";

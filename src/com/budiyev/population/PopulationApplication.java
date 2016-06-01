@@ -295,8 +295,8 @@ public final class PopulationApplication extends Application {
         String lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
         String encoding = settings.get(TaskParser.Settings.ENCODING);
         Calculator.Results results = Calculator
-                .calculate(initialStates, transitions, stepsCount, startPoint, higherAccuracy,
-                        allowNegative);
+                .calculateSync(initialStates, transitions, startPoint, stepsCount, higherAccuracy,
+                        allowNegative, true);
         Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
                 encoding, resources);
     }

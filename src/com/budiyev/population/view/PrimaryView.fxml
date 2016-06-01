@@ -127,6 +127,7 @@
                                         </HBox>
                                         <HBox spacing="10.0">
                                             <children>
+                                                <CheckBox fx:id="mParallel" mnemonicParsing="false" text="%parallel" />
                                                 <CheckBox fx:id="mHigherAccuracy" mnemonicParsing="false" text="%higher_accuracy" />
                                                 <CheckBox fx:id="mAllowNegativeNumbers" mnemonicParsing="false" text="%allow_negative_values" />
                                                 <CheckBox fx:id="mResultsOnChart" mnemonicParsing="false" selected="true" text="%results_on_chart" />
