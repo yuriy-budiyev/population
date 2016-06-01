@@ -290,13 +290,14 @@ public final class PopulationApplication extends Application {
         int stepsCount = Integer.valueOf(settings.get(TaskParser.Settings.STEPS_COUNT));
         boolean higherAccuracy = Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY));
         boolean allowNegative = Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE));
+        boolean parallel = Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL));
         char columnSeparator = settings.get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
         char decimalSeparator = settings.get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
         String lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
         String encoding = settings.get(TaskParser.Settings.ENCODING);
         Calculator.Results results = Calculator
                 .calculateSync(initialStates, transitions, startPoint, stepsCount, higherAccuracy,
-                        allowNegative, true);
+                        allowNegative, parallel);
         Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
                 encoding, resources);
     }
