@@ -50,25 +50,25 @@
                     <content>
                         <AnchorPane>
                             <children>
-                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
-                                    <children>
-                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addState" text="%add" />
-                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeState" text="%remove" />
-                                    </children>
-                                </HBox>
-                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
-                                    <children>
-                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateUp" text="%move_up" />
-                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateDown" text="%move_down" />
-                                    </children>
-                                </HBox>
-                                <TableView fx:id="mStatesTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="49.0">
+                                <TableView fx:id="mStatesTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
                                     <columns>
                                         <TableColumn fx:id="mStatesTableNameColumn" prefWidth="150.0" sortable="false" text="%state_name" />
                                         <TableColumn fx:id="mStatesTableCountColumn" prefWidth="150.0" sortable="false" text="%state_count" />
                                         <TableColumn fx:id="mStatesTableDescriptionColumn" prefWidth="400.0" sortable="false" text="%description" />
                                     </columns>
                                 </TableView>
+                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addState" text="%add" />
+                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeState" text="%remove" />
+                                    </children>
+                                </HBox>
+                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateUp" text="%move_up" />
+                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateDown" text="%move_down" />
+                                    </children>
+                                </HBox>
                             </children>
                         </AnchorPane>
                     </content>
@@ -77,19 +77,7 @@
                     <content>
                         <AnchorPane>
                             <children>
-                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
-                                    <children>
-                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addTransition" text="%add" />
-                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeTransition" text="%remove" />
-                                    </children>
-                                </HBox>
-                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
-                                    <children>
-                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionUp" text="%move_up" />
-                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionDown" text="%move_down" />
-                                    </children>
-                                </HBox>
-                                <TableView fx:id="mTransitionsTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="49.0">
+                                <TableView fx:id="mTransitionsTable" editable="true" layoutX="14.0" layoutY="49.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
                                     <columns>
                                         <TableColumn fx:id="mTransitionsTableSourceStateColumn" prefWidth="75.0" sortable="false" text="%transition_source_state" />
                                         <TableColumn fx:id="mTransitionsTableSourceCoefficientColumn" prefWidth="45.0" sortable="false" text="%transition_source_coefficient" />
@@ -105,6 +93,18 @@
                                         <TableColumn fx:id="mTransitionsTableDescriptionColumn" prefWidth="150.0" sortable="false" text="%description" />
                                     </columns>
                                 </TableView>
+                                <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addTransition" text="%add" />
+                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeTransition" text="%remove" />
+                                    </children>
+                                </HBox>
+                                <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                    <children>
+                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionUp" text="%move_up" />
+                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionDown" text="%move_down" />
+                                    </children>
+                                </HBox>
                             </children>
                         </AnchorPane>
                     </content>
