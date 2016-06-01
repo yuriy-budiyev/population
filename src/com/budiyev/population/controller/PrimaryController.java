@@ -885,6 +885,7 @@ public class PrimaryController extends AbstractController {
         TableColumn<ArrayList<Calculator.Result>, Number> numberColumn = new TableColumn<>();
         numberColumn.setText(getString("step"));
         numberColumn.setCellFactory(integerCell(x -> true, 0));
+        numberColumn.setPrefWidth(40);
         numberColumn.setSortable(false);
         numberColumn.setEditable(false);
         numberColumn.setCellValueFactory(param -> {
@@ -904,7 +905,7 @@ public class PrimaryController extends AbstractController {
                 valueColumn.setText(headers.get(j));
                 valueColumn.setCellFactory(
                         doubleCell(x -> true, 0, Utils.DECIMAL_FORMAT_RESULTS_TABLE));
-                valueColumn.setPrefWidth(100);
+                valueColumn.setPrefWidth(80);
                 final int resultIndex = i;
                 final int stateIndex = j;
                 valueColumn.setCellValueFactory(param -> {
