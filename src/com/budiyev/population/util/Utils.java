@@ -46,11 +46,19 @@ public final class Utils {
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
             (thread, throwable) -> {
+                for (; ; ) {
+                    Throwable cause = throwable.getCause();
+                    if (cause == null) {
+                        break;
+                    }
+                    throwable = cause;
+                }
                 throwable.printStackTrace();
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
                         .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
-                        .append("Stack trace:").append(System.lineSeparator());
+                        .append(System.lineSeparator()).append("Stack trace:")
+                        .append(System.lineSeparator());
                 StackTraceElement[] stackTrace = throwable.getStackTrace();
                 for (int i = 0; i < stackTrace.length && i < 10; i++) {
                     stringBuilder.append(stackTrace[i]);
