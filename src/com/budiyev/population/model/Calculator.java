@@ -912,7 +912,7 @@ public class Calculator {
             }
             int sourceIndex = delay(mStep - 1, mTransition.sourceDelay);
             int operandIndex = delay(mStep - 1, mTransition.operandDelay);
-            BigDecimal value = decimalValue(0);
+            BigDecimal value = BigDecimal.ZERO;
             if (mTransition.type == TransitionType.LINEAR) {
                 if (sourceExternal) {
                     BigDecimal operandDensity = applyCoefficientLinear(
