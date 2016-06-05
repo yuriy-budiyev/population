@@ -360,11 +360,11 @@ public class Calculator {
     private static BigDecimal applyTransitionCommon(BigDecimal u, BigDecimal operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
-            u = operandDensity.subtract(u);
+            u = operandDensity.subtract(multiply(u, decimalValue(transition.operandCoefficient)));
         }
         u = multiply(u, decimalValue(transition.probability));
         if (transition.mode == TransitionMode.RESIDUAL) {
-            u = operandDensity.subtract(u);
+            u = operandDensity.subtract(multiply(u, decimalValue(transition.operandCoefficient)));
         }
         return u;
     }
@@ -375,11 +375,11 @@ public class Calculator {
     private static double applyTransitionCommon(double u, double operandDensity,
             TransitionValues transition) {
         if (transition.mode == TransitionMode.INHIBITOR) {
-            u = operandDensity - u;
+            u = operandDensity - u * transition.operandCoefficient;
         }
         u *= transition.probability;
         if (transition.mode == TransitionMode.RESIDUAL) {
-            u = operandDensity - u;
+            u = operandDensity - u * transition.operandCoefficient;
         }
         return u;
     }
@@ -867,19 +867,22 @@ public class Calculator {
                     }
                 }
             }
-            if (mTransition.mode == TransitionMode.REMOVING) {
-                if (!sourceExternal) {
-                    decrementState(mStep, sourceState, value * mTransition.sourceCoefficient);
-                    checkStateNegativeness(mStep, sourceState);
+            if (!sourceExternal && mTransition.mode == TransitionMode.REMOVING) {
+                decrementState(mStep, sourceState, value * mTransition.sourceCoefficient);
+                checkStateNegativeness(mStep, sourceState);
+            }
+            if (!operandExternal) {
+                if (mTransition.mode == TransitionMode.INHIBITOR ||
+                    mTransition.mode == TransitionMode.RESIDUAL) {
+                    decrementState(mStep, operandState, value);
+                } else if (mTransition.mode != TransitionMode.RETAINING) {
+                    decrementState(mStep, operandState, value * mTransition.operandCoefficient);
                 }
+                checkStateNegativeness(mStep, operandState);
             }
             if (!resultExternal) {
                 incrementState(mStep, resultState, value * mTransition.resultCoefficient);
                 checkStateNegativeness(mStep, resultState);
-            }
-            if (mTransition.mode != TransitionMode.RETAINING && !operandExternal) {
-                decrementState(mStep, operandState, value * mTransition.operandCoefficient);
-                checkStateNegativeness(mStep, operandState);
             }
         }
     }
@@ -1038,15 +1041,20 @@ public class Calculator {
                     checkStateNegativeness(mStep, sourceState);
                 }
             }
+            if (!operandExternal) {
+                if (mTransition.mode == TransitionMode.INHIBITOR ||
+                    mTransition.mode == TransitionMode.RESIDUAL) {
+                    decrementState(mStep, operandState, value);
+                } else if (mTransition.mode != TransitionMode.RETAINING) {
+                    decrementState(mStep, operandState,
+                            multiply(value, decimalValue(mTransition.operandCoefficient)));
+                }
+                checkStateNegativeness(mStep, operandState);
+            }
             if (!resultExternal) {
                 incrementState(mStep, resultState,
                         multiply(value, decimalValue(mTransition.resultCoefficient)));
                 checkStateNegativeness(mStep, resultState);
-            }
-            if (mTransition.mode != TransitionMode.RETAINING && !operandExternal) {
-                decrementState(mStep, operandState,
-                        multiply(value, decimalValue(mTransition.operandCoefficient)));
-                checkStateNegativeness(mStep, operandState);
             }
         }
     }
