@@ -53,7 +53,6 @@ public final class Utils {
                     }
                     throwable = cause;
                 }
-                throwable.printStackTrace();
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
                         .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
