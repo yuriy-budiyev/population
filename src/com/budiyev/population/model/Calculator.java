@@ -767,7 +767,7 @@ public class Calculator {
                                     mTransition.operandCoefficient);
                     value = operandDensity * mTransition.probability;
                     if (mTransition.mode == TransitionMode.RESIDUAL) {
-                        value = operandDensity - value;
+                        value = operandDensity - value * mTransition.operandCoefficient;
                     }
                 } else if (operandExternal) {
                     value = applyCoefficientLinear(getState(sourceIndex, sourceState),
@@ -920,7 +920,8 @@ public class Calculator {
                             mTransition.operandCoefficient);
                     value = multiply(operandDensity, decimalValue(mTransition.probability));
                     if (mTransition.mode == TransitionMode.RESIDUAL) {
-                        value = operandDensity.subtract(value);
+                        value = operandDensity.subtract(
+                                multiply(value, decimalValue(mTransition.operandCoefficient)));
                     }
                 } else if (operandExternal) {
                     value = multiply(
