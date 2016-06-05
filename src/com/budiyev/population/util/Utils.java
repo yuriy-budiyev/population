@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.ThreadFactory;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -40,6 +41,7 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.StageStyle;
 
 public final class Utils {
+    private static final int MAX_STACK_TRACE_LENGTH = 10;
     public static final String DECIMAL_FORMAT_COMMON =
             "#." + createRepeatingString('#', Calculator.SCALE);
     public static final String DECIMAL_FORMAT_RESULTS_TABLE = "#.#####";
@@ -59,9 +61,10 @@ public final class Utils {
                         .append(System.lineSeparator()).append("Stack trace:")
                         .append(System.lineSeparator());
                 StackTraceElement[] stackTrace = throwable.getStackTrace();
-                for (int i = 0; i < stackTrace.length && i < 10; i++) {
+                for (int i = 0; i < stackTrace.length && i < MAX_STACK_TRACE_LENGTH; i++) {
                     stringBuilder.append(stackTrace[i]);
-                    if (i == 9) {
+                    if (i == MAX_STACK_TRACE_LENGTH - 1 &&
+                        stackTrace.length > MAX_STACK_TRACE_LENGTH) {
                         stringBuilder.append("...");
                     } else {
                         stringBuilder.append(System.lineSeparator());
@@ -77,7 +80,23 @@ public final class Utils {
                 });
             };
 
+    public static final ThreadFactory THREAD_FACTORY = runnable -> {
+        Thread thread = new Thread(runnable, "Population background thread");
+        thread.setUncaughtExceptionHandler(UNCAUGHT_EXCEPTION_HANDLER);
+        if (!thread.isDaemon()) {
+            thread.setDaemon(true);
+        }
+        if (thread.getPriority() != Thread.NORM_PRIORITY) {
+            thread.setPriority(Thread.NORM_PRIORITY);
+        }
+        return thread;
+    };
+
     private Utils() {
+    }
+
+    public static void runAsync(Runnable runnable) {
+        THREAD_FACTORY.newThread(runnable).start();
     }
 
     public static String createRepeatingString(char character, int count) {

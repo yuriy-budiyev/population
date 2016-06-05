@@ -430,16 +430,7 @@ public class PrimaryController extends AbstractController {
             zoomRect.setHeight(Math.abs(y - mouseAnchor.get().getY()));
         });
         final ScheduledExecutorService executor =
-                Executors.newSingleThreadScheduledExecutor(runnable -> {
-                    Thread thread = new Thread(runnable,
-                            "Population application diagram refresh schedule thread");
-                    thread.setDaemon(true);
-                    thread.setUncaughtExceptionHandler(Utils.UNCAUGHT_EXCEPTION_HANDLER);
-                    if (thread.getPriority() != Thread.NORM_PRIORITY) {
-                        thread.setPriority(Thread.NORM_PRIORITY);
-                    }
-                    return thread;
-                });
+                Executors.newSingleThreadScheduledExecutor(Utils.THREAD_FACTORY);
         final int[] zoomedBounds = new int[2];
         final ScheduledFuture<?>[] refreshChart = new ScheduledFuture<?>[1];
         getStage().widthProperty().addListener((observable, oldValue, newValue) -> {

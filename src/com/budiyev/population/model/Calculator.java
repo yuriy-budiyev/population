@@ -91,13 +91,8 @@ public class Calculator {
             mTransitions[i] = new TransitionValues(transitions.get(i));
         }
         if (mParallel) {
-            mExecutor = Executors
-                    .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), runnable -> {
-                        Thread thread = new Thread(runnable, "Population transition thread");
-                        thread.setUncaughtExceptionHandler(Utils.UNCAUGHT_EXCEPTION_HANDLER);
-                        thread.setDaemon(true);
-                        return thread;
-                    });
+            mExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+                    Utils.THREAD_FACTORY);
         } else {
             mExecutor = null;
         }
@@ -278,7 +273,7 @@ public class Calculator {
     }
 
     public void calculateAsync() {
-        Thread thread = new Thread(() -> {
+        Utils.runAsync(() -> {
             Results results;
             if (mHigherAccuracy) {
                 results = calculateInternalHigherAccuracy();
@@ -286,10 +281,7 @@ public class Calculator {
                 results = calculateInternalNormalAccuracy();
             }
             callbackResults(results);
-        }, "Population calculation thread");
-        thread.setUncaughtExceptionHandler(Utils.UNCAUGHT_EXCEPTION_HANDLER);
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     /**
