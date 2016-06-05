@@ -1034,12 +1034,10 @@ public class Calculator {
                     }
                 }
             }
-            if (mTransition.mode == TransitionMode.REMOVING) {
-                if (!sourceExternal) {
-                    decrementState(mStep, sourceState,
-                            multiply(value, decimalValue(mTransition.sourceCoefficient)));
-                    checkStateNegativeness(mStep, sourceState);
-                }
+            if (!sourceExternal && mTransition.mode == TransitionMode.REMOVING) {
+                decrementState(mStep, sourceState,
+                        multiply(value, decimalValue(mTransition.sourceCoefficient)));
+                checkStateNegativeness(mStep, sourceState);
             }
             if (!operandExternal) {
                 if (mTransition.mode == TransitionMode.INHIBITOR ||
