@@ -44,7 +44,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    public static final int SCALE = 384;
+    public static final int SCALE = Double.MAX_EXPONENT + 1;
     private final int mStepsCount;
     private final int mStartPoint;
     private final int mStatesCount;
