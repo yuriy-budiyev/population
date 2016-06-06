@@ -83,7 +83,7 @@ public class PrimaryController extends AbstractController {
     private final ObservableList<ChartSeries> mResultsChartData =
             FXCollections.observableArrayList();
     private final ArrayList<Calculator.Results> mResultsTableData = new ArrayList<>();
-    private final int[] mCurrentChartBounds = {Integer.MIN_VALUE, Integer.MAX_VALUE};
+    private final int[] mCurrentChartBounds = {0, 110};
     private volatile boolean mZoomingChart;
     private int mResultsTablePrecision = 5;
     private File mTaskFile;
@@ -452,6 +452,11 @@ public class PrimaryController extends AbstractController {
                 Platform.runLater(PrimaryController.this::refreshResultsChart);
             }, 500, TimeUnit.MILLISECONDS);
         });
+        NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
+        NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();
+        xAxis.setAutoRanging(false);
+        xAxis.setUpperBound(110);
+        xAxis.setTickUnit(10);
         mResultsChart.setOnMouseReleased(event -> {
             double zoomRectWidth = zoomRect.getWidth();
             double zoomRectHeight = zoomRect.getHeight();
@@ -462,8 +467,6 @@ public class PrimaryController extends AbstractController {
                 return;
             }
             Point2D chartInScene = mResultsChart.localToScene(0, 0);
-            NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
-            NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();
             Point2D xAxisInScene = xAxis.localToScene(0, 0);
             Point2D yAxisInScene = yAxis.localToScene(0, 0);
             double xScale = xAxis.getScale();
@@ -482,7 +485,6 @@ public class PrimaryController extends AbstractController {
                                        chartInScene.getY());
             double xLowerBound = xAxis.getLowerBound();
             double yLowerBound = yAxis.getLowerBound();
-            xAxis.setAutoRanging(false);
             yAxis.setAutoRanging(false);
             double xNLowerBound = Math.floor(xLowerBound + zoomAreaX);
             double xNUpperBound = Math.ceil(xNLowerBound + zoomAreaWidth);
@@ -496,6 +498,8 @@ public class PrimaryController extends AbstractController {
             xAxis.setUpperBound(xNUpperBound);
             yAxis.setLowerBound(yNLowerBound);
             yAxis.setUpperBound(yNUpperBound);
+            xAxis.setTickUnit(Math.ceil((xNUpperBound - xNLowerBound) / 11d));
+            yAxis.setTickUnit(Math.ceil((yNUpperBound - yNLowerBound) / 11d));
             zoomRect.setWidth(0);
             zoomRect.setHeight(0);
             mZoomingChart = true;
@@ -503,12 +507,9 @@ public class PrimaryController extends AbstractController {
     }
 
     private void resetResultsChartScale() {
-        NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
-        NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();
         resetResultsChartBounds();
         refreshResultsChart();
-        xAxis.setAutoRanging(true);
-        yAxis.setAutoRanging(true);
+        mResultsChart.getYAxis().setAutoRanging(true);
         mZoomingChart = false;
     }
 
@@ -828,7 +829,34 @@ public class PrimaryController extends AbstractController {
     }
 
     private void resetResultsChartBounds() {
-        setResultsChartBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        for (ChartSeries chartSeries : mResultsChartData) {
+            ObservableList<XYChart.Data<Number, Number>> data = chartSeries.getData().getData();
+            int size = data.size();
+            if (size == 0) {
+                continue;
+            }
+            int startPoint = chartSeries.getStartPoint();
+            int endPoint = data.get(size - 1).getXValue().intValue();
+            if (startPoint < min) {
+                min = startPoint;
+            }
+            if (endPoint > max) {
+                max = endPoint;
+            }
+        }
+        if (min == Integer.MAX_VALUE) {
+            min = 0;
+        }
+        if (max == Integer.MIN_VALUE) {
+            max = 110;
+        }
+        setResultsChartBounds(min, max);
+        NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
+        xAxis.setLowerBound(min);
+        xAxis.setUpperBound(max);
+        xAxis.setTickUnit(Math.ceil((max - min) / 11d));
     }
 
     private void refreshResultsChart() {
@@ -1172,7 +1200,6 @@ public class PrimaryController extends AbstractController {
     public void clearResultsChart() {
         mResultsChartData.clear();
         mResultsChart.getData().clear();
-        mResultsChart.getXAxis().setAutoRanging(true);
         mResultsChart.getYAxis().setAutoRanging(true);
         resetResultsChartBounds();
     }
