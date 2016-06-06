@@ -42,9 +42,7 @@ import javafx.stage.StageStyle;
 
 public final class Utils {
     private static final int MAX_STACK_TRACE_LENGTH = 10;
-    public static final String DECIMAL_FORMAT_COMMON =
-            "#." + createRepeatingString('#', Calculator.SCALE);
-    public static final String DECIMAL_FORMAT_RESULTS_TABLE = "#.#####";
+    public static final String DECIMAL_FORMAT_COMMON = buildDecimalFormat(Calculator.SCALE);
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
             (thread, throwable) -> {
@@ -103,6 +101,14 @@ public final class Utils {
         char[] chars = new char[count];
         Arrays.fill(chars, character);
         return new String(chars);
+    }
+
+    public static String buildDecimalFormat(int scale) {
+        if (scale <= 0) {
+            return "#";
+        } else {
+            return "#." + createRepeatingString('#', scale);
+        }
     }
 
     public static boolean isNullOrEmpty(CharSequence charSequence) {

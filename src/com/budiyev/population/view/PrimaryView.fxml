@@ -188,6 +188,10 @@
                                                             <children>
                                                                 <Button fx:id="mClearResultsTableButton" mnemonicParsing="false" onAction="#clearResultsTable" text="%clear" />
                                                                 <Button fx:id="mExportResultsButton" mnemonicParsing="false" onAction="#exportResults" text="%export" />
+                                                                <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                                                <Label text="%precision" />
+                                                                <TextField fx:id="mResultsTablePrecisionField" text="5" />
+                                                                <Button fx:id="mApplyResultsTablePrecisionButton" mnemonicParsing="false" onAction="#applyResultsTablePrecision" text="%apply" />
                                                             </children>
                                                         </HBox>
                                                     </children>

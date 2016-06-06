@@ -85,6 +85,7 @@ public class PrimaryController extends AbstractController {
     private final ArrayList<Calculator.Results> mResultsTableData = new ArrayList<>();
     private final int[] mCurrentChartBounds = {Integer.MIN_VALUE, Integer.MAX_VALUE};
     private volatile boolean mZoomingChart;
+    private int mResultsTablePrecision = 5;
     private File mTaskFile;
     public MenuItem mClearMenuItem;
     public MenuItem mOpenMenuItem;
@@ -119,6 +120,7 @@ public class PrimaryController extends AbstractController {
     public Label mStepsCountLabel;
     public TextField mStepsCountField;
     public TextField mStartPointField;
+    public TextField mResultsTablePrecisionField;
     public ProgressBar mCalculationProgressBar;
     public TableView<ArrayList<Calculator.Result>> mResultsTable;
     public LineChart<Number, Number> mResultsChart;
@@ -127,6 +129,7 @@ public class PrimaryController extends AbstractController {
     public Button mClearResultsChartButton;
     public Button mClearResultsTableButton;
     public Button mExportResultsButton;
+    public Button mApplyResultsTablePrecisionButton;
     public CheckBox mParallel;
     public CheckBox mHigherAccuracy;
     public CheckBox mAllowNegativeNumbers;
@@ -895,7 +898,7 @@ public class PrimaryController extends AbstractController {
                 TableColumn<ArrayList<Calculator.Result>, Number> valueColumn = new TableColumn<>();
                 valueColumn.setText(headers.get(j));
                 valueColumn.setCellFactory(
-                        doubleCell(x -> true, 0, Utils.DECIMAL_FORMAT_RESULTS_TABLE));
+                        doubleCell(x -> true, 0, Utils.buildDecimalFormat(mResultsTablePrecision)));
                 valueColumn.setPrefWidth(80);
                 final int resultIndex = i;
                 final int stateIndex = j;
@@ -1208,6 +1211,33 @@ public class PrimaryController extends AbstractController {
 
     public void exportResults() {
         getApplication().showExportDialog(mResultsTableData, mTaskSettings);
+    }
+
+    public void applyResultsTablePrecision() {
+        int precision;
+        try {
+            precision = Integer.valueOf(mResultsTablePrecisionField.getText());
+        } catch (NumberFormatException e) {
+            showCurrentPrecision();
+            return;
+        }
+        if (precision == mResultsTablePrecision) {
+            return;
+        }
+        if (precision < 0) {
+            mResultsTablePrecision = 0;
+            showCurrentPrecision();
+        } else if (precision > Calculator.SCALE) {
+            mResultsTablePrecision = Calculator.SCALE;
+            showCurrentPrecision();
+        } else {
+            mResultsTablePrecision = precision;
+        }
+        refreshResultsTable();
+    }
+
+    private void showCurrentPrecision() {
+        mResultsTablePrecisionField.setText(String.valueOf(mResultsTablePrecision));
     }
 
     public void about() {
