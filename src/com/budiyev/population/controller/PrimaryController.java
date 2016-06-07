@@ -83,7 +83,7 @@ public class PrimaryController extends AbstractController {
     private final ObservableList<ChartSeries> mResultsChartData =
             FXCollections.observableArrayList();
     private final ArrayList<Calculator.Results> mResultsTableData = new ArrayList<>();
-    private final int[] mCurrentChartBounds = {0, 110};
+    private final int[] mCurrentChartBounds = {0, 100};
     private volatile boolean mZoomingChart;
     private int mResultsTablePrecision = 5;
     private File mTaskFile;
@@ -455,7 +455,7 @@ public class PrimaryController extends AbstractController {
         NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
         NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();
         xAxis.setAutoRanging(false);
-        xAxis.setUpperBound(110);
+        xAxis.setUpperBound(100);
         xAxis.setTickUnit(10);
         mResultsChart.setOnMouseReleased(event -> {
             double zoomRectWidth = zoomRect.getWidth();
@@ -498,8 +498,8 @@ public class PrimaryController extends AbstractController {
             xAxis.setUpperBound(xNUpperBound);
             yAxis.setLowerBound(yNLowerBound);
             yAxis.setUpperBound(yNUpperBound);
-            xAxis.setTickUnit(Math.ceil((xNUpperBound - xNLowerBound) / 11d));
-            yAxis.setTickUnit(Math.ceil((yNUpperBound - yNLowerBound) / 11d));
+            xAxis.setTickUnit(Math.ceil((xNUpperBound - xNLowerBound) / 10d));
+            yAxis.setTickUnit(Math.ceil((yNUpperBound - yNLowerBound) / 10d));
             zoomRect.setWidth(0);
             zoomRect.setHeight(0);
             mZoomingChart = true;
@@ -850,13 +850,13 @@ public class PrimaryController extends AbstractController {
             min = 0;
         }
         if (max == Integer.MIN_VALUE) {
-            max = 110;
+            max = 100;
         }
         setResultsChartBounds(min, max);
         NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
         xAxis.setLowerBound(min);
         xAxis.setUpperBound(max);
-        xAxis.setTickUnit(Math.ceil((max - min) / 11d));
+        xAxis.setTickUnit(Math.ceil((max - min) / 10d));
     }
 
     private void refreshResultsChart() {
