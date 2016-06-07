@@ -920,13 +920,13 @@ public class PrimaryController extends AbstractController {
             return null;
         });
         mResultsTable.getColumns().add(numberColumn);
+        String decimalFormat = Utils.buildDecimalFormat(mResultsTablePrecision);
         for (int i = 0; i < mResultsTableData.size(); i++) {
             ArrayList<String> headers = mResultsTableData.get(i).getDataNames();
             for (int j = 0; j < headers.size(); j++) {
                 TableColumn<ArrayList<Calculator.Result>, Number> valueColumn = new TableColumn<>();
                 valueColumn.setText(headers.get(j));
-                valueColumn.setCellFactory(
-                        doubleCell(x -> true, 0, Utils.buildDecimalFormat(mResultsTablePrecision)));
+                valueColumn.setCellFactory(doubleCell(x -> true, 0, decimalFormat));
                 valueColumn.setPrefWidth(80);
                 final int resultIndex = i;
                 final int stateIndex = j;
