@@ -498,8 +498,8 @@ public class PrimaryController extends AbstractController {
             xAxis.setUpperBound(xNUpperBound);
             yAxis.setLowerBound(yNLowerBound);
             yAxis.setUpperBound(yNUpperBound);
-            xAxis.setTickUnit(Math.ceil((xNUpperBound - xNLowerBound) / 10d));
-            yAxis.setTickUnit(Math.ceil((yNUpperBound - yNLowerBound) / 10d));
+            updateAxisTickUnit(xAxis);
+            updateAxisTickUnit(yAxis);
             zoomRect.setWidth(0);
             zoomRect.setHeight(0);
             mZoomingChart = true;
@@ -856,7 +856,21 @@ public class PrimaryController extends AbstractController {
         NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
         xAxis.setLowerBound(min);
         xAxis.setUpperBound(max);
-        xAxis.setTickUnit(Math.ceil((max - min) / 10d));
+        updateAxisTickUnit(xAxis);
+    }
+
+    private void updateAxisTickUnit(NumberAxis axis) {
+        double tick = Math.ceil(Math.abs(axis.getUpperBound() - axis.getLowerBound()) / 10);
+        if (tick > 100) {
+            tick = tick - (tick % 100);
+        } else if (tick > 10) {
+            tick = tick - (tick % 10);
+        } else if (tick > 5) {
+            tick = tick - (tick % 5);
+        } else if (tick > 2) {
+            tick = tick - (tick % 2);
+        }
+        axis.setTickUnit(tick);
     }
 
     private void refreshResultsChart() {
