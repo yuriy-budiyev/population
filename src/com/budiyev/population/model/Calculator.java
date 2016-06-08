@@ -45,23 +45,38 @@ public class Calculator {
      * в режиме повышенной точности
      */
     public static final int SCALE = Double.MAX_EXPONENT + 1;
-    private final int mStepsCount;
-    private final int mStartPoint;
-    private final int mStatesCount;
-    private final double[][] mStates;
-    private final boolean mAllowNegative;
-    private final int[] mStateIds;
-    private final String[] mStateNames;
-    private final TransitionValues[] mTransitions;
-    private final ExecutorService mExecutor;
-    private final ResultCallback mResultCallback;
-    private final ProgressCallback mProgressCallback;
-    private final boolean mHigherAccuracy;
-    private final boolean mParallel;
-    private final boolean mPrepareResultsTableData;
-    private final boolean mPrepareResultsChartData;
-    private double mProgress;
+    private final int mStepsCount; // Количество шагов
+    private final int mStartPoint; // Начало отсчёта
+    private final int mStatesCount; // Количество состояний
+    private final double[][] mStates; // Состояния
+    private final boolean mAllowNegative; // Разрешить отрицательные значения
+    private final int[] mStateIds; // Идентификаторы состояний
+    private final String[] mStateNames; // Имена состояний
+    private final TransitionValues[] mTransitions; // Переходы
+    private final ExecutorService mExecutor; // Исполнитель (для параллельног режима)
+    private final ResultCallback mResultCallback; // Обратный вызов результата
+    private final ProgressCallback mProgressCallback; // Обратный вызов прогресса вычислений
+    private final boolean mHigherAccuracy; // Повышенная точность
+    private final boolean mParallel; // Параллельно
+    private final boolean mPrepareResultsTableData; // Подготовить результат в табличном виде
+    private final boolean mPrepareResultsChartData; // Подготовить результат в графическом виде
+    private double mProgress; // Прогресс вычислений
 
+    /**
+     * Вычислитель
+     *
+     * @param initialStates           начальные состояния
+     * @param transitions             переходы
+     * @param startPoint              начало отсчёта
+     * @param stepsCount              количество шагов
+     * @param allowNegative           разрешить отрицательные значения
+     * @param higherAccuracy          повышенная точность
+     * @param parallel                паралельно
+     * @param prepareResultsTableData подготовить результат в табличном виде
+     * @param prepareResultsChartData подготовить результат в графическом виде
+     * @param resultCallback          обратный вызов результата
+     * @param progressCallback        обратный вызов прогресса вычислений
+     */
     private Calculator(List<State> initialStates, List<Transition> transitions, int startPoint,
             int stepsCount, boolean allowNegative, boolean higherAccuracy, boolean parallel,
             boolean prepareResultsTableData, boolean prepareResultsChartData,
@@ -98,18 +113,38 @@ public class Calculator {
         }
     }
 
+    /**
+     * Значение состояния в шаге
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     * @return значение состояния
+     */
     private double getState(int step, int state) {
         synchronized (mStates) {
             return mStates[step][state];
         }
     }
 
+    /**
+     * Установка значения заданного состояния для заднного шага
+     *
+     * @param step  шаг
+     * @param state идентификатор состояния
+     * @param value значение
+     */
     private void setState(int step, int state, double value) {
         synchronized (mStates) {
             mStates[step][state] = value;
         }
     }
 
+    /**
+     * Проверка состояния на отрицательность и корректировка значения, если это необходимо
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     */
     private void checkStateNegativeness(int step, int state) {
         if (!mAllowNegative) {
             synchronized (mStates) {
@@ -120,22 +155,50 @@ public class Calculator {
         }
     }
 
+    /**
+     * Увеличение значения заданного состояния на заданном шаге на заданное значение
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     * @param value значение
+     */
     private void incrementState(int step, int state, double value) {
         synchronized (mStates) {
             mStates[step][state] += value;
         }
     }
 
+    /**
+     * Увеличение значения заданного состояния на заданном шаге на заданное значение
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     * @param value значение
+     */
     private void incrementState(int step, int state, BigDecimal value) {
         synchronized (mStates) {
             mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).add(value));
         }
     }
 
+    /**
+     * Уменьшение значения заданного состояния на заданном шаге на заданное значение
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     * @param value значение
+     */
     private void decrementState(int step, int state, double value) {
         incrementState(step, state, -value);
     }
 
+    /**
+     * Уменьшение значения заданного состояния на заданном шаге на заданное значение
+     *
+     * @param step  номер шага
+     * @param state идентификатор состояния
+     * @param value значение
+     */
     private void decrementState(int step, int state, BigDecimal value) {
         synchronized (mStates) {
             mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).subtract(value));
@@ -143,7 +206,7 @@ public class Calculator {
     }
 
     /**
-     * Поиск позиции состояния
+     * Поиск позиции состояния по идентификатору
      *
      * @param id идентификатор состояния
      * @return позиция состояния
@@ -160,6 +223,11 @@ public class Calculator {
         return -1;
     }
 
+    /**
+     * Выполнение обратного вызова результата, если он задан
+     *
+     * @param results результаты
+     */
     private void callbackResults(Results results) {
         ResultCallback resultCallback = mResultCallback;
         if (resultCallback != null) {
@@ -167,7 +235,13 @@ public class Calculator {
         }
     }
 
-    private void updateProgress(int step, double threshold) {
+    /**
+     * Выполнение обратного вызова прогресса вычислений, если это необходимо и он задан
+     *
+     * @param step      номер шага
+     * @param threshold минимальное изменение прогресса, на которое стоит реагировать
+     */
+    private void callbackProgress(int step, double threshold) {
         if (mProgressCallback != null) {
             final double progress;
             boolean needUpdate;
@@ -189,10 +263,10 @@ public class Calculator {
     }
 
     /**
-     * Вычисления с обычной точностью
+     * Вычисление с обычной точностью
      */
-    private Results calculateInternalNormalAccuracy() {
-        updateProgress(0, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+    private Results calculateNormalAccuracy() {
+        callbackProgress(0, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
         for (int step = 1; step < mStepsCount; step++) {
             double totalCount = 0;
             for (int state = 0; state < mStatesCount; state++) {
@@ -215,20 +289,20 @@ public class Calculator {
                 }
             } else {
                 for (TransitionValues transition : mTransitions) {
-                    new TransitionActionNormalAccuracy(step, totalCount, transition).run();
+                    transitionNormalAccuracy(step, totalCount, transition);
                 }
             }
-            updateProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+            callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
         }
         return new Results(mStartPoint, mStates, mStateNames, mPrepareResultsTableData,
                 mPrepareResultsChartData);
     }
 
     /**
-     * Вычисления с повышенной точностью
+     * Вычисление с повышенной точностью
      */
-    private Results calculateInternalHigherAccuracy() {
-        updateProgress(0, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+    private Results calculateHigherAccuracy() {
+        callbackProgress(0, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
         for (int step = 1; step < mStepsCount; step++) {
             BigDecimal totalCount = decimalValue(0);
             for (int state = 0; state < mStatesCount; state++) {
@@ -251,34 +325,340 @@ public class Calculator {
                 }
             } else {
                 for (TransitionValues transition : mTransitions) {
-                    new TransitionActionHigherAccuracy(step, totalCount, transition).run();
+                    transitionHigherAccuracy(step, totalCount, transition);
                 }
             }
-
-            updateProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+            callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
         }
         return new Results(mStartPoint, mStates, mStateNames, mPrepareResultsTableData,
                 mPrepareResultsChartData);
     }
 
+    /**
+     * Вычисление перехода с обычной точностью
+     *
+     * @param step       номер шага
+     * @param totalCount общее количество автоматов на прошлом шаге
+     * @param transition переход
+     */
+    private void transitionNormalAccuracy(int step, double totalCount,
+            TransitionValues transition) {
+        int sourceState = findState(transition.sourceState);
+        int operandState = findState(transition.operandState);
+        int resultState = findState(transition.resultState);
+        boolean sourceExternal = isStateExternal(sourceState);
+        boolean operandExternal = isStateExternal(operandState);
+        boolean resultExternal = isStateExternal(resultState);
+        if (sourceExternal && operandExternal) {
+            return;
+        }
+        int sourceIndex = delay(step - 1, transition.sourceDelay);
+        int operandIndex = delay(step - 1, transition.operandDelay);
+        double value = 0;
+        if (transition.type == TransitionType.LINEAR) {
+            if (sourceExternal) {
+                double operandDensity = applyCoefficientLinear(getState(operandIndex, operandState),
+                        transition.operandCoefficient);
+                value = operandDensity * transition.probability;
+                if (transition.mode == TransitionMode.RESIDUAL) {
+                    value = operandDensity - value * transition.operandCoefficient;
+                }
+            } else if (operandExternal) {
+                value = applyCoefficientLinear(getState(sourceIndex, sourceState),
+                        transition.sourceCoefficient) * transition.probability;
+            } else if (sourceState == operandState) {
+                double density = applyCoefficientLinear(getState(sourceIndex, sourceState),
+                        transition.sourceCoefficient + transition.operandCoefficient - 1);
+                value = applyTransitionCommon(density, density, transition);
+            } else {
+                double sourceDensity = applyCoefficientLinear(getState(sourceIndex, sourceState),
+                        transition.sourceCoefficient);
+                double operandDensity = applyCoefficientLinear(getState(operandIndex, operandState),
+                        transition.operandCoefficient);
+                value = applyTransitionCommon(Math.min(sourceDensity, operandDensity),
+                        operandDensity, transition);
+            }
+        } else if (transition.type == TransitionType.SOLUTE) {
+            if (totalCount > 0) {
+                if (sourceExternal) {
+                    double operandDensity =
+                            applyCoefficientPower(getState(operandIndex, operandState),
+                                    transition.operandCoefficient);
+                    value = operandDensity;
+                    if (transition.operandCoefficient > 1) {
+                        value /= Math.pow(totalCount, transition.operandCoefficient - 1);
+                    }
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                } else if (operandExternal) {
+                    value = applyCoefficientPower(getState(sourceIndex, sourceState),
+                            transition.sourceCoefficient);
+                    if (transition.sourceCoefficient > 1) {
+                        value /= Math.pow(totalCount, transition.sourceCoefficient - 1);
+                    }
+                    value *= transition.probability;
+                } else if (sourceState == operandState) {
+                    double density = applyCoefficientPower(getState(sourceIndex, sourceState),
+                            transition.sourceCoefficient + transition.operandCoefficient);
+                    value = density / Math.pow(totalCount,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1);
+                    value = applyTransitionCommon(value, density, transition);
+                } else {
+                    double sourceDensity = applyCoefficientPower(getState(sourceIndex, sourceState),
+                            transition.sourceCoefficient);
+                    double operandDensity =
+                            applyCoefficientPower(getState(operandIndex, operandState),
+                                    transition.operandCoefficient);
+                    value = sourceDensity * operandDensity / Math.pow(totalCount,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1);
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            }
+        } else if (transition.type == TransitionType.BLEND) {
+            if (sourceExternal) {
+                double operandCount = getState(operandIndex, operandState);
+                if (operandCount > 0) {
+                    double operandDensity =
+                            applyCoefficientPower(operandCount, transition.operandCoefficient);
+                    value = operandDensity;
+                    if (transition.operandCoefficient > 1) {
+                        value /= Math.pow(operandCount, transition.operandCoefficient - 1);
+                    }
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            } else if (operandExternal) {
+                double sourceCount = getState(sourceIndex, sourceState);
+                if (sourceCount > 0) {
+                    value = applyCoefficientPower(sourceCount, transition.sourceCoefficient);
+                    if (transition.sourceCoefficient > 1) {
+                        value /= Math.pow(sourceCount, transition.sourceCoefficient - 1);
+                    }
+                    value *= transition.probability;
+                }
+            } else if (sourceState == operandState) {
+                double count = getState(sourceIndex, sourceState);
+                if (count > 0) {
+                    double density = applyCoefficientPower(count,
+                            transition.sourceCoefficient + transition.operandCoefficient);
+                    value = density / Math.pow(count,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1);
+                    value = applyTransitionCommon(value, density, transition);
+                }
+            } else {
+                double sourceCount = getState(sourceIndex, sourceState);
+                double operandCount = getState(operandIndex, operandState);
+                double sum = sourceCount + operandCount;
+                if (sum > 0) {
+                    double sourceDensity =
+                            applyCoefficientPower(sourceCount, transition.sourceCoefficient);
+                    double operandDensity =
+                            applyCoefficientPower(operandCount, transition.operandCoefficient);
+                    value = sourceDensity * operandDensity / Math.pow(sum,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1);
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            }
+        }
+        if (!sourceExternal && transition.mode == TransitionMode.REMOVING) {
+            decrementState(step, sourceState, value * transition.sourceCoefficient);
+            checkStateNegativeness(step, sourceState);
+        }
+        if (!operandExternal) {
+            if (transition.mode == TransitionMode.INHIBITOR ||
+                transition.mode == TransitionMode.RESIDUAL) {
+                decrementState(step, operandState, value);
+            } else if (transition.mode != TransitionMode.RETAINING) {
+                decrementState(step, operandState, value * transition.operandCoefficient);
+            }
+            checkStateNegativeness(step, operandState);
+        }
+        if (!resultExternal) {
+            incrementState(step, resultState, value * transition.resultCoefficient);
+            checkStateNegativeness(step, resultState);
+        }
+    }
+
+    /**
+     * Вычисление перехода с повышенной точностью
+     *
+     * @param step       номер шага
+     * @param totalCount общее количество автоматов на прошлом шаге
+     * @param transition переход
+     */
+    private void transitionHigherAccuracy(int step, BigDecimal totalCount,
+            TransitionValues transition) {
+        int sourceState = findState(transition.sourceState);
+        int operandState = findState(transition.operandState);
+        int resultState = findState(transition.resultState);
+        boolean sourceExternal = isStateExternal(sourceState);
+        boolean operandExternal = isStateExternal(operandState);
+        boolean resultExternal = isStateExternal(resultState);
+        if (sourceExternal && operandExternal) {
+            return;
+        }
+        int sourceIndex = delay(step - 1, transition.sourceDelay);
+        int operandIndex = delay(step - 1, transition.operandDelay);
+        BigDecimal value = BigDecimal.ZERO;
+        if (transition.type == TransitionType.LINEAR) {
+            if (sourceExternal) {
+                BigDecimal operandDensity =
+                        applyCoefficientLinear(decimalValue(getState(operandIndex, operandState)),
+                                transition.operandCoefficient);
+                value = multiply(operandDensity, decimalValue(transition.probability));
+                if (transition.mode == TransitionMode.RESIDUAL) {
+                    value = operandDensity
+                            .subtract(multiply(value, decimalValue(transition.operandCoefficient)));
+                }
+            } else if (operandExternal) {
+                value = multiply(
+                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
+                                transition.sourceCoefficient),
+                        decimalValue(transition.probability));
+            } else if (sourceState == operandState) {
+                BigDecimal density =
+                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
+                                transition.sourceCoefficient + transition.operandCoefficient - 1);
+                value = applyTransitionCommon(density, density, transition);
+            } else {
+                BigDecimal sourceDensity =
+                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
+                                transition.sourceCoefficient);
+                BigDecimal operandDensity =
+                        applyCoefficientLinear(decimalValue(getState(operandIndex, operandState)),
+                                transition.operandCoefficient);
+                value = applyTransitionCommon(sourceDensity.min(operandDensity), operandDensity,
+                        transition);
+            }
+        } else if (transition.type == TransitionType.SOLUTE) {
+            if (totalCount.compareTo(BigDecimal.ZERO) > 0) {
+                if (sourceExternal) {
+                    BigDecimal operandDensity = applyCoefficientPower(
+                            decimalValue(getState(operandIndex, operandState)),
+                            transition.operandCoefficient);
+                    value = operandDensity;
+                    if (transition.operandCoefficient > 1) {
+                        value = divide(value, power(totalCount, transition.operandCoefficient - 1));
+                    }
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                } else if (operandExternal) {
+                    value = applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                            transition.sourceCoefficient);
+                    if (transition.sourceCoefficient > 1) {
+                        value = divide(value, power(totalCount, transition.sourceCoefficient - 1));
+                    }
+                    value = multiply(value, decimalValue(transition.probability));
+                } else if (sourceState == operandState) {
+                    BigDecimal density =
+                            applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                                    transition.sourceCoefficient + transition.operandCoefficient);
+                    value = divide(density, power(totalCount,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1));
+                    value = applyTransitionCommon(value, density, transition);
+                } else {
+                    BigDecimal sourceDensity =
+                            applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                                    transition.sourceCoefficient);
+                    BigDecimal operandDensity = applyCoefficientPower(
+                            decimalValue(getState(operandIndex, operandState)),
+                            transition.operandCoefficient);
+                    value = divide(multiply(sourceDensity, operandDensity), power(totalCount,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1));
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            }
+        } else if (transition.type == TransitionType.BLEND) {
+            if (sourceExternal) {
+                BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
+                if (operandCount.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal operandDensity =
+                            applyCoefficientPower(operandCount, transition.operandCoefficient);
+                    value = operandDensity;
+                    if (transition.operandCoefficient > 1) {
+                        value = divide(value,
+                                power(operandCount, transition.operandCoefficient - 1));
+                    }
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            } else if (operandExternal) {
+                BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
+                if (sourceCount.compareTo(BigDecimal.ZERO) > 0) {
+                    value = applyCoefficientPower(sourceCount, transition.sourceCoefficient);
+                    if (transition.sourceCoefficient > 1) {
+                        value = divide(value, power(sourceCount, transition.sourceCoefficient - 1));
+                    }
+                    value = multiply(value, decimalValue(transition.probability));
+                }
+            } else if (sourceState == operandState) {
+                BigDecimal count = decimalValue(getState(sourceIndex, sourceState));
+                if (count.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal density = applyCoefficientPower(count,
+                            transition.sourceCoefficient + transition.operandCoefficient);
+                    value = divide(density, power(count,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1));
+                    value = applyTransitionCommon(value, density, transition);
+                }
+            } else {
+                BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
+                BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
+                BigDecimal sum = sourceCount.add(operandCount);
+                if (sum.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal sourceDensity =
+                            applyCoefficientPower(sourceCount, transition.sourceCoefficient);
+                    BigDecimal operandDensity =
+                            applyCoefficientPower(operandCount, transition.operandCoefficient);
+                    value = divide(multiply(sourceDensity, operandDensity), power(sum,
+                            transition.sourceCoefficient + transition.operandCoefficient - 1));
+                    value = applyTransitionCommon(value, operandDensity, transition);
+                }
+            }
+        }
+        if (!sourceExternal && transition.mode == TransitionMode.REMOVING) {
+            decrementState(step, sourceState,
+                    multiply(value, decimalValue(transition.sourceCoefficient)));
+            checkStateNegativeness(step, sourceState);
+        }
+        if (!operandExternal) {
+            if (transition.mode == TransitionMode.INHIBITOR ||
+                transition.mode == TransitionMode.RESIDUAL) {
+                decrementState(step, operandState, value);
+            } else if (transition.mode != TransitionMode.RETAINING) {
+                decrementState(step, operandState,
+                        multiply(value, decimalValue(transition.operandCoefficient)));
+            }
+            checkStateNegativeness(step, operandState);
+        }
+        if (!resultExternal) {
+            incrementState(step, resultState,
+                    multiply(value, decimalValue(transition.resultCoefficient)));
+            checkStateNegativeness(step, resultState);
+        }
+    }
+
+    /**
+     * Выполнение расчётов синхронно
+     *
+     * @return результаты вычислений
+     */
     public Results calculateSync() {
         Results results;
         if (mHigherAccuracy) {
-            results = calculateInternalHigherAccuracy();
+            results = calculateHigherAccuracy();
         } else {
-            results = calculateInternalNormalAccuracy();
+            results = calculateNormalAccuracy();
         }
         callbackResults(results);
         return results;
     }
 
+    /**
+     * Выполнение расчётов асинхронно
+     */
     public void calculateAsync() {
         Utils.runAsync(() -> {
             Results results;
             if (mHigherAccuracy) {
-                results = calculateInternalHigherAccuracy();
+                results = calculateHigherAccuracy();
             } else {
-                results = calculateInternalNormalAccuracy();
+                results = calculateNormalAccuracy();
             }
             callbackResults(results);
         });
@@ -287,9 +667,9 @@ public class Calculator {
     /**
      * Применение задержки
      *
-     * @param step  шаг
+     * @param step  номер шага
      * @param delay задержка
-     * @return шаг с задержкой
+     * @return номер шага с задержкой
      */
     private static int delay(int step, int delay) {
         if (step > delay) {
@@ -320,7 +700,7 @@ public class Calculator {
     }
 
     /**
-     * Внешнее соснояние или нет
+     * Определение, является состояние внешним или нет
      */
     private static boolean isStateExternal(int stateId) {
         return stateId == State.EXTERNAL;
@@ -376,14 +756,35 @@ public class Calculator {
         return u;
     }
 
+    /**
+     * Деление с точностью по-умолчанию для режима повышенной точности
+     *
+     * @param u делимое
+     * @param v делитель
+     * @return частное
+     */
     private static BigDecimal divide(BigDecimal u, BigDecimal v) {
         return divide(u, v, SCALE);
     }
 
+    /**
+     * Умножение с точностью по-умолчанию для режима повышенной точности
+     *
+     * @param u множитель
+     * @param v множитель
+     * @return произведение
+     */
     private static BigDecimal multiply(BigDecimal u, BigDecimal v) {
         return multiply(u, v, SCALE);
     }
 
+    /**
+     * Возведение в степень с точностью по-умолчанию для режима повышенной точности
+     *
+     * @param u        основание
+     * @param exponent показатель
+     * @return результат
+     */
     private static BigDecimal power(BigDecimal u, double exponent) {
         return power(u, exponent, SCALE);
     }
@@ -391,19 +792,19 @@ public class Calculator {
     private static BigDecimal exponent0(BigDecimal u, int scale) {
         BigDecimal a = BigDecimal.ONE;
         BigDecimal b = u;
-        BigDecimal c;
-        BigDecimal d = u.add(BigDecimal.ONE);
+        BigDecimal c = u.add(BigDecimal.ONE);
+        BigDecimal d;
         for (int i = 2; ; i++) {
             b = multiply(b, u, scale);
             a = a.multiply(BigDecimal.valueOf(i));
             BigDecimal e = divide(b, a, scale);
-            c = d;
-            d = d.add(e);
-            if (d.compareTo(c) == 0) {
+            d = c;
+            c = c.add(e);
+            if (c.compareTo(d) == 0) {
                 break;
             }
         }
-        return d;
+        return c;
     }
 
     private static BigDecimal naturalLogarithm0(BigDecimal u, int scale) {
@@ -681,7 +1082,7 @@ public class Calculator {
     }
 
     /**
-     * Вычислить (синхронно)
+     * Вычисление (синхронно)
      *
      * @param initialStates           начальные состояния
      * @param transitions             переходы
@@ -703,7 +1104,7 @@ public class Calculator {
     }
 
     /**
-     * Вычислить (асинхронно)
+     * Вычисление (асинхронно)
      *
      * @param initialStates           начальные состояния
      * @param transitions             переходы
@@ -726,11 +1127,19 @@ public class Calculator {
                 resultCallback, progressCallback).calculateAsync();
     }
 
+    /**
+     * Действие, представляющее собой вычисление перехода с обычной точностью
+     */
     private class TransitionActionNormalAccuracy implements Runnable {
         private final int mStep;
         private final double mTotalCount;
         private final TransitionValues mTransition;
 
+        /**
+         * @param step       номер шага
+         * @param totalCount общее количество автоматов на прошлом шаге
+         * @param transition переход
+         */
         private TransitionActionNormalAccuracy(int step, double totalCount,
                 TransitionValues transition) {
             mStep = step;
@@ -740,150 +1149,23 @@ public class Calculator {
 
         @Override
         public void run() {
-            int sourceState = findState(mTransition.sourceState);
-            int operandState = findState(mTransition.operandState);
-            int resultState = findState(mTransition.resultState);
-            boolean sourceExternal = isStateExternal(sourceState);
-            boolean operandExternal = isStateExternal(operandState);
-            boolean resultExternal = isStateExternal(resultState);
-            if (sourceExternal && operandExternal) {
-                return;
-            }
-            int sourceIndex = delay(mStep - 1, mTransition.sourceDelay);
-            int operandIndex = delay(mStep - 1, mTransition.operandDelay);
-            double value = 0;
-            if (mTransition.type == TransitionType.LINEAR) {
-                if (sourceExternal) {
-                    double operandDensity =
-                            applyCoefficientLinear(getState(operandIndex, operandState),
-                                    mTransition.operandCoefficient);
-                    value = operandDensity * mTransition.probability;
-                    if (mTransition.mode == TransitionMode.RESIDUAL) {
-                        value = operandDensity - value * mTransition.operandCoefficient;
-                    }
-                } else if (operandExternal) {
-                    value = applyCoefficientLinear(getState(sourceIndex, sourceState),
-                            mTransition.sourceCoefficient) * mTransition.probability;
-                } else if (sourceState == operandState) {
-                    double density = applyCoefficientLinear(getState(sourceIndex, sourceState),
-                            mTransition.sourceCoefficient + mTransition.operandCoefficient - 1);
-                    value = applyTransitionCommon(density, density, mTransition);
-                } else {
-                    double sourceDensity =
-                            applyCoefficientLinear(getState(sourceIndex, sourceState),
-                                    mTransition.sourceCoefficient);
-                    double operandDensity =
-                            applyCoefficientLinear(getState(operandIndex, operandState),
-                                    mTransition.operandCoefficient);
-                    value = applyTransitionCommon(Math.min(sourceDensity, operandDensity),
-                            operandDensity, mTransition);
-                }
-            } else if (mTransition.type == TransitionType.SOLUTE) {
-                if (mTotalCount > 0) {
-                    if (sourceExternal) {
-                        double operandDensity =
-                                applyCoefficientPower(getState(operandIndex, operandState),
-                                        mTransition.operandCoefficient);
-                        value = operandDensity;
-                        if (mTransition.operandCoefficient > 1) {
-                            value /= Math.pow(mTotalCount, mTransition.operandCoefficient - 1);
-                        }
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    } else if (operandExternal) {
-                        value = applyCoefficientPower(getState(sourceIndex, sourceState),
-                                mTransition.sourceCoefficient);
-                        if (mTransition.sourceCoefficient > 1) {
-                            value /= Math.pow(mTotalCount, mTransition.sourceCoefficient - 1);
-                        }
-                        value *= mTransition.probability;
-                    } else if (sourceState == operandState) {
-                        double density = applyCoefficientPower(getState(sourceIndex, sourceState),
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient);
-                        value = density / Math.pow(mTotalCount,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient - 1);
-                        value = applyTransitionCommon(value, density, mTransition);
-                    } else {
-                        double sourceDensity =
-                                applyCoefficientPower(getState(sourceIndex, sourceState),
-                                        mTransition.sourceCoefficient);
-                        double operandDensity =
-                                applyCoefficientPower(getState(operandIndex, operandState),
-                                        mTransition.operandCoefficient);
-                        value = sourceDensity * operandDensity / Math.pow(mTotalCount,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient - 1);
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                }
-            } else if (mTransition.type == TransitionType.BLEND) {
-                if (sourceExternal) {
-                    double operandCount = getState(operandIndex, operandState);
-                    if (operandCount > 0) {
-                        double operandDensity =
-                                applyCoefficientPower(operandCount, mTransition.operandCoefficient);
-                        value = operandDensity;
-                        if (mTransition.operandCoefficient > 1) {
-                            value /= Math.pow(operandCount, mTransition.operandCoefficient - 1);
-                        }
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                } else if (operandExternal) {
-                    double sourceCount = getState(sourceIndex, sourceState);
-                    if (sourceCount > 0) {
-                        value = applyCoefficientPower(sourceCount, mTransition.sourceCoefficient);
-                        if (mTransition.sourceCoefficient > 1) {
-                            value /= Math.pow(sourceCount, mTransition.sourceCoefficient - 1);
-                        }
-                        value *= mTransition.probability;
-                    }
-                } else if (sourceState == operandState) {
-                    double count = getState(sourceIndex, sourceState);
-                    if (count > 0) {
-                        double density = applyCoefficientPower(count,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient);
-                        value = density / Math.pow(count,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient - 1);
-                        value = applyTransitionCommon(value, density, mTransition);
-                    }
-                } else {
-                    double sourceCount = getState(sourceIndex, sourceState);
-                    double operandCount = getState(operandIndex, operandState);
-                    double sum = sourceCount + operandCount;
-                    if (sum > 0) {
-                        double sourceDensity =
-                                applyCoefficientPower(sourceCount, mTransition.sourceCoefficient);
-                        double operandDensity =
-                                applyCoefficientPower(operandCount, mTransition.operandCoefficient);
-                        value = sourceDensity * operandDensity / Math.pow(sum,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient - 1);
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                }
-            }
-            if (!sourceExternal && mTransition.mode == TransitionMode.REMOVING) {
-                decrementState(mStep, sourceState, value * mTransition.sourceCoefficient);
-                checkStateNegativeness(mStep, sourceState);
-            }
-            if (!operandExternal) {
-                if (mTransition.mode == TransitionMode.INHIBITOR ||
-                    mTransition.mode == TransitionMode.RESIDUAL) {
-                    decrementState(mStep, operandState, value);
-                } else if (mTransition.mode != TransitionMode.RETAINING) {
-                    decrementState(mStep, operandState, value * mTransition.operandCoefficient);
-                }
-                checkStateNegativeness(mStep, operandState);
-            }
-            if (!resultExternal) {
-                incrementState(mStep, resultState, value * mTransition.resultCoefficient);
-                checkStateNegativeness(mStep, resultState);
-            }
+            transitionNormalAccuracy(mStep, mTotalCount, mTransition);
         }
     }
 
+    /**
+     * Действие, представляющее собой вычисление перехода с повышенной точностью
+     */
     private class TransitionActionHigherAccuracy implements Runnable {
         private final int mStep;
         private final BigDecimal mTotalCount;
         private final TransitionValues mTransition;
 
+        /**
+         * @param step       номер шага
+         * @param totalCount общее количество автоматов на прошлом шаге
+         * @param transition переход
+         */
         private TransitionActionHigherAccuracy(int step, BigDecimal totalCount,
                 TransitionValues transition) {
             mStep = step;
@@ -893,163 +1175,13 @@ public class Calculator {
 
         @Override
         public void run() {
-            int sourceState = findState(mTransition.sourceState);
-            int operandState = findState(mTransition.operandState);
-            int resultState = findState(mTransition.resultState);
-            boolean sourceExternal = isStateExternal(sourceState);
-            boolean operandExternal = isStateExternal(operandState);
-            boolean resultExternal = isStateExternal(resultState);
-            if (sourceExternal && operandExternal) {
-                return;
-            }
-            int sourceIndex = delay(mStep - 1, mTransition.sourceDelay);
-            int operandIndex = delay(mStep - 1, mTransition.operandDelay);
-            BigDecimal value = BigDecimal.ZERO;
-            if (mTransition.type == TransitionType.LINEAR) {
-                if (sourceExternal) {
-                    BigDecimal operandDensity = applyCoefficientLinear(
-                            decimalValue(getState(operandIndex, operandState)),
-                            mTransition.operandCoefficient);
-                    value = multiply(operandDensity, decimalValue(mTransition.probability));
-                    if (mTransition.mode == TransitionMode.RESIDUAL) {
-                        value = operandDensity.subtract(
-                                multiply(value, decimalValue(mTransition.operandCoefficient)));
-                    }
-                } else if (operandExternal) {
-                    value = multiply(
-                            applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
-                                    mTransition.sourceCoefficient),
-                            decimalValue(mTransition.probability));
-                } else if (sourceState == operandState) {
-                    BigDecimal density =
-                            applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
-                                    mTransition.sourceCoefficient + mTransition.operandCoefficient -
-                                    1);
-                    value = applyTransitionCommon(density, density, mTransition);
-                } else {
-                    BigDecimal sourceDensity =
-                            applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
-                                    mTransition.sourceCoefficient);
-                    BigDecimal operandDensity = applyCoefficientLinear(
-                            decimalValue(getState(operandIndex, operandState)),
-                            mTransition.operandCoefficient);
-                    value = applyTransitionCommon(sourceDensity.min(operandDensity), operandDensity,
-                            mTransition);
-                }
-            } else if (mTransition.type == TransitionType.SOLUTE) {
-                if (mTotalCount.compareTo(BigDecimal.ZERO) > 0) {
-                    if (sourceExternal) {
-                        BigDecimal operandDensity = applyCoefficientPower(
-                                decimalValue(getState(operandIndex, operandState)),
-                                mTransition.operandCoefficient);
-                        value = operandDensity;
-                        if (mTransition.operandCoefficient > 1) {
-                            value = divide(value,
-                                    power(mTotalCount, mTransition.operandCoefficient - 1));
-                        }
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    } else if (operandExternal) {
-                        value = applyCoefficientPower(
-                                decimalValue(getState(sourceIndex, sourceState)),
-                                mTransition.sourceCoefficient);
-                        if (mTransition.sourceCoefficient > 1) {
-                            value = divide(value,
-                                    power(mTotalCount, mTransition.sourceCoefficient - 1));
-                        }
-                        value = multiply(value, decimalValue(mTransition.probability));
-                    } else if (sourceState == operandState) {
-                        BigDecimal density = applyCoefficientPower(
-                                decimalValue(getState(sourceIndex, sourceState)),
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient);
-                        value = divide(density, power(mTotalCount,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient -
-                                1));
-                        value = applyTransitionCommon(value, density, mTransition);
-                    } else {
-                        BigDecimal sourceDensity = applyCoefficientPower(
-                                decimalValue(getState(sourceIndex, sourceState)),
-                                mTransition.sourceCoefficient);
-                        BigDecimal operandDensity = applyCoefficientPower(
-                                decimalValue(getState(operandIndex, operandState)),
-                                mTransition.operandCoefficient);
-                        value = divide(multiply(sourceDensity, operandDensity), power(mTotalCount,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient -
-                                1));
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                }
-            } else if (mTransition.type == TransitionType.BLEND) {
-                if (sourceExternal) {
-                    BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
-                    if (operandCount.compareTo(BigDecimal.ZERO) > 0) {
-                        BigDecimal operandDensity =
-                                applyCoefficientPower(operandCount, mTransition.operandCoefficient);
-                        value = operandDensity;
-                        if (mTransition.operandCoefficient > 1) {
-                            value = divide(value,
-                                    power(operandCount, mTransition.operandCoefficient - 1));
-                        }
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                } else if (operandExternal) {
-                    BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
-                    if (sourceCount.compareTo(BigDecimal.ZERO) > 0) {
-                        value = applyCoefficientPower(sourceCount, mTransition.sourceCoefficient);
-                        if (mTransition.sourceCoefficient > 1) {
-                            value = divide(value,
-                                    power(sourceCount, mTransition.sourceCoefficient - 1));
-                        }
-                        value = multiply(value, decimalValue(mTransition.probability));
-                    }
-                } else if (sourceState == operandState) {
-                    BigDecimal count = decimalValue(getState(sourceIndex, sourceState));
-                    if (count.compareTo(BigDecimal.ZERO) > 0) {
-                        BigDecimal density = applyCoefficientPower(count,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient);
-                        value = divide(density, power(count,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient -
-                                1));
-                        value = applyTransitionCommon(value, density, mTransition);
-                    }
-                } else {
-                    BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
-                    BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
-                    BigDecimal sum = sourceCount.add(operandCount);
-                    if (sum.compareTo(BigDecimal.ZERO) > 0) {
-                        BigDecimal sourceDensity =
-                                applyCoefficientPower(sourceCount, mTransition.sourceCoefficient);
-                        BigDecimal operandDensity =
-                                applyCoefficientPower(operandCount, mTransition.operandCoefficient);
-                        value = divide(multiply(sourceDensity, operandDensity), power(sum,
-                                mTransition.sourceCoefficient + mTransition.operandCoefficient -
-                                1));
-                        value = applyTransitionCommon(value, operandDensity, mTransition);
-                    }
-                }
-            }
-            if (!sourceExternal && mTransition.mode == TransitionMode.REMOVING) {
-                decrementState(mStep, sourceState,
-                        multiply(value, decimalValue(mTransition.sourceCoefficient)));
-                checkStateNegativeness(mStep, sourceState);
-            }
-            if (!operandExternal) {
-                if (mTransition.mode == TransitionMode.INHIBITOR ||
-                    mTransition.mode == TransitionMode.RESIDUAL) {
-                    decrementState(mStep, operandState, value);
-                } else if (mTransition.mode != TransitionMode.RETAINING) {
-                    decrementState(mStep, operandState,
-                            multiply(value, decimalValue(mTransition.operandCoefficient)));
-                }
-                checkStateNegativeness(mStep, operandState);
-            }
-            if (!resultExternal) {
-                incrementState(mStep, resultState,
-                        multiply(value, decimalValue(mTransition.resultCoefficient)));
-                checkStateNegativeness(mStep, resultState);
-            }
+            transitionHigherAccuracy(mStep, mTotalCount, mTransition);
         }
     }
 
+    /**
+     * Характеристики перехода
+     */
     public static class TransitionValues {
         public final int sourceState; // Состояние - источник
         public final double sourceCoefficient; // Коэффициент источника
@@ -1063,6 +1195,9 @@ public class Calculator {
         public final int type; // Тип перехода
         public final int mode; // Вид перехода
 
+        /**
+         * @param transition переход
+         */
         private TransitionValues(Transition transition) {
             sourceCoefficient = transition.getSourceCoefficient();
             sourceState = transition.getSourceState();
@@ -1078,12 +1213,22 @@ public class Calculator {
         }
     }
 
+    /**
+     * Результаты вычислений
+     */
     public static class Results {
         private final int mStartPoint;
         private final ArrayList<String> mDataNames;
         private final ArrayList<Result> mTableData;
         private final ArrayList<XYChart.Series<Number, Number>> mChartData;
 
+        /**
+         * @param startPoint              начало отсчёта
+         * @param states                  состояния
+         * @param stateNames              имена состояний
+         * @param prepareResultsTableData подготовить результат в табличном виде
+         * @param prepareResultsChartData подготовить результат в графическом виде
+         */
         private Results(int startPoint, double[][] states, String[] stateNames,
                 boolean prepareResultsTableData, boolean prepareResultsChartData) {
             mStartPoint = startPoint;
@@ -1114,10 +1259,16 @@ public class Calculator {
             }
         }
 
+        /**
+         * @return начало отсчёта
+         */
         public int getStartPoint() {
             return mStartPoint;
         }
 
+        /**
+         * @return имена состояний
+         */
         public ArrayList<String> getDataNames() {
             return mDataNames;
         }
