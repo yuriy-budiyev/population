@@ -414,7 +414,7 @@ public class PrimaryController extends AbstractController {
     private void initializeResultsChart() {
         Rectangle zoomRect = new Rectangle();
         zoomRect.setManaged(false);
-        zoomRect.setFill(Color.LIGHTSEAGREEN.deriveColor(0, 1, 1, 0.5));
+        zoomRect.setFill(Color.GRAY.deriveColor(0, 1, 1, 0.25));
         mResultsChartContainer.getChildren().add(zoomRect);
         mResultsChart.setCreateSymbols(false);
         mResultsChart.setAnimated(false);
