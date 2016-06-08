@@ -42,7 +42,8 @@ import javafx.stage.StageStyle;
 
 public final class Utils {
     private static final int MAX_STACK_TRACE_LENGTH = 10;
-    public static final String DECIMAL_FORMAT_COMMON = buildDecimalFormat(Calculator.SCALE);
+    public static final String DECIMAL_FORMAT_COMMON =
+            buildDecimalFormat(Calculator.HIGHER_ACCURACY_SCALE);
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
             (thread, throwable) -> {

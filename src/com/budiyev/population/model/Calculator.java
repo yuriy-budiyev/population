@@ -44,7 +44,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    public static final int SCALE = 384;
+    public static final int HIGHER_ACCURACY_SCALE = 384;
     private final int mStepsCount; // Количество шагов
     private final int mStartPoint; // Начало отсчёта
     private final int mStatesCount; // Количество состояний
@@ -764,7 +764,7 @@ public class Calculator {
      * @return частное
      */
     private static BigDecimal divide(BigDecimal u, BigDecimal v) {
-        return divide(u, v, SCALE);
+        return divide(u, v, HIGHER_ACCURACY_SCALE);
     }
 
     /**
@@ -775,7 +775,7 @@ public class Calculator {
      * @return произведение
      */
     private static BigDecimal multiply(BigDecimal u, BigDecimal v) {
-        return multiply(u, v, SCALE);
+        return multiply(u, v, HIGHER_ACCURACY_SCALE);
     }
 
     /**
@@ -786,7 +786,7 @@ public class Calculator {
      * @return результат
      */
     private static BigDecimal power(BigDecimal u, double exponent) {
-        return power(u, exponent, SCALE);
+        return power(u, exponent, HIGHER_ACCURACY_SCALE);
     }
 
     private static BigDecimal exponent0(BigDecimal u, int scale) {
@@ -917,7 +917,7 @@ public class Calculator {
     }
 
     private static BigDecimal probabilisticFactorialBig(double u) {
-        return probabilisticFactorialBig(u, SCALE);
+        return probabilisticFactorialBig(u, HIGHER_ACCURACY_SCALE);
     }
 
     /**

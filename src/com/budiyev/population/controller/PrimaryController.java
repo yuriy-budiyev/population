@@ -1269,8 +1269,8 @@ public class PrimaryController extends AbstractController {
         if (precision < 0) {
             mResultsTablePrecision = 0;
             showCurrentPrecision();
-        } else if (precision > Calculator.SCALE) {
-            mResultsTablePrecision = Calculator.SCALE;
+        } else if (precision > Calculator.HIGHER_ACCURACY_SCALE) {
+            mResultsTablePrecision = Calculator.HIGHER_ACCURACY_SCALE;
             showCurrentPrecision();
         } else {
             mResultsTablePrecision = precision;
