@@ -119,12 +119,12 @@ public final class PopulationApplication extends Application {
     private void showPrimaryStage(Stage primaryStage) {
         mPrimaryStage = primaryStage;
         mPrimaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            long rounded = Math.round(newValue.doubleValue());
-            if (rounded % 2 != 0) {
-                rounded++;
-                mPrimaryStage.setHeight(rounded);
+            double floor = Math.floor(newValue.doubleValue());
+            double remainder = floor % 2;
+            if (remainder != 0) {
+                mPrimaryStage.setHeight(floor - remainder);
             }
-        }); // We need this to avoid shitty JavaFX's drawing blurring in chart legend (WTF).
+        }); // We need this to avoid JavaFX's drawing blurring in chart legend
         mPrimaryStage.setTitle(mResources.getString("application_name"));
         mPrimaryStage.setMinWidth(PRIMARY_STAGE_MIN_WIDTH);
         mPrimaryStage.setMinHeight(PRIMARY_STAGE_MIN_HEIGHT);
