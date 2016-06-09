@@ -285,6 +285,23 @@ public final class PopulationApplication extends Application {
         return mResources;
     }
 
+    private static File buildResultFile(File inputFile) {
+        return new File(inputFile.getAbsolutePath() + ".result.csv");
+    }
+
+    private static void printInitialization(int tasks, int processors, boolean parallel) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Initialized");
+        if (tasks > 1) {
+            stringBuilder.append(", tasks: ").append(tasks);
+        }
+        stringBuilder.append(", processors: ").append(processors);
+        if (parallel) {
+            stringBuilder.append(", parallel");
+        }
+        System.out.println(stringBuilder.toString());
+    }
+
     private static void calculate(File inputFile, File outputFile, ResourceBundle resources) throws
             Exception {
         System.out.println("Calculating: " + inputFile.getName());
@@ -309,24 +326,33 @@ public final class PopulationApplication extends Application {
         System.out.println("Done: " + outputFile.getName());
     }
 
-    private static void calculateParallel(File[] tasks, ResourceBundle resources, int processors) {
-        ExecutorService executor = Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
-        Future<?>[] futures = new Future<?>[tasks.length];
-        System.out.println("Initialized, tasks: " + tasks.length + ", processors: " + processors);
-        for (int i = 0; i < tasks.length; i++) {
-            futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
-        }
-        for (Future<?> future : futures) {
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException ignored) {
+    private static void calculateMany(File[] tasks, ResourceBundle resources, int processors,
+            boolean parallel) throws Exception {
+        if (parallel) {
+            ExecutorService executor =
+                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
+            Future<?>[] futures = new Future<?>[tasks.length];
+            printInitialization(tasks.length, processors, true);
+            for (int i = 0; i < tasks.length; i++) {
+                futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
+            }
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException ignored) {
+                }
+            }
+        } else {
+            printInitialization(tasks.length, processors, false);
+            for (File task : tasks) {
+                calculate(task, buildResultFile(task), resources);
             }
         }
         System.out.println("Done all.");
     }
 
     public static void main(String[] args) {
-        if (args.length > 0) {
+        if (args.length > 1) {
             try {
                 System.out.println("Population version 3.0, Copyright (C) 2016 Yuriy Budiyev" +
                                    " [yuriy.budiyev@yandex.ru]." + System.lineSeparator() +
@@ -338,11 +364,13 @@ public final class PopulationApplication extends Application {
                 ResourceBundle resources = ResourceBundle
                         .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
                 if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
-                    File[] tasks = new File[args.length - 1];
-                    for (int i = 1; i < args.length; i++) {
-                        tasks[i - 1] = new File(args[i]);
+                    boolean parallel = Objects.equals(args[1].toUpperCase(), "PARALLEL");
+                    int shift = parallel ? 2 : 1;
+                    File[] tasks = new File[args.length - shift];
+                    for (int i = shift; i < args.length; i++) {
+                        tasks[i - shift] = new File(args[i]);
                     }
-                    calculateParallel(tasks, resources, processors);
+                    calculateMany(tasks, resources, processors, parallel);
                 } else if (args.length == 2) {
                     File inputFile = new File(args[0]);
                     File outputFile = new File(args[1]);
@@ -351,7 +379,7 @@ public final class PopulationApplication extends Application {
                         System.exit(1);
                         return;
                     }
-                    System.out.println("Initialized, processors: " + processors);
+                    printInitialization(1, processors, false);
                     calculate(inputFile, outputFile, resources);
                 }
                 System.exit(0);
@@ -372,6 +400,7 @@ public final class PopulationApplication extends Application {
         public static final String PRIMARY_STAGE_Y = "PrimaryStageY";
         public static final String PRIMARY_STAGE_WIDTH = "PrimaryStageWidth";
         public static final String PRIMARY_STAGE_HEIGHT = "PrimaryStageHeight";
+
         public static final String PRIMARY_STAGE_MAXIMIZED = "PrimaryStageMaximized";
 
         private Settings() {
@@ -380,18 +409,16 @@ public final class PopulationApplication extends Application {
 
     private static class CalculationAction implements Callable<Void> {
         private final File mInputFile;
-        private final File mOutputFile;
         private final ResourceBundle mResources;
 
         public CalculationAction(File inputFile, ResourceBundle resources) {
             mInputFile = inputFile;
-            mOutputFile = new File(inputFile.getAbsolutePath() + ".result.csv");
             mResources = resources;
         }
 
         @Override
         public Void call() throws Exception {
-            calculate(mInputFile, mOutputFile, mResources);
+            calculate(mInputFile, buildResultFile(mInputFile), mResources);
             return null;
         }
     }
