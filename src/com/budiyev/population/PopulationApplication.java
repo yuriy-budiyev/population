@@ -287,7 +287,7 @@ public final class PopulationApplication extends Application {
 
     private static void calculate(File inputFile, File outputFile, ResourceBundle resources) throws
             Exception {
-        System.out.println("Calculating task: " + inputFile.getName());
+        System.out.println("Calculating: " + inputFile.getName());
         ArrayList<State> initialStates = new ArrayList<>();
         ArrayList<Transition> transitions = new ArrayList<>();
         HashMap<String, String> settings = new HashMap<>();
@@ -306,7 +306,7 @@ public final class PopulationApplication extends Application {
                         allowNegative, parallel, true, false);
         Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
                 encoding, resources);
-        System.out.println("Done :" + outputFile.getName());
+        System.out.println("Done: " + outputFile.getName());
     }
 
     private static void calculateParallel(File[] tasks, ResourceBundle resources, int processors) {
