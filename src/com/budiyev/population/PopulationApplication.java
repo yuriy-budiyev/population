@@ -307,16 +307,8 @@ public final class PopulationApplication extends Application {
             try {
                 File inputFile = new File(args[0]);
                 File outputFile = new File(args[1]);
-                boolean needExit = false;
                 if (!inputFile.exists()) {
                     System.out.println("Error: " + inputFile + " doesn't exist.");
-                    needExit = true;
-                }
-                if (!outputFile.exists()) {
-                    System.out.println("Error: " + outputFile + " doesn't exist.");
-                    needExit = true;
-                }
-                if (needExit) {
                     System.exit(1);
                 }
                 Locale locale;
