@@ -333,7 +333,7 @@ public final class PopulationApplication extends Application {
                                    "welcome to redistribute it under certain conditions.");
                 ResourceBundle resources = ResourceBundle
                         .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
-                if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
+                if (Objects.equals(args[0].toUpperCase(), "-TASKS")) {
                     File[] tasks = new File[args.length - 1];
                     for (int i = 1; i < args.length; i++) {
                         tasks[i - 1] = new File(args[i]);
