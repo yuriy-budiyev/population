@@ -325,8 +325,16 @@ public final class PopulationApplication extends Application {
                 } else {
                     locale = Locale.getDefault();
                 }
+                String lineSeparator = System.lineSeparator();
+                System.out.println("Population version 3.0, Copyright (C) 2016 Yuriy Budiyev" +
+                                   " [yuriy.budiyev@yandex.ru]." + lineSeparator +
+                                   "This program comes with ABSOLUTELY NO WARRANTY." +
+                                   lineSeparator + "This is free software, and you are welcome " +
+                                   "to redistribute it under certain conditions.");
+                System.out.println("Starting calculations: " + inputFile.getName());
                 calculate(inputFile, outputFile, ResourceBundle
                         .getBundle("com.budiyev.population.resource.strings", locale));
+                System.out.println("Done: " + outputFile.getName());
             } catch (Exception e) {
                 System.out.println(
                         "Error: " + e.getClass().getSimpleName() + " - " + e.getLocalizedMessage());
