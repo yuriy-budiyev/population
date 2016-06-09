@@ -287,6 +287,7 @@ public final class PopulationApplication extends Application {
 
     private static void calculate(File inputFile, File outputFile, ResourceBundle resources) throws
             Exception {
+        System.out.println("Calculating task: " + inputFile.getName());
         ArrayList<State> initialStates = new ArrayList<>();
         ArrayList<Transition> transitions = new ArrayList<>();
         HashMap<String, String> settings = new HashMap<>();
@@ -305,13 +306,13 @@ public final class PopulationApplication extends Application {
                         allowNegative, parallel, true, false);
         Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
                 encoding, resources);
+        System.out.println("Done :" + outputFile.getName());
     }
 
-    private static void calculateParallel(File[] tasks, ResourceBundle resources) {
-        ExecutorService executor = Executors
-                .newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-                        Utils.THREAD_FACTORY);
+    private static void calculateParallel(File[] tasks, ResourceBundle resources, int processors) {
+        ExecutorService executor = Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
         Future<?>[] futures = new Future<?>[tasks.length];
+        System.out.println("Initialized, tasks: " + tasks.length + ", processors: " + processors);
         for (int i = 0; i < tasks.length; i++) {
             futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
         }
@@ -321,6 +322,7 @@ public final class PopulationApplication extends Application {
             } catch (InterruptedException | ExecutionException ignored) {
             }
         }
+        System.out.println("Done all.");
     }
 
     public static void main(String[] args) {
@@ -331,27 +333,26 @@ public final class PopulationApplication extends Application {
                                    "This program comes with ABSOLUTELY NO WARRANTY." +
                                    System.lineSeparator() + "This is free software, and you are " +
                                    "welcome to redistribute it under certain conditions.");
+                System.out.println("Initializing...");
+                int processors = Runtime.getRuntime().availableProcessors();
                 ResourceBundle resources = ResourceBundle
                         .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
-                if (Objects.equals(args[0].toUpperCase(), "-TASKS")) {
+                if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
                     File[] tasks = new File[args.length - 1];
                     for (int i = 1; i < args.length; i++) {
                         tasks[i - 1] = new File(args[i]);
                     }
-                    System.out.println("Starting calculations...");
-                    calculateParallel(tasks, resources);
-                    System.out.println("Done.");
+                    calculateParallel(tasks, resources, processors);
                 } else if (args.length == 2) {
                     File inputFile = new File(args[0]);
                     File outputFile = new File(args[1]);
                     if (!inputFile.exists()) {
                         System.out.println("Error: " + inputFile + " doesn't exist.");
                         System.exit(1);
+                        return;
                     }
-                    System.out.println("Starting calculations: " + inputFile.getName());
+                    System.out.println("Initialized, processors: " + processors);
                     calculate(inputFile, outputFile, resources);
-                    System.out.println("Done: " + outputFile.getName());
-
                 }
                 System.exit(0);
             } catch (Exception e) {
@@ -390,9 +391,7 @@ public final class PopulationApplication extends Application {
 
         @Override
         public Void call() throws Exception {
-            System.out.println("Starting calculations: " + mInputFile.getName());
             calculate(mInputFile, mOutputFile, mResources);
-            System.out.println("Done: " + mOutputFile.getName());
             return null;
         }
     }
