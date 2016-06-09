@@ -37,6 +37,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -302,36 +307,58 @@ public final class PopulationApplication extends Application {
                 encoding, resources);
     }
 
+    private static void calculateParallel(File[] tasks, ResourceBundle resources) {
+        ExecutorService executor = Executors
+                .newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+                        Utils.THREAD_FACTORY);
+        Future<?>[] futures = new Future<?>[tasks.length];
+        for (int i = 0; i < tasks.length; i++) {
+            futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
+        }
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException ignored) {
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        if (args.length == 2 || args.length == 3) {
+        if (args.length > 0) {
             try {
                 System.out.println("Population version 3.0, Copyright (C) 2016 Yuriy Budiyev" +
                                    " [yuriy.budiyev@yandex.ru]." + System.lineSeparator() +
                                    "This program comes with ABSOLUTELY NO WARRANTY." +
                                    System.lineSeparator() + "This is free software, and you are " +
                                    "welcome to redistribute it under certain conditions.");
-                File inputFile = new File(args[0]);
-                File outputFile = new File(args[1]);
-                if (!inputFile.exists()) {
-                    System.out.println("Error: " + inputFile + " doesn't exist.");
-                    System.exit(1);
+                ResourceBundle resources = ResourceBundle
+                        .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
+                if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
+                    File[] tasks = new File[args.length - 1];
+                    for (int i = 1; i < args.length; i++) {
+                        tasks[i - 1] = new File(args[i]);
+                    }
+                    System.out.println("Starting calculations...");
+                    calculateParallel(tasks, resources);
+                    System.out.println("Done.");
+                } else if (args.length == 2) {
+                    File inputFile = new File(args[0]);
+                    File outputFile = new File(args[1]);
+                    if (!inputFile.exists()) {
+                        System.out.println("Error: " + inputFile + " doesn't exist.");
+                        System.exit(1);
+                    }
+                    System.out.println("Starting calculations: " + inputFile.getName());
+                    calculate(inputFile, outputFile, resources);
+                    System.out.println("Done: " + outputFile.getName());
+
                 }
-                Locale locale;
-                if (args.length == 3) {
-                    locale = Locale.forLanguageTag(args[2].toLowerCase());
-                } else {
-                    locale = Locale.getDefault();
-                }
-                System.out.println("Starting calculations: " + inputFile.getName());
-                calculate(inputFile, outputFile, ResourceBundle
-                        .getBundle("com.budiyev.population.resource.strings", locale));
-                System.out.println("Done: " + outputFile.getName());
+                System.exit(0);
             } catch (Exception e) {
-                System.out.println(
-                        "Error: " + e.getClass().getSimpleName() + " - " + e.getLocalizedMessage());
+                System.out.println("Error: " + e.getClass().getSimpleName() + " - " +
+                                   e.getLocalizedMessage());
                 System.exit(1);
             }
-            System.exit(0);
         } else {
             launch(PopulationApplication.class, args);
         }
@@ -347,6 +374,26 @@ public final class PopulationApplication extends Application {
         public static final String PRIMARY_STAGE_MAXIMIZED = "PrimaryStageMaximized";
 
         private Settings() {
+        }
+    }
+
+    private static class CalculationAction implements Callable<Void> {
+        private final File mInputFile;
+        private final File mOutputFile;
+        private final ResourceBundle mResources;
+
+        public CalculationAction(File inputFile, ResourceBundle resources) {
+            mInputFile = inputFile;
+            mOutputFile = new File(inputFile.getAbsolutePath() + ".result.csv");
+            mResources = resources;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            System.out.println("Starting calculations: " + mInputFile.getName());
+            calculate(mInputFile, mOutputFile, mResources);
+            System.out.println("Done: " + mOutputFile.getName());
+            return null;
         }
     }
 }
