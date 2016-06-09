@@ -53,7 +53,7 @@ public class Calculator {
     private final int[] mStateIds; // Идентификаторы состояний
     private final String[] mStateNames; // Имена состояний
     private final TransitionValues[] mTransitions; // Переходы
-    private final ExecutorService mExecutor; // Исполнитель (для параллельног режима)
+    private final ExecutorService mExecutor; // Исполнитель (для параллельного режима)
     private final ResultCallback mResultCallback; // Обратный вызов результата
     private final ProgressCallback mProgressCallback; // Обратный вызов прогресса вычислений
     private final boolean mHigherAccuracy; // Повышенная точность
