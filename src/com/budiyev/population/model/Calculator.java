@@ -284,7 +284,8 @@ public class Calculator {
                 for (Future<?> future : futures) {
                     try {
                         future.get();
-                    } catch (InterruptedException | ExecutionException ignored) {
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             } else {
@@ -320,7 +321,8 @@ public class Calculator {
                 for (Future<?> future : futures) {
                     try {
                         future.get();
-                    } catch (InterruptedException | ExecutionException ignored) {
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             } else {
