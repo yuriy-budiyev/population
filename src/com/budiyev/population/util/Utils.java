@@ -17,6 +17,7 @@
  */
 package com.budiyev.population.util;
 
+import com.budiyev.population.Launcher;
 import com.budiyev.population.model.Calculator;
 
 import java.io.BufferedWriter;
@@ -41,42 +42,24 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.StageStyle;
 
 public final class Utils {
-    private static final int MAX_STACK_TRACE_LENGTH = 10;
     public static final String DECIMAL_FORMAT_COMMON =
             buildDecimalFormat(Calculator.HIGHER_ACCURACY_SCALE);
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
             (thread, throwable) -> {
-                for (; ; ) {
-                    Throwable cause = throwable.getCause();
-                    if (cause == null) {
-                        break;
-                    }
-                    throwable = cause;
+                if (Launcher.isConsoleMode()) {
+                    System.out.println("Error");
+                    System.out.println(buildErrorText(throwable, Integer.MAX_VALUE));
+                } else {
+                    String errorText = buildErrorText(throwable, 10);
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, errorText, ButtonType.CLOSE);
+                        alert.initStyle(StageStyle.UTILITY);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("An unexpected error occurred");
+                        alert.showAndWait();
+                    });
                 }
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
-                        .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
-                        .append(System.lineSeparator()).append("Stack trace:")
-                        .append(System.lineSeparator());
-                StackTraceElement[] stackTrace = throwable.getStackTrace();
-                for (int i = 0; i < stackTrace.length && i < MAX_STACK_TRACE_LENGTH; i++) {
-                    stringBuilder.append(stackTrace[i]);
-                    if (i == MAX_STACK_TRACE_LENGTH - 1 &&
-                        stackTrace.length > MAX_STACK_TRACE_LENGTH) {
-                        stringBuilder.append("...");
-                    } else {
-                        stringBuilder.append(System.lineSeparator());
-                    }
-                }
-                String contentText = stringBuilder.toString();
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, contentText, ButtonType.CLOSE);
-                    alert.initStyle(StageStyle.UTILITY);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("An unexpected error occurred");
-                    alert.showAndWait();
-                });
             };
 
     public static final ThreadFactory THREAD_FACTORY = runnable -> {
@@ -92,6 +75,31 @@ public final class Utils {
     };
 
     private Utils() {
+    }
+
+    public static String buildErrorText(Throwable throwable, int maxStackTraceSize) {
+        for (; ; ) {
+            Throwable cause = throwable.getCause();
+            if (cause == null) {
+                break;
+            }
+            throwable = cause;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
+                .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
+                .append(System.lineSeparator()).append("Stack trace:")
+                .append(System.lineSeparator());
+        StackTraceElement[] stackTrace = throwable.getStackTrace();
+        for (int i = 0; i < stackTrace.length && i < maxStackTraceSize; i++) {
+            stringBuilder.append(stackTrace[i]);
+            if (i == maxStackTraceSize - 1 && stackTrace.length > maxStackTraceSize) {
+                stringBuilder.append("...");
+            } else {
+                stringBuilder.append(System.lineSeparator());
+            }
+        }
+        return stringBuilder.toString();
     }
 
     public static void runAsync(Runnable runnable) {

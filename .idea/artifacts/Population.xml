@@ -4,7 +4,7 @@
     <properties id="javafx-properties">
       <options>
         <option name="alias" value="release" />
-        <option name="appClass" value="com.budiyev.population.PopulationApplication" />
+        <option name="appClass" value="com.budiyev.population.Launcher" />
         <option name="description" value="Population modeling application" />
         <option name="enabledSigning" value="true" />
         <option name="height" value="480" />

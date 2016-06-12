@@ -21,10 +21,7 @@ import com.budiyev.population.controller.base.AbstractAboutController;
 import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.controller.base.AbstractExportController;
 import com.budiyev.population.model.Calculator;
-import com.budiyev.population.model.State;
-import com.budiyev.population.model.Transition;
 import com.budiyev.population.util.CsvParser;
-import com.budiyev.population.util.TaskParser;
 import com.budiyev.population.util.Utils;
 
 import java.io.File;
@@ -37,10 +34,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -284,111 +277,6 @@ public final class PopulationApplication extends Application {
         return mResources;
     }
 
-    private static File buildResultFile(File inputFile) {
-        return new File(inputFile.getAbsolutePath() + ".result.csv");
-    }
-
-    private static void printInitialization(int tasks, int processors, boolean parallel) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Initialized");
-        if (tasks > 1) {
-            stringBuilder.append(", tasks: ").append(tasks);
-        }
-        stringBuilder.append(", processors: ").append(processors);
-        if (parallel) {
-            stringBuilder.append(", parallel");
-        }
-        System.out.println(stringBuilder.toString());
-    }
-
-    private static void calculate(File inputFile, File outputFile, ResourceBundle resources) throws
-            Exception {
-        System.out.println("Calculating: " + inputFile.getName());
-        ArrayList<State> initialStates = new ArrayList<>();
-        ArrayList<Transition> transitions = new ArrayList<>();
-        HashMap<String, String> settings = new HashMap<>();
-        TaskParser.parse(inputFile, initialStates, transitions, settings);
-        int startPoint = Integer.valueOf(settings.get(TaskParser.Settings.START_POINT));
-        int stepsCount = Integer.valueOf(settings.get(TaskParser.Settings.STEPS_COUNT));
-        boolean higherAccuracy = Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY));
-        boolean allowNegative = Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE));
-        boolean parallel = Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL));
-        char columnSeparator = settings.get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
-        char decimalSeparator = settings.get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
-        String lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
-        String encoding = settings.get(TaskParser.Settings.ENCODING);
-        Calculator.Results results = Calculator
-                .calculateSync(initialStates, transitions, startPoint, stepsCount, higherAccuracy,
-                        allowNegative, parallel, true, false);
-        Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
-                encoding, resources);
-        System.out.println("Done: " + outputFile.getName());
-    }
-
-    private static void calculateMany(File[] tasks, ResourceBundle resources, int processors,
-            boolean parallel) throws Exception {
-        if (parallel) {
-            ExecutorService executor =
-                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
-            Future<?>[] futures = new Future<?>[tasks.length];
-            printInitialization(tasks.length, processors, true);
-            for (int i = 0; i < tasks.length; i++) {
-                futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
-            }
-            for (Future<?> future : futures) {
-                future.get();
-            }
-        } else {
-            printInitialization(tasks.length, processors, false);
-            for (File task : tasks) {
-                calculate(task, buildResultFile(task), resources);
-            }
-        }
-        System.out.println("Done all.");
-    }
-
-    public static void main(String[] args) {
-        if (args.length > 1) {
-            try {
-                System.out.println("Population version 3.0, Copyright (C) 2016 Yuriy Budiyev" +
-                                   " [yuriy.budiyev@yandex.ru]." + System.lineSeparator() +
-                                   "This program comes with ABSOLUTELY NO WARRANTY." +
-                                   System.lineSeparator() + "This is free software, and you are " +
-                                   "welcome to redistribute it under certain conditions.");
-                System.out.println("Initializing...");
-                int processors = Runtime.getRuntime().availableProcessors();
-                ResourceBundle resources = ResourceBundle
-                        .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
-                if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
-                    boolean parallel = Objects.equals(args[1].toUpperCase(), "PARALLEL");
-                    int shift = parallel ? 2 : 1;
-                    File[] tasks = new File[args.length - shift];
-                    for (int i = shift; i < args.length; i++) {
-                        tasks[i - shift] = new File(args[i]);
-                    }
-                    calculateMany(tasks, resources, processors, parallel);
-                } else if (args.length == 2) {
-                    File inputFile = new File(args[0]);
-                    File outputFile = new File(args[1]);
-                    if (!inputFile.exists()) {
-                        System.out.println("Error: " + inputFile + " doesn't exist.");
-                        System.exit(1);
-                        return;
-                    }
-                    printInitialization(1, processors, false);
-                    calculate(inputFile, outputFile, resources);
-                }
-                System.exit(0);
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getClass().getSimpleName() + " - " +
-                                   e.getLocalizedMessage());
-                System.exit(1);
-            }
-        } else {
-            launch(PopulationApplication.class, args);
-        }
-    }
-
     private static final class Settings {
         public static final String FILE = ".population";
         public static final String WORK_DIRECTORY = "WorkDirectory";
@@ -396,26 +284,9 @@ public final class PopulationApplication extends Application {
         public static final String PRIMARY_STAGE_Y = "PrimaryStageY";
         public static final String PRIMARY_STAGE_WIDTH = "PrimaryStageWidth";
         public static final String PRIMARY_STAGE_HEIGHT = "PrimaryStageHeight";
-
         public static final String PRIMARY_STAGE_MAXIMIZED = "PrimaryStageMaximized";
 
         private Settings() {
-        }
-    }
-
-    private static class CalculationAction implements Callable<Void> {
-        private final File mInputFile;
-        private final ResourceBundle mResources;
-
-        public CalculationAction(File inputFile, ResourceBundle resources) {
-            mInputFile = inputFile;
-            mResources = resources;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            calculate(mInputFile, buildResultFile(mInputFile), mResources);
-            return null;
         }
     }
 }
