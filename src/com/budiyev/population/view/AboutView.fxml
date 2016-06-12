@@ -19,7 +19,7 @@
             <Font name="System Bold" size="13.0" />
           </font>
         </Label>
-        <Label text="%about_details" textAlignment="LEFT" wrapText="true">
+        <Label fx:id="mApplicationDetails" textAlignment="LEFT" wrapText="true">
           <font>
             <Font size="12.0" />
           </font>

@@ -17,16 +17,23 @@
  */
 package com.budiyev.population.controller;
 
+import com.budiyev.population.Launcher;
 import com.budiyev.population.controller.base.AbstractAboutController;
 
+import java.util.Locale;
+
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 
 public class AboutController extends AbstractAboutController {
     public ImageView mApplicationIcon;
+    public Label mApplicationDetails;
 
     @Override
     public void initialize() {
         mApplicationIcon.setImage(getImage());
+        mApplicationDetails.setText(
+                String.format(Locale.getDefault(), getString("about_details"), Launcher.VERSION));
     }
 
     public void close() {

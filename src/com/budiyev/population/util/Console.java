@@ -1,5 +1,6 @@
 package com.budiyev.population.util;
 
+import com.budiyev.population.Launcher;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.State;
 import com.budiyev.population.model.Transition;
@@ -84,8 +85,9 @@ public final class Console {
 
     public static void launch(String[] args) {
         try {
-            System.out.println("Population version 3.0, Copyright (C) 2016 Yuriy Budiyev" +
-                               " [yuriy.budiyev@yandex.ru]." + System.lineSeparator() +
+            System.out.println("Population version " + Launcher.VERSION +
+                               ", Copyright (C) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]." +
+                               System.lineSeparator() +
                                "This program comes with ABSOLUTELY NO WARRANTY." +
                                System.lineSeparator() + "This is free software, and you are " +
                                "welcome to redistribute it under certain conditions.");
