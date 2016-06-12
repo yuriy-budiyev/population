@@ -108,6 +108,8 @@ public final class Console {
                 File outputFile = new File(args[1]);
                 printInitialization(1, processors, false);
                 calculateTask(inputFile, outputFile, resources);
+            } else {
+                System.out.println("Invalid arguments.");
             }
             System.exit(0);
         } catch (Throwable t) {
