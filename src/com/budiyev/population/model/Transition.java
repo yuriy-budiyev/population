@@ -70,6 +70,29 @@ public class Transition {
         mDescription = new SimpleStringProperty(description);
     }
 
+    /**
+     * Создаёт полую копию перехода (псевдоним),
+     * за исключением вероятности, которая задаётся со смещением
+     * Все поля исходного перехода и создаваемого, кроме вероятности - одни и те же
+     *
+     * @param transition исходный переход
+     * @param probabilityShift смещение вероятности
+     */
+    public Transition(Transition transition, double probabilityShift) {
+        mSourceState = transition.mSourceState;
+        mSourceCoefficient = transition.mSourceCoefficient;
+        mSourceDelay = transition.mSourceDelay;
+        mOperandState = transition.mOperandState;
+        mOperandCoefficient = transition.mOperandCoefficient;
+        mOperandDelay = transition.mOperandDelay;
+        mResultState = transition.mResultState;
+        mResultCoefficient = transition.mResultCoefficient;
+        mProbability = new SimpleDoubleProperty(transition.getProbability() + probabilityShift);
+        mType = transition.mType;
+        mMode = transition.mMode;
+        mDescription = transition.mDescription;
+    }
+
     public int getSourceState() {
         return mSourceState.get();
     }

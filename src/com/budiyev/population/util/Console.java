@@ -25,6 +25,7 @@ import com.budiyev.population.model.Transition;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -34,6 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class Console {
+    private static final String KEY_TASKS = "-TASKS";
+    private static final String KEY_INTERVAL = "-INTERVAL";
+    private static final String KEY_PARALLEL = "-PARALLEL";
+
     private Console() {
     }
 
@@ -78,7 +83,7 @@ public final class Console {
         System.out.println("Done: " + outputFile.getName());
     }
 
-    private static void calculateMany(File[] tasks, ResourceBundle resources, int processors,
+    private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
             boolean parallel) throws Exception {
         if (parallel) {
             ExecutorService executor =
@@ -100,6 +105,11 @@ public final class Console {
         System.out.println("Done all.");
     }
 
+    private static void calculateInterval(File startFile, File endFile, int size,
+            ResourceBundle resources, int processors, boolean parallel) {
+
+    }
+
     public static void launch(String[] args) {
         try {
             System.out.println("Population version " + Launcher.VERSION +
@@ -112,14 +122,23 @@ public final class Console {
             int processors = Runtime.getRuntime().availableProcessors();
             ResourceBundle resources = ResourceBundle
                     .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
-            if (Objects.equals(args[0].toUpperCase(), "TASKS")) {
-                boolean parallel = Objects.equals(args[1].toUpperCase(), "PARALLEL");
+            String firstArgument = args[0].toUpperCase();
+            String secondArgument = args[1].toUpperCase();
+            if (Objects.equals(firstArgument, KEY_TASKS)) {
+                boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 File[] tasks = new File[args.length - shift];
                 for (int i = shift; i < args.length; i++) {
                     tasks[i - shift] = new File(args[i]);
                 }
-                calculateMany(tasks, resources, processors, parallel);
+                calculateTasks(tasks, resources, processors, parallel);
+            } else if (Objects.equals(firstArgument, KEY_INTERVAL)) {
+                boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
+                int shift = parallel ? 2 : 1;
+                File startFile = new File(args[shift]);
+                File endFile = new File(args[shift + 1]);
+                int size = Integer.valueOf(args[shift + 2]);
+                calculateInterval(startFile, endFile, size, resources, processors, parallel);
             } else if (args.length == 2) {
                 File inputFile = new File(args[0]);
                 File outputFile = new File(args[1]);
@@ -149,6 +168,54 @@ public final class Console {
         public Void call() throws Exception {
             calculateTask(mInputFile, buildResultFile(mInputFile), mResources);
             return null;
+        }
+    }
+
+    private static class Task {
+        public final List<State> initialStates;
+        public final List<Transition> transitions;
+        public final int startPoint;
+        public final int stepsCount;
+        public final boolean allowNegative;
+        public final boolean higherAccuracy;
+        public final boolean parallel;
+        public final char columnSeparator;
+        public final char decimalSeparator;
+        public final String lineSeparator;
+        public final String encoding;
+
+        public Task(File file) {
+            initialStates = new ArrayList<>();
+            transitions = new ArrayList<>();
+            HashMap<String, String> settings = new HashMap<>();
+            TaskParser.parse(file, initialStates, transitions, settings);
+            startPoint = Integer.valueOf(settings.get(TaskParser.Settings.START_POINT));
+            stepsCount = Integer.valueOf(settings.get(TaskParser.Settings.STEPS_COUNT));
+            higherAccuracy = Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY));
+            allowNegative = Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE));
+            parallel = Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL));
+            columnSeparator = settings.get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
+            decimalSeparator = settings.get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
+            lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
+            encoding = settings.get(TaskParser.Settings.ENCODING);
+        }
+
+        public Task(Task task, double probabilityShift) {
+            initialStates = task.initialStates;
+            transitions = new ArrayList<>(task.transitions.size());
+            for (Transition transition : task.transitions) {
+                Transition shifted = new Transition(transition, probabilityShift);
+                transitions.add(shifted);
+            }
+            startPoint = task.startPoint;
+            stepsCount = task.stepsCount;
+            allowNegative = task.allowNegative;
+            higherAccuracy = task.higherAccuracy;
+            parallel = task.parallel;
+            columnSeparator = task.columnSeparator;
+            decimalSeparator = task.decimalSeparator;
+            lineSeparator = task.lineSeparator;
+            encoding = task.encoding;
         }
     }
 }
