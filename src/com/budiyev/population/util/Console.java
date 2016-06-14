@@ -155,8 +155,7 @@ public final class Console {
         } else {
             printInitialization(tasks.length, processors, false);
             for (int i = 0; i < tasks.length; i++) {
-                Task task = tasks[i];
-                calculateTask(task, resources, startFileAbsolutePath, i);
+                calculateTask(tasks[i], resources, startFileAbsolutePath, i);
             }
         }
         System.out.println("Done all.");
