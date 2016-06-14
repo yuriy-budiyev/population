@@ -20,7 +20,7 @@ package com.budiyev.population;
 import com.budiyev.population.util.Console;
 
 public final class Launcher {
-    public static final String VERSION = "3.0.0";
+    public static final String VERSION = "3.0.1";
     private static volatile boolean sConsoleMode;
 
     public static void main(String[] args) {
