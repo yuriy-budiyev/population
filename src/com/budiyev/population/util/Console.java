@@ -46,6 +46,10 @@ public final class Console {
         return new File(inputFile.getAbsolutePath() + ".result.csv");
     }
 
+    private static File buildResultFile(String inputFilePath, int number) {
+        return new File(inputFilePath + ".result_" + number + ".csv");
+    }
+
     private static void printInitialization(int tasks, int processors, boolean parallel) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Initialized");
@@ -83,6 +87,18 @@ public final class Console {
         System.out.println("Done: " + outputFile.getName());
     }
 
+    private static void calculateTask(Task task, ResourceBundle resources, String startFilePath,
+            int number) throws Exception {
+        System.out.println("Calculating: " + number);
+        Calculator.Results results = Calculator
+                .calculateSync(task.initialStates, task.transitions, task.startPoint,
+                        task.stepsCount, task.higherAccuracy, task.allowNegative, task.parallel,
+                        true, false);
+        Utils.exportResults(buildResultFile(startFilePath, number), results, task.columnSeparator,
+                task.decimalSeparator, task.lineSeparator, task.encoding, resources);
+        System.out.println("Done: " + number);
+    }
+
     private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
             boolean parallel) throws Exception {
         if (parallel) {
@@ -91,7 +107,7 @@ public final class Console {
             Future<?>[] futures = new Future<?>[tasks.length];
             printInitialization(tasks.length, processors, true);
             for (int i = 0; i < tasks.length; i++) {
-                futures[i] = executor.submit(new CalculationAction(tasks[i], resources));
+                futures[i] = executor.submit(new CalculateFileAction(tasks[i], resources));
             }
             for (Future<?> future : futures) {
                 future.get();
@@ -105,9 +121,45 @@ public final class Console {
         System.out.println("Done all.");
     }
 
-    private static void calculateInterval(File startFile, File endFile, int size,
-            ResourceBundle resources, int processors, boolean parallel) {
+    private static Task[] buildTasks(File startFile, File endFile, int size) {
+        Task[] result = new Task[size];
+        Task startTask = result[0] = new Task(startFile);
+        Task endTask = result[size - 1] = new Task(endFile);
+        double[] shift = new double[startTask.transitions.size()];
+        for (int i = 0; i < shift.length; i++) {
+            shift[i] = (endTask.transitions.get(i).getProbability() -
+                        startTask.transitions.get(i).getProbability()) / size;
+        }
+        for (int i = 1; i < result.length - 1; i++) {
+            result[i] = new Task(result[i - 1], shift);
+        }
+        return result;
+    }
 
+    private static void calculateInterval(File startFile, File endFile, int size,
+            ResourceBundle resources, int processors, boolean parallel) throws Exception {
+        Task[] tasks = buildTasks(startFile, endFile, size);
+        String startFileAbsolutePath = startFile.getAbsolutePath();
+        if (parallel) {
+            ExecutorService executor =
+                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
+            Future<?>[] futures = new Future<?>[tasks.length];
+            printInitialization(tasks.length, processors, true);
+            for (int i = 0; i < tasks.length; i++) {
+                futures[i] = executor.submit(
+                        new CalculateTaskAction(startFileAbsolutePath, i, tasks[i], resources));
+            }
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } else {
+            printInitialization(tasks.length, processors, false);
+            for (int i = 0; i < tasks.length; i++) {
+                Task task = tasks[i];
+                calculateTask(task, resources, startFileAbsolutePath, i);
+            }
+        }
+        System.out.println("Done all.");
     }
 
     public static void launch(String[] args) {
@@ -155,11 +207,11 @@ public final class Console {
         }
     }
 
-    private static class CalculationAction implements Callable<Void> {
+    private static class CalculateFileAction implements Callable<Void> {
         private final File mInputFile;
         private final ResourceBundle mResources;
 
-        public CalculationAction(File inputFile, ResourceBundle resources) {
+        public CalculateFileAction(File inputFile, ResourceBundle resources) {
             mInputFile = inputFile;
             mResources = resources;
         }
@@ -167,6 +219,27 @@ public final class Console {
         @Override
         public Void call() throws Exception {
             calculateTask(mInputFile, buildResultFile(mInputFile), mResources);
+            return null;
+        }
+    }
+
+    private static class CalculateTaskAction implements Callable<Void> {
+        private final String mStartFilePath;
+        private final int mNumber;
+        private final Task mTask;
+        private final ResourceBundle mResources;
+
+        private CalculateTaskAction(String startFilePath, int number, Task task,
+                ResourceBundle resources) {
+            mStartFilePath = startFilePath;
+            mNumber = number;
+            mTask = task;
+            mResources = resources;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            calculateTask(mTask, mResources, mStartFilePath, mNumber);
             return null;
         }
     }
@@ -200,12 +273,11 @@ public final class Console {
             encoding = settings.get(TaskParser.Settings.ENCODING);
         }
 
-        public Task(Task task, double probabilityShift) {
+        public Task(Task task, double[] probabilityShift) {
             initialStates = task.initialStates;
             transitions = new ArrayList<>(task.transitions.size());
-            for (Transition transition : task.transitions) {
-                Transition shifted = new Transition(transition, probabilityShift);
-                transitions.add(shifted);
+            for (int i = 0; i < task.transitions.size(); i++) {
+                transitions.add(task.transitions.get(i).shiftProbability(probabilityShift[i]));
             }
             startPoint = task.startPoint;
             stepsCount = task.stepsCount;
