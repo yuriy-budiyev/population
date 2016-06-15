@@ -59,14 +59,14 @@
                                 </TableView>
                                 <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0">
                                     <children>
-                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addState" text="%add" />
-                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeState" text="%remove" />
+                                        <Button fx:id="mAddStateButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addState" text="%add" />
+                                        <Button fx:id="mRemoveStateButton" layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeState" text="%remove" />
                                     </children>
                                 </HBox>
                                 <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
                                     <children>
-                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateUp" text="%move_up" />
-                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateDown" text="%move_down" />
+                                        <Button fx:id="mMoveStateUpButton" layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateUp" text="%move_up" />
+                                        <Button fx:id="mMoveStateDownButton" layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveStateDown" text="%move_down" />
                                     </children>
                                 </HBox>
                             </children>
@@ -95,14 +95,14 @@
                                 </TableView>
                                 <HBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0">
                                     <children>
-                                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addTransition" text="%add" />
-                                        <Button layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeTransition" text="%remove" />
+                                        <Button fx:id="mAddTransitionButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#addTransition" text="%add" />
+                                        <Button fx:id="mRemoveTransitionButton" layoutX="75.0" layoutY="14.0" mnemonicParsing="false" onAction="#removeTransition" text="%remove" />
                                     </children>
                                 </HBox>
                                 <HBox layoutX="523.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
                                     <children>
-                                        <Button layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionUp" text="%move_up" />
-                                        <Button layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionDown" text="%move_down" />
+                                        <Button fx:id="mMoveTransitionUpButton" layoutX="523.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionUp" text="%move_up" />
+                                        <Button fx:id="mMoveTransitionDownButton" layoutX="585.0" layoutY="14.0" mnemonicParsing="false" onAction="#moveTransitionDown" text="%move_down" />
                                     </children>
                                 </HBox>
                             </children>

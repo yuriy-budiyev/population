@@ -18,8 +18,8 @@
 package com.budiyev.population.controller;
 
 import com.budiyev.population.controller.base.AbstractExportController;
-import com.budiyev.population.model.Calculator;
-import com.budiyev.population.util.TaskParser;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.Task;
 import com.budiyev.population.util.Utils;
 
 import java.io.File;
@@ -66,7 +66,7 @@ public class ExportController extends AbstractExportController {
     }
 
     private void readSelectionFromSettings() {
-        char separator = getTaskSettings().get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
+        char separator = getTaskSettings().get(Task.Keys.COLUMN_SEPARATOR).charAt(0);
         int selected = 0;
         for (int i = 0; i < mColumnSeparators.size(); i++) {
             if (Objects.equals(mColumnSeparators.get(i).getKey(), separator)) {
@@ -75,7 +75,7 @@ public class ExportController extends AbstractExportController {
             }
         }
         mColumnSeparatorChoiceBox.getSelectionModel().select(selected);
-        separator = getTaskSettings().get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
+        separator = getTaskSettings().get(Task.Keys.DECIMAL_SEPARATOR).charAt(0);
         for (int i = 0; i < mDecimalSeparators.size(); i++) {
             if (Objects.equals(mDecimalSeparators.get(i).getKey(), separator)) {
                 selected = i;
@@ -83,7 +83,7 @@ public class ExportController extends AbstractExportController {
             }
         }
         mDecimalSeparatorChoiceBox.getSelectionModel().select(selected);
-        String lineSeparator = getTaskSettings().get(TaskParser.Settings.LINE_SEPARATOR);
+        String lineSeparator = getTaskSettings().get(Task.Keys.LINE_SEPARATOR);
         selected = 1;
         for (int i = 0; i < mLineSeparators.size(); i++) {
             if (Objects.equals(mLineSeparators.get(i).getKey(), lineSeparator)) {
@@ -93,7 +93,7 @@ public class ExportController extends AbstractExportController {
         }
         mLineSeparatorChoiceBox.getSelectionModel().select(selected);
         selected = 0;
-        String encoding = getTaskSettings().get(TaskParser.Settings.ENCODING);
+        String encoding = getTaskSettings().get(Task.Keys.ENCODING);
         for (int i = 0; i < mEncodings.size(); i++) {
             if (Objects.equals(mEncodings.get(i), encoding)) {
                 selected = i;
@@ -150,19 +150,17 @@ public class ExportController extends AbstractExportController {
         readSelectionFromSettings();
         mColumnSeparatorChoiceBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(TaskParser.Settings.COLUMN_SEPARATOR,
-                                String.valueOf(newValue.getKey())));
+                        .put(Task.Keys.COLUMN_SEPARATOR, String.valueOf(newValue.getKey())));
         mDecimalSeparatorChoiceBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(TaskParser.Settings.DECIMAL_SEPARATOR,
-                                String.valueOf(newValue.getKey())));
+                        .put(Task.Keys.DECIMAL_SEPARATOR, String.valueOf(newValue.getKey())));
         mLineSeparatorChoiceBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(TaskParser.Settings.LINE_SEPARATOR, newValue.getKey()));
+                        .put(Task.Keys.LINE_SEPARATOR, newValue.getKey()));
         mEncodingChoiceBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(TaskParser.Settings.ENCODING, newValue));
-        ArrayList<Calculator.Results> results = getResults();
+                        .put(Task.Keys.ENCODING, newValue));
+        ArrayList<Result> results = getResults();
         mSaveButton.setDisable(results == null || results.size() == 0);
     }
 

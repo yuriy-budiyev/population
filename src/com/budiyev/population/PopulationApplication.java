@@ -20,7 +20,7 @@ package com.budiyev.population;
 import com.budiyev.population.controller.base.AbstractAboutController;
 import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.controller.base.AbstractExportController;
-import com.budiyev.population.model.Calculator;
+import com.budiyev.population.model.Result;
 import com.budiyev.population.util.CsvParser;
 import com.budiyev.population.util.Utils;
 
@@ -197,8 +197,7 @@ public final class PopulationApplication extends Application {
         saveSettings();
     }
 
-    public void showExportDialog(ArrayList<Calculator.Results> results,
-            HashMap<String, String> taskSettings) {
+    public void showExportDialog(ArrayList<Result> results, HashMap<String, String> taskSettings) {
         Stage exportStage = new Stage(StageStyle.UTILITY);
         exportStage.initModality(Modality.APPLICATION_MODAL);
         exportStage.initOwner(mPrimaryStage.getOwner());

@@ -20,7 +20,10 @@ package com.budiyev.population.controller;
 import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.ChartSeries;
+import com.budiyev.population.model.Result;
 import com.budiyev.population.model.State;
+import com.budiyev.population.model.TableResult;
+import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;
 import com.budiyev.population.model.TransitionMode;
 import com.budiyev.population.model.TransitionType;
@@ -83,9 +86,10 @@ public class PrimaryController extends AbstractController {
     private final HashMap<String, String> mTaskSettings = new HashMap<>();
     private final ObservableList<ChartSeries> mResultsChartData =
             FXCollections.observableArrayList();
-    private final ArrayList<Calculator.Results> mResultsTableData = new ArrayList<>();
+    private final ArrayList<Result> mResultsTableData = new ArrayList<>();
     private final int[] mCurrentChartBounds = {0, 100};
     private volatile boolean mZoomingChart;
+    private volatile boolean mCalculating;
     private int mResultsTablePrecision = 5;
     private File mTaskFile;
     public MenuItem mClearMenuItem;
@@ -123,9 +127,17 @@ public class PrimaryController extends AbstractController {
     public TextField mStartPointField;
     public TextField mResultsTablePrecisionField;
     public ProgressBar mCalculationProgressBar;
-    public TableView<ArrayList<Calculator.Result>> mResultsTable;
+    public TableView<ArrayList<TableResult>> mResultsTable;
     public LineChart<Number, Number> mResultsChart;
     public AnchorPane mResultsChartContainer;
+    public Button mAddStateButton;
+    public Button mRemoveStateButton;
+    public Button mMoveStateUpButton;
+    public Button mMoveStateDownButton;
+    public Button mAddTransitionButton;
+    public Button mRemoveTransitionButton;
+    public Button mMoveTransitionUpButton;
+    public Button mMoveTransitionDownButton;
     public Button mCalculateButton;
     public Button mClearResultsChartButton;
     public Button mClearResultsTableButton;
@@ -669,34 +681,32 @@ public class PrimaryController extends AbstractController {
             stepsCount = Integer.valueOf(mStepsCountField.getText());
         } catch (NumberFormatException ignored) {
         }
-        mTaskSettings.put(TaskParser.Settings.START_POINT, String.valueOf(startPoint));
-        mTaskSettings.put(TaskParser.Settings.STEPS_COUNT, String.valueOf(stepsCount));
-        mTaskSettings.put(TaskParser.Settings.PARALLEL, String.valueOf(mParallel.isSelected()));
-        mTaskSettings.put(TaskParser.Settings.HIGHER_ACCURACY,
-                String.valueOf(mHigherAccuracy.isSelected()));
-        mTaskSettings.put(TaskParser.Settings.ALLOW_NEGATIVE,
-                String.valueOf(mAllowNegativeNumbers.isSelected()));
+        mTaskSettings.put(Task.Keys.START_POINT, String.valueOf(startPoint));
+        mTaskSettings.put(Task.Keys.STEPS_COUNT, String.valueOf(stepsCount));
+        mTaskSettings.put(Task.Keys.PARALLEL, String.valueOf(mParallel.isSelected()));
+        mTaskSettings.put(Task.Keys.HIGHER_ACCURACY, String.valueOf(mHigherAccuracy.isSelected()));
+        mTaskSettings
+                .put(Task.Keys.ALLOW_NEGATIVE, String.valueOf(mAllowNegativeNumbers.isSelected()));
         return mTaskSettings;
     }
 
     private void readSettings(HashMap<String, String> settings) {
         settings.forEach(mTaskSettings::put);
-        if (settings.containsKey(TaskParser.Settings.START_POINT)) {
-            mStartPointField.setText(settings.get(TaskParser.Settings.START_POINT));
+        if (settings.containsKey(Task.Keys.START_POINT)) {
+            mStartPointField.setText(settings.get(Task.Keys.START_POINT));
         }
-        if (settings.containsKey(TaskParser.Settings.STEPS_COUNT)) {
-            mStepsCountField.setText(settings.get(TaskParser.Settings.STEPS_COUNT));
+        if (settings.containsKey(Task.Keys.STEPS_COUNT)) {
+            mStepsCountField.setText(settings.get(Task.Keys.STEPS_COUNT));
         }
-        if (settings.containsKey(TaskParser.Settings.PARALLEL)) {
-            mParallel.setSelected(Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL)));
+        if (settings.containsKey(Task.Keys.PARALLEL)) {
+            mParallel.setSelected(Boolean.valueOf(settings.get(Task.Keys.PARALLEL)));
         }
-        if (settings.containsKey(TaskParser.Settings.HIGHER_ACCURACY)) {
-            mHigherAccuracy.setSelected(
-                    Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY)));
+        if (settings.containsKey(Task.Keys.HIGHER_ACCURACY)) {
+            mHigherAccuracy.setSelected(Boolean.valueOf(settings.get(Task.Keys.HIGHER_ACCURACY)));
         }
-        if (settings.containsKey(TaskParser.Settings.ALLOW_NEGATIVE)) {
+        if (settings.containsKey(Task.Keys.ALLOW_NEGATIVE)) {
             mAllowNegativeNumbers
-                    .setSelected(Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE)));
+                    .setSelected(Boolean.valueOf(settings.get(Task.Keys.ALLOW_NEGATIVE)));
         }
     }
 
@@ -883,12 +893,11 @@ public class PrimaryController extends AbstractController {
     }
 
     private int getResultsTableSelectedStep() {
-        ArrayList<Calculator.Result> selectedItem =
-                mResultsTable.getSelectionModel().getSelectedItem();
+        ArrayList<TableResult> selectedItem = mResultsTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null) {
             return Integer.MIN_VALUE;
         }
-        for (Calculator.Result result : selectedItem) {
+        for (TableResult result : selectedItem) {
             if (result != null) {
                 return result.getNumber();
             }
@@ -897,11 +906,11 @@ public class PrimaryController extends AbstractController {
     }
 
     private void selectResultsTableRowByStep(int step) {
-        ObservableList<ArrayList<Calculator.Result>> items = mResultsTable.getItems();
+        ObservableList<ArrayList<TableResult>> items = mResultsTable.getItems();
         for (int i = 0; i < items.size(); i++) {
             boolean found = false;
-            ArrayList<Calculator.Result> results = items.get(i);
-            for (Calculator.Result result : results) {
+            ArrayList<TableResult> resultStates = items.get(i);
+            for (TableResult result : resultStates) {
                 if (result != null && result.getNumber() == step) {
                     mResultsTable.getSelectionModel().select(i);
                     mResultsTable.scrollTo(i);
@@ -919,15 +928,15 @@ public class PrimaryController extends AbstractController {
         int selectedStep = getResultsTableSelectedStep();
         mResultsTable.getItems().clear();
         mResultsTable.getColumns().clear();
-        TableColumn<ArrayList<Calculator.Result>, Number> numberColumn = new TableColumn<>();
+        TableColumn<ArrayList<TableResult>, Number> numberColumn = new TableColumn<>();
         numberColumn.setText(getString("step"));
         numberColumn.setCellFactory(integerCell(x -> true, 0));
         numberColumn.setPrefWidth(40);
         numberColumn.setSortable(false);
         numberColumn.setEditable(false);
         numberColumn.setCellValueFactory(param -> {
-            ArrayList<Calculator.Result> results = param.getValue();
-            for (Calculator.Result result : results) {
+            ArrayList<TableResult> resultStates = param.getValue();
+            for (TableResult result : resultStates) {
                 if (result != null) {
                     return result.numberProperty();
                 }
@@ -939,14 +948,14 @@ public class PrimaryController extends AbstractController {
         for (int i = 0; i < mResultsTableData.size(); i++) {
             ArrayList<String> headers = mResultsTableData.get(i).getDataNames();
             for (int j = 0; j < headers.size(); j++) {
-                TableColumn<ArrayList<Calculator.Result>, Number> valueColumn = new TableColumn<>();
+                TableColumn<ArrayList<TableResult>, Number> valueColumn = new TableColumn<>();
                 valueColumn.setText(headers.get(j));
                 valueColumn.setCellFactory(doubleCell(x -> true, 0, decimalFormat));
                 valueColumn.setPrefWidth(80);
                 final int resultIndex = i;
                 final int stateIndex = j;
                 valueColumn.setCellValueFactory(param -> {
-                    Calculator.Result result = param.getValue().get(resultIndex);
+                    TableResult result = param.getValue().get(resultIndex);
                     if (result == null) {
                         return null;
                     }
@@ -960,10 +969,10 @@ public class PrimaryController extends AbstractController {
         int start = Integer.MAX_VALUE;
         int end = Integer.MIN_VALUE;
         int columnCount = 0;
-        for (Calculator.Results results : mResultsTableData) {
-            columnCount += results.getDataNames().size();
-            int startPoint = results.getStartPoint();
-            int size = results.getTableData().size() + startPoint;
+        for (Result result : mResultsTableData) {
+            columnCount += result.getDataNames().size();
+            int startPoint = result.getStartPoint();
+            int size = result.getTableData().size() + startPoint;
             if (end <= size) {
                 end = size;
             }
@@ -979,13 +988,13 @@ public class PrimaryController extends AbstractController {
         }
         dataSize = dataSize < MAX_DISPLAYING_DATA_SIZE ? dataSize : MAX_DISPLAYING_DATA_SIZE;
         end = start + dataSize;
-        ArrayList<ArrayList<Calculator.Result>> table = new ArrayList<>();
+        ArrayList<ArrayList<TableResult>> table = new ArrayList<>();
         for (int i = start; i < end; i++) {
             boolean empty = true;
-            ArrayList<Calculator.Result> row = new ArrayList<>(columnCount);
-            for (Calculator.Results results : mResultsTableData) {
-                ArrayList<Calculator.Result> data = results.getTableData();
-                int localIndex = i - results.getStartPoint();
+            ArrayList<TableResult> row = new ArrayList<>(columnCount);
+            for (Result result : mResultsTableData) {
+                ArrayList<TableResult> data = result.getTableData();
+                int localIndex = i - result.getStartPoint();
                 if (localIndex >= 0 && localIndex < data.size()) {
                     row.add(data.get(localIndex));
                     empty = false;
@@ -1001,19 +1010,19 @@ public class PrimaryController extends AbstractController {
         selectResultsTableRowByStep(selectedStep);
     }
 
-    private void publishResults(Calculator.Results results) {
+    private void publishResults(Result result) {
         if (mResultsOnChart.isSelected()) {
             int colorsCount = ChartSeries.Color.ARRAY.length - 8;
             int dashesCount = ChartSeries.Dash.ARRAY.length;
             int thicknessesCount = ChartSeries.Thickness.ARRAY.length;
-            ArrayList<XYChart.Series<Number, Number>> chart = results.getChartData();
+            ArrayList<XYChart.Series<Number, Number>> chart = result.getChartData();
             for (XYChart.Series<Number, Number> series : chart) {
                 int size = mResultsChartData.size();
                 int color = size % colorsCount;
                 int dash = (size / colorsCount) % dashesCount;
                 int thickness = (size / (colorsCount * dashesCount)) % thicknessesCount;
                 ChartSeries chartSeries =
-                        new ChartSeries(series, results.getStartPoint(), color, dash, thickness,
+                        new ChartSeries(series, result.getStartPoint(), color, dash, thickness,
                                 true);
                 chartSeries.visibilityProperty()
                         .addListener((observable, oldValue, newValue) -> refreshResultsChart());
@@ -1023,7 +1032,7 @@ public class PrimaryController extends AbstractController {
             resetResultsChartScale();
         }
         if (mResultsInTable.isSelected()) {
-            mResultsTableData.add(results);
+            mResultsTableData.add(result);
             refreshResultsTable();
         }
     }
@@ -1066,7 +1075,18 @@ public class PrimaryController extends AbstractController {
             stepsCount == Integer.MAX_VALUE) {
             return;
         }
+        mCalculating = true;
         stepsCount++;
+        mStatesTable.setDisable(true);
+        mTransitionsTable.setDisable(true);
+        mAddStateButton.setDisable(true);
+        mRemoveStateButton.setDisable(true);
+        mMoveStateUpButton.setDisable(true);
+        mMoveStateDownButton.setDisable(true);
+        mAddTransitionButton.setDisable(true);
+        mRemoveTransitionButton.setDisable(true);
+        mMoveTransitionUpButton.setDisable(true);
+        mMoveTransitionDownButton.setDisable(true);
         mStartPointLabel.setDisable(true);
         mStartPointField.setDisable(true);
         mStepsCountLabel.setDisable(true);
@@ -1082,12 +1102,28 @@ public class PrimaryController extends AbstractController {
         mResultsInTable.setDisable(true);
         mCalculationProgressBar.setProgress(0);
         mCalculationProgressBar.setVisible(true);
-        Calculator.calculateAsync(mStates, mTransitions, startPoint, stepsCount,
-                mHigherAccuracy.isSelected(), mAllowNegativeNumbers.isSelected(),
-                mParallel.isSelected(), mResultsInTable.isSelected(), mResultsOnChart.isSelected(),
+        Task task = new Task();
+        task.setStates(mStates);
+        task.setTransitions(mTransitions);
+        task.setStartPoint(startPoint);
+        task.setStepsCount(stepsCount);
+        task.setHigherAccuracy(mHigherAccuracy.isSelected());
+        task.setAllowNegative(mAllowNegativeNumbers.isSelected());
+        task.setParallel(mParallel.isSelected());
+        Calculator.calculateAsync(task, mResultsInTable.isSelected(), mResultsOnChart.isSelected(),
                 results -> Platform.runLater(() -> {
                     publishResults(results);
                     mCalculationProgressBar.setVisible(false);
+                    mStatesTable.setDisable(false);
+                    mTransitionsTable.setDisable(false);
+                    mAddStateButton.setDisable(false);
+                    mRemoveStateButton.setDisable(false);
+                    mMoveStateUpButton.setDisable(false);
+                    mMoveStateDownButton.setDisable(false);
+                    mAddTransitionButton.setDisable(false);
+                    mRemoveTransitionButton.setDisable(false);
+                    mMoveTransitionUpButton.setDisable(false);
+                    mMoveTransitionDownButton.setDisable(false);
                     mStartPointLabel.setDisable(false);
                     mStartPointField.setDisable(false);
                     mStepsCountLabel.setDisable(false);
@@ -1101,6 +1137,7 @@ public class PrimaryController extends AbstractController {
                     mAllowNegativeNumbers.setDisable(false);
                     mResultsOnChart.setDisable(false);
                     mResultsInTable.setDisable(false);
+                    mCalculating = false;
                 }),
                 progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)));
     }
@@ -1184,6 +1221,9 @@ public class PrimaryController extends AbstractController {
     }
 
     public void openTask() {
+        if (mCalculating) {
+            return;
+        }
         File file = getTaskFileChooser(getString("open_task"))
                 .showOpenDialog(mStatesTable.getScene().getWindow());
         if (file == null) {
@@ -1192,7 +1232,13 @@ public class PrimaryController extends AbstractController {
         mStates.clear();
         mTransitions.clear();
         HashMap<String, String> settings = new HashMap<>();
-        TaskParser.parse(file, mStates, mTransitions, settings);
+        Task task = TaskParser.parse(file);
+        if (task == null) {
+            return;
+        }
+        mStates.addAll(task.getStates());
+        mTransitions.addAll(task.getTransitions());
+        Task.writeSettings(task, settings);
         readSettings(settings);
         mTaskFile = file;
         getApplication().setWorkDirectory(file.getParent());
@@ -1200,6 +1246,9 @@ public class PrimaryController extends AbstractController {
     }
 
     public void clearTask() {
+        if (mCalculating) {
+            return;
+        }
         mStates.clear();
         mTransitions.clear();
         mStartPointField.setText("0");
@@ -1237,7 +1286,11 @@ public class PrimaryController extends AbstractController {
             path += ".pmt";
             file = new File(path);
         }
-        TaskParser.encode(file, mStates, mTransitions, buildSettings());
+        Task task = new Task();
+        task.setStates(mStates);
+        task.setTransitions(mTransitions);
+        Task.writeSettings(task, buildSettings());
+        TaskParser.encode(file, task);
         mTaskFile = file;
         getApplication().setWorkDirectory(file.getParent());
         setTitle(file);
@@ -1247,7 +1300,11 @@ public class PrimaryController extends AbstractController {
         if (mTaskFile == null) {
             saveTaskAs();
         } else {
-            TaskParser.encode(mTaskFile, mStates, mTransitions, buildSettings());
+            Task task = new Task();
+            task.setStates(mStates);
+            task.setTransitions(mTransitions);
+            Task.writeSettings(task, buildSettings());
+            TaskParser.encode(mTaskFile, task);
         }
     }
 

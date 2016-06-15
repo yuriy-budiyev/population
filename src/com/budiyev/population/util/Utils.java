@@ -19,6 +19,9 @@ package com.budiyev.population.util;
 
 import com.budiyev.population.Launcher;
 import com.budiyev.population.model.Calculator;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.TableResult;
+import com.budiyev.population.model.Task;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -141,8 +144,8 @@ public final class Utils {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void exportResults(ArrayList<Calculator.Results> results, File file,
-            char columnSeparator, char decimalSeparator, String lineSeparator, String encoding,
+    public static void exportResults(ArrayList<Result> results, File file, char columnSeparator,
+            char decimalSeparator, String lineSeparator, String encoding,
             ResourceBundle resources) throws IOException {
         if (results == null || file == null ||
             lineSeparator == null || encoding == null || resources == null) {
@@ -150,7 +153,7 @@ public final class Utils {
         }
         int start = Integer.MAX_VALUE;
         int end = Integer.MIN_VALUE;
-        for (Calculator.Results result : results) {
+        for (Result result : results) {
             int startPoint = result.getStartPoint();
             int size = result.getTableData().size() + startPoint;
             if (end <= size) {
@@ -186,13 +189,13 @@ public final class Utils {
             for (int i = start; i < end; i++) {
                 boolean empty = true;
                 StringBuilder rowBuilder = new StringBuilder();
-                Calculator.Result firstExistent = null;
+                TableResult firstExistent = null;
                 for (int j = 0; j < results.size(); j++) {
-                    Calculator.Results result = results.get(j);
-                    ArrayList<Calculator.Result> data = result.getTableData();
+                    Result result = results.get(j);
+                    ArrayList<TableResult> data = result.getTableData();
                     int localIndex = i - result.getStartPoint();
                     if (localIndex >= 0 && localIndex < data.size()) {
-                        Calculator.Result localResult = data.get(localIndex);
+                        TableResult localResult = data.get(localIndex);
                         for (int k = 0; k < localResult.valueCount(); k++) {
                             rowBuilder.append(quote)
                                     .append(formatter.format(localResult.getValue(k)))
@@ -224,23 +227,23 @@ public final class Utils {
         }
     }
 
-    public static void exportResults(File file, Calculator.Results results, char columnSeparator,
+    public static void exportResults(File file, Result result, char columnSeparator,
             char decimalSeparator, String lineSeparator, String encoding,
             ResourceBundle resources) throws IOException {
-        ArrayList<Calculator.Results> resultsList = new ArrayList<>(1);
-        resultsList.add(results);
-        exportResults(resultsList, file, columnSeparator, decimalSeparator, lineSeparator, encoding,
+        ArrayList<Result> resultList = new ArrayList<>(1);
+        resultList.add(result);
+        exportResults(resultList, file, columnSeparator, decimalSeparator, lineSeparator, encoding,
                 resources);
     }
 
     public static void setDefaultTaskSettings(HashMap<String, String> taskSettings) {
-        taskSettings.put(TaskParser.Settings.STEPS_COUNT, String.valueOf(0));
-        taskSettings.put(TaskParser.Settings.HIGHER_ACCURACY, String.valueOf(false));
-        taskSettings.put(TaskParser.Settings.ALLOW_NEGATIVE, String.valueOf(false));
-        taskSettings.put(TaskParser.Settings.COLUMN_SEPARATOR, String.valueOf(','));
-        taskSettings.put(TaskParser.Settings.DECIMAL_SEPARATOR,
+        taskSettings.put(Task.Keys.STEPS_COUNT, String.valueOf(0));
+        taskSettings.put(Task.Keys.HIGHER_ACCURACY, String.valueOf(false));
+        taskSettings.put(Task.Keys.ALLOW_NEGATIVE, String.valueOf(false));
+        taskSettings.put(Task.Keys.COLUMN_SEPARATOR, String.valueOf(','));
+        taskSettings.put(Task.Keys.DECIMAL_SEPARATOR,
                 String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator()));
-        taskSettings.put(TaskParser.Settings.LINE_SEPARATOR, System.lineSeparator());
-        taskSettings.put(TaskParser.Settings.ENCODING, Charset.defaultCharset().name());
+        taskSettings.put(Task.Keys.LINE_SEPARATOR, System.lineSeparator());
+        taskSettings.put(Task.Keys.ENCODING, Charset.defaultCharset().name());
     }
 }

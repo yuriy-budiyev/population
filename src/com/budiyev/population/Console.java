@@ -15,21 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package com.budiyev.population.util;
+package com.budiyev.population;
 
-import com.budiyev.population.Launcher;
 import com.budiyev.population.model.Calculator;
-import com.budiyev.population.model.State;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;
+import com.budiyev.population.util.TaskParser;
+import com.budiyev.population.util.Utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,43 +67,30 @@ public final class Console {
     }
 
     private static void calculateTask(File inputFile, File outputFile,
-            ResourceBundle resources) throws Exception {
+            ResourceBundle resources) throws IOException {
         System.out.println("Calculating: " + inputFile.getName());
-        ArrayList<State> initialStates = new ArrayList<>();
-        ArrayList<Transition> transitions = new ArrayList<>();
-        HashMap<String, String> settings = new HashMap<>();
-        TaskParser.parse(inputFile, initialStates, transitions, settings);
-        int startPoint = Integer.valueOf(settings.get(TaskParser.Settings.START_POINT));
-        int stepsCount = Integer.valueOf(settings.get(TaskParser.Settings.STEPS_COUNT));
-        boolean higherAccuracy = Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY));
-        boolean allowNegative = Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE));
-        boolean parallel = Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL));
-        char columnSeparator = settings.get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
-        char decimalSeparator = settings.get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
-        String lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
-        String encoding = settings.get(TaskParser.Settings.ENCODING);
-        Calculator.Results results = Calculator
-                .calculateSync(initialStates, transitions, startPoint, stepsCount, higherAccuracy,
-                        allowNegative, parallel, true, false);
-        Utils.exportResults(outputFile, results, columnSeparator, decimalSeparator, lineSeparator,
-                encoding, resources);
+        Task task = TaskParser.parse(inputFile);
+        if (task == null) {
+            System.out.println("Can't load: " + inputFile.getName());
+            return;
+        }
+        Result result = Calculator.calculateSync(task, true, false);
+        Utils.exportResults(outputFile, result, task.getColumnSeparator(),
+                task.getDecimalSeparator(), task.getLineSeparator(), task.getEncoding(), resources);
         System.out.println("Done: " + outputFile.getName());
     }
 
-    private static void calculateTask(Task task, ResourceBundle resources, String startFilePath,
-            int number) throws Exception {
-        System.out.println("Calculating: " + number);
-        Calculator.Results results = Calculator
-                .calculateSync(task.initialStates, task.transitions, task.startPoint,
-                        task.stepsCount, task.higherAccuracy, task.allowNegative, task.parallel,
-                        true, false);
-        Utils.exportResults(buildResultFile(startFilePath, number), results, task.columnSeparator,
-                task.decimalSeparator, task.lineSeparator, task.encoding, resources);
-        System.out.println("Done: " + number);
+    private static void calculateTask(Task task, ResourceBundle resources) throws IOException {
+        System.out.println("Calculating: " + task.getId());
+        Result result = Calculator.calculateSync(task, true, false);
+        Utils.exportResults(buildResultFile(task.getName(), task.getId()), result,
+                task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
+                task.getEncoding(), resources);
+        System.out.println("Done: " + task.getId());
     }
 
     private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
-            boolean parallel) throws Exception {
+            boolean parallel) throws ExecutionException, InterruptedException, IOException {
         if (parallel) {
             ExecutorService executor =
                     Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
@@ -121,41 +111,83 @@ public final class Console {
         System.out.println("Done all.");
     }
 
-    private static Task[] buildTasks(File startFile, File endFile, int size) {
-        Task[] result = new Task[size];
-        Task startTask = result[0] = new Task(startFile);
-        Task endTask = result[size - 1] = new Task(endFile);
-        double[] shift = new double[startTask.transitions.size()];
-        for (int i = 0; i < shift.length; i++) {
-            shift[i] = (endTask.transitions.get(i).getProbability() -
-                        startTask.transitions.get(i).getProbability()) / size;
+    private static Task buildTask(Task start, Task end, List<Double> shifts, int position,
+            int size) {
+        if (position == 0) {
+            return start;
         }
-        for (int i = 1; i < result.length - 1; i++) {
-            result[i] = new Task(result[i - 1], shift);
+        if (position == size - 1) {
+            return end;
+        }
+        Task result = new Task();
+        result.setId(position);
+        result.setName(start.getName());
+        result.setStates(start.getStates());
+        List<Transition> startTransitions = start.getTransitions();
+        List<Transition> resultTransitions = new ArrayList<>(startTransitions.size());
+        for (int i = 0; i < startTransitions.size(); i++) {
+            Transition startTransition = startTransitions.get(i);
+            Transition resultTransition = new Transition(startTransition.getSourceState(),
+                    startTransition.getSourceCoefficient(), startTransition.getSourceDelay(),
+                    startTransition.getOperandState(), startTransition.getOperandCoefficient(),
+                    startTransition.getOperandDelay(), startTransition.getResultState(),
+                    startTransition.getResultCoefficient(),
+                    startTransition.getProbability() + position * shifts.get(i),
+                    startTransition.getType(), startTransition.getMode(),
+                    startTransition.getDescription());
+            resultTransitions.add(resultTransition);
+        }
+        result.setTransitions(resultTransitions);
+        result.setStartPoint(start.getStartPoint());
+        result.setStepsCount(start.getStepsCount());
+        result.setParallel(start.isParallel());
+        result.setHigherAccuracy(start.isHigherAccuracy());
+        result.setAllowNegative(start.isAllowNegative());
+        result.setColumnSeparator(start.getColumnSeparator());
+        result.setDecimalSeparator(start.getDecimalSeparator());
+        result.setLineSeparator(start.getLineSeparator());
+        result.setEncoding(start.getEncoding());
+        return result;
+    }
+
+    private static List<Double> calculateShifts(Task start, Task end, int size) {
+        List<Double> result = new ArrayList<>(start.getTransitions().size());
+        for (int i = 0; i < result.size(); i++) {
+            result.add((end.getTransitions().get(i).getProbability() -
+                        start.getTransitions().get(i).getProbability()) / size);
         }
         return result;
     }
 
-    private static void calculateInterval(File startFile, File endFile, int size,
+    private static void calculateTasks(File startFile, File endFile, int size,
             ResourceBundle resources, int processors, boolean parallel) throws Exception {
-        Task[] tasks = buildTasks(startFile, endFile, size);
+        Task startTask = TaskParser.parse(startFile);
+        Task endTask = TaskParser.parse(endFile);
+        if (startTask == null || endTask == null ||
+            startTask.getTransitions().size() != endTask.getTransitions().size()) {
+            System.out.println("Can't perform calculations. Invalid or missing data.");
+            return;
+        }
+        startTask.setId(0);
+        endTask.setId(size - 1);
         String startFileAbsolutePath = startFile.getAbsolutePath();
+        startTask.setName(startFileAbsolutePath);
+        endTask.setName(startFileAbsolutePath);
+        List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
             ExecutorService executor =
                     Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
-            Future<?>[] futures = new Future<?>[tasks.length];
-            printInitialization(tasks.length, processors, true);
-            for (int i = 0; i < tasks.length; i++) {
+            Future<?>[] futures = new Future<?>[size];
+            for (int i = 0; i < size; i++) {
                 futures[i] = executor.submit(
-                        new CalculateTaskAction(startFileAbsolutePath, i, tasks[i], resources));
+                        new CalculateTaskAction(i, size, startTask, endTask, shifts, resources));
             }
             for (Future<?> future : futures) {
                 future.get();
             }
         } else {
-            printInitialization(tasks.length, processors, false);
-            for (int i = 0; i < tasks.length; i++) {
-                calculateTask(tasks[i], resources, startFileAbsolutePath, i);
+            for (int i = 0; i < size; i++) {
+                calculateTask(buildTask(startTask, endTask, shifts, i, size), resources);
             }
         }
         System.out.println("Done all.");
@@ -189,7 +221,7 @@ public final class Console {
                 File startFile = new File(args[shift]);
                 File endFile = new File(args[shift + 1]);
                 int size = Integer.valueOf(args[shift + 2]);
-                calculateInterval(startFile, endFile, size, resources, processors, parallel);
+                calculateTasks(startFile, endFile, size, resources, processors, parallel);
             } else if (args.length == 2) {
                 File inputFile = new File(args[0]);
                 File outputFile = new File(args[1]);
@@ -223,70 +255,27 @@ public final class Console {
     }
 
     private static class CalculateTaskAction implements Callable<Void> {
-        private final String mStartFilePath;
-        private final int mNumber;
-        private final Task mTask;
+        private final int mPosition;
+        private final int mSize;
+        private final Task mStartTask;
+        private final Task mEndTask;
+        private final List<Double> mShifts;
         private final ResourceBundle mResources;
 
-        private CalculateTaskAction(String startFilePath, int number, Task task,
-                ResourceBundle resources) {
-            mStartFilePath = startFilePath;
-            mNumber = number;
-            mTask = task;
+        private CalculateTaskAction(int position, int size, Task startTask, Task endTask,
+                List<Double> shifts, ResourceBundle resources) {
+            mPosition = position;
+            mSize = size;
+            mStartTask = startTask;
+            mEndTask = endTask;
+            mShifts = shifts;
             mResources = resources;
         }
 
         @Override
         public Void call() throws Exception {
-            calculateTask(mTask, mResources, mStartFilePath, mNumber);
+            calculateTask(buildTask(mStartTask, mEndTask, mShifts, mPosition, mSize), mResources);
             return null;
-        }
-    }
-
-    private static class Task {
-        public final List<State> initialStates;
-        public final List<Transition> transitions;
-        public final int startPoint;
-        public final int stepsCount;
-        public final boolean allowNegative;
-        public final boolean higherAccuracy;
-        public final boolean parallel;
-        public final char columnSeparator;
-        public final char decimalSeparator;
-        public final String lineSeparator;
-        public final String encoding;
-
-        public Task(File file) {
-            initialStates = new ArrayList<>();
-            transitions = new ArrayList<>();
-            HashMap<String, String> settings = new HashMap<>();
-            TaskParser.parse(file, initialStates, transitions, settings);
-            startPoint = Integer.valueOf(settings.get(TaskParser.Settings.START_POINT));
-            stepsCount = Integer.valueOf(settings.get(TaskParser.Settings.STEPS_COUNT));
-            higherAccuracy = Boolean.valueOf(settings.get(TaskParser.Settings.HIGHER_ACCURACY));
-            allowNegative = Boolean.valueOf(settings.get(TaskParser.Settings.ALLOW_NEGATIVE));
-            parallel = Boolean.valueOf(settings.get(TaskParser.Settings.PARALLEL));
-            columnSeparator = settings.get(TaskParser.Settings.COLUMN_SEPARATOR).charAt(0);
-            decimalSeparator = settings.get(TaskParser.Settings.DECIMAL_SEPARATOR).charAt(0);
-            lineSeparator = settings.get(TaskParser.Settings.LINE_SEPARATOR);
-            encoding = settings.get(TaskParser.Settings.ENCODING);
-        }
-
-        public Task(Task task, double[] probabilityShift) {
-            initialStates = task.initialStates;
-            transitions = new ArrayList<>(task.transitions.size());
-            for (int i = 0; i < task.transitions.size(); i++) {
-                transitions.add(task.transitions.get(i).shiftProbability(probabilityShift[i]));
-            }
-            startPoint = task.startPoint;
-            stepsCount = task.stepsCount;
-            allowNegative = task.allowNegative;
-            higherAccuracy = task.higherAccuracy;
-            parallel = task.parallel;
-            columnSeparator = task.columnSeparator;
-            decimalSeparator = task.decimalSeparator;
-            lineSeparator = task.lineSeparator;
-            encoding = task.encoding;
         }
     }
 }

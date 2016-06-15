@@ -18,6 +18,7 @@
 package com.budiyev.population.util;
 
 import com.budiyev.population.model.State;
+import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;
 
 import java.io.File;
@@ -25,9 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Objects;
+
+import javafx.collections.FXCollections;
 
 public final class TaskParser {
     private static final String FORMAT_NAME = "PopulationModelingTask";
@@ -42,19 +43,26 @@ public final class TaskParser {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void encode(File file, Collection<State> states,
-            Collection<Transition> transitions, HashMap<String, String> settings) {
+    public static void encode(File file, Task task) {
         CsvParser.Table table = new CsvParser.Table();
         table.add(new CsvParser.Row(FORMAT_NAME, FORMAT_VERSION));
-        settings.forEach((key, value) -> table.add(new CsvParser.Row(key, value)));
+        table.add(new CsvParser.Row(Task.Keys.START_POINT, task.getStartPoint()));
+        table.add(new CsvParser.Row(Task.Keys.STEPS_COUNT, task.getStepsCount()));
+        table.add(new CsvParser.Row(Task.Keys.PARALLEL, task.isParallel()));
+        table.add(new CsvParser.Row(Task.Keys.HIGHER_ACCURACY, task.isHigherAccuracy()));
+        table.add(new CsvParser.Row(Task.Keys.ALLOW_NEGATIVE, task.isAllowNegative()));
+        table.add(new CsvParser.Row(Task.Keys.COLUMN_SEPARATOR, task.getColumnSeparator()));
+        table.add(new CsvParser.Row(Task.Keys.DECIMAL_SEPARATOR, task.getDecimalSeparator()));
+        table.add(new CsvParser.Row(Task.Keys.LINE_SEPARATOR, task.getLineSeparator()));
+        table.add(new CsvParser.Row(Task.Keys.ENCODING, task.getEncoding()));
         table.add(new CsvParser.Row(KEY_STATES_OPEN));
-        for (State state : states) {
+        for (State state : task.getStates()) {
             table.add(new CsvParser.Row(state.getId(), state.getName(), state.getCount(),
                     state.getDescription()));
         }
         table.add(new CsvParser.Row(KEY_STATES_CLOSE));
         table.add(new CsvParser.Row(KEY_TRANSITIONS_OPEN));
-        for (Transition transition : transitions) {
+        for (Transition transition : task.getTransitions()) {
             table.add(new CsvParser.Row(transition.getSourceState(),
                     transition.getSourceCoefficient(), transition.getSourceDelay(),
                     transition.getOperandState(), transition.getOperandCoefficient(),
@@ -73,16 +81,18 @@ public final class TaskParser {
         }
     }
 
-    public static void parse(File file, Collection<State> states,
-            Collection<Transition> transitions, HashMap<String, String> settings) {
+    public static Task parse(File file) {
         CsvParser.Table table = null;
         try {
             table = CsvParser.parse(new FileInputStream(file), SEPARATOR, "UTF-8");
         } catch (FileNotFoundException ignored) {
         }
         if (table == null) {
-            return;
+            return null;
         }
+        Task task = new Task();
+        task.setStates(FXCollections.observableArrayList());
+        task.setTransitions(FXCollections.observableArrayList());
         boolean readingStates = false;
         boolean readingTransitions = false;
         for (CsvParser.Row row : table) {
@@ -98,40 +108,40 @@ public final class TaskParser {
             } else if (Objects.equals(row.cell(0), KEY_TRANSITIONS_CLOSE)) {
                 readingTransitions = false;
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.START_POINT)) {
-                settings.put(Settings.START_POINT, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.START_POINT)) {
+                task.setStartPoint(Integer.valueOf(row.cell(1)));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.STEPS_COUNT)) {
-                settings.put(Settings.STEPS_COUNT, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.STEPS_COUNT)) {
+                task.setStepsCount(Integer.valueOf(row.cell(1)));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.PARALLEL)) {
-                settings.put(Settings.PARALLEL, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.PARALLEL)) {
+                task.setParallel(Boolean.valueOf(row.cell(1)));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.HIGHER_ACCURACY)) {
-                settings.put(Settings.HIGHER_ACCURACY, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.HIGHER_ACCURACY)) {
+                task.setHigherAccuracy(Boolean.valueOf(row.cell(1)));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.ALLOW_NEGATIVE)) {
-                settings.put(Settings.ALLOW_NEGATIVE, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.ALLOW_NEGATIVE)) {
+                task.setAllowNegative(Boolean.valueOf(row.cell(1)));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.COLUMN_SEPARATOR)) {
-                settings.put(Settings.COLUMN_SEPARATOR, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.COLUMN_SEPARATOR)) {
+                task.setColumnSeparator(row.cell(1).charAt(0));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.DECIMAL_SEPARATOR)) {
-                settings.put(Settings.DECIMAL_SEPARATOR, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.DECIMAL_SEPARATOR)) {
+                task.setDecimalSeparator(row.cell(1).charAt(0));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.LINE_SEPARATOR)) {
-                settings.put(Settings.LINE_SEPARATOR, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.LINE_SEPARATOR)) {
+                task.setLineSeparator(row.cell(1));
                 continue;
-            } else if (Objects.equals(row.cell(0), Settings.ENCODING)) {
-                settings.put(Settings.ENCODING, row.cell(1));
+            } else if (Objects.equals(row.cell(0), Task.Keys.ENCODING)) {
+                task.setEncoding(row.cell(1));
                 continue;
             }
             if (readingStates) {
-                states.add(new State(Integer.valueOf(row.cell(0)), row.cell(1),
+                task.getStates().add(new State(Integer.valueOf(row.cell(0)), row.cell(1),
                         Double.valueOf(row.cell(2)), row.cell(3)));
             }
             if (readingTransitions) {
-                transitions.add(new Transition(Integer.valueOf(row.cell(0)),
+                task.getTransitions().add(new Transition(Integer.valueOf(row.cell(0)),
                         Double.valueOf(row.cell(1)), Integer.valueOf(row.cell(2)),
                         Integer.valueOf(row.cell(3)), Double.valueOf(row.cell(4)),
                         Integer.valueOf(row.cell(5)), Integer.valueOf(row.cell(6)),
@@ -139,20 +149,7 @@ public final class TaskParser {
                         Integer.valueOf(row.cell(9)), Integer.valueOf(row.cell(10)), row.cell(11)));
             }
         }
+        return task;
     }
 
-    public static final class Settings {
-        public static final String START_POINT = "StartPoint";
-        public static final String STEPS_COUNT = "StepsCount";
-        public static final String PARALLEL = "Parallel";
-        public static final String HIGHER_ACCURACY = "HigherAccuracy";
-        public static final String ALLOW_NEGATIVE = "AllowNegative";
-        public static final String COLUMN_SEPARATOR = "ColumnSeparator";
-        public static final String DECIMAL_SEPARATOR = "DecimalSeparator";
-        public static final String LINE_SEPARATOR = "LineSeparator";
-        public static final String ENCODING = "Encoding";
-
-        private Settings() {
-        }
-    }
 }

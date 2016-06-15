@@ -17,20 +17,20 @@
  */
 package com.budiyev.population.controller.base;
 
-import com.budiyev.population.model.Calculator;
+import com.budiyev.population.model.Result;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class AbstractExportController extends AbstractController {
-    private ArrayList<Calculator.Results> mResults;
+    private ArrayList<Result> mResults;
     private HashMap<String, String> mTaskSettings;
 
-    public ArrayList<Calculator.Results> getResults() {
+    public ArrayList<Result> getResults() {
         return mResults;
     }
 
-    public final void setResults(ArrayList<Calculator.Results> results) {
+    public final void setResults(ArrayList<Result> results) {
         mResults = results;
     }
 
