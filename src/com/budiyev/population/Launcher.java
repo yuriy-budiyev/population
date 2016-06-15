@@ -22,7 +22,7 @@ public final class Launcher {
     private static volatile boolean sConsoleMode;
 
     public static void main(String[] args) {
-        if (args.length > 1) {
+        if (args.length > 0) {
             sConsoleMode = true;
             Console.launch(args);
         } else {

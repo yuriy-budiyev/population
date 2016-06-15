@@ -91,8 +91,7 @@ public final class Utils {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
                 .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
-                .append(System.lineSeparator()).append("Stack trace:")
-                .append(System.lineSeparator());
+                .append("Stack trace:").append(System.lineSeparator());
         StackTraceElement[] stackTrace = throwable.getStackTrace();
         for (int i = 0; i < stackTrace.length && i < maxStackTraceSize; i++) {
             stringBuilder.append(stackTrace[i]);

@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class Console {
+    private static final String KEY_HELP = "-HELP";
     private static final String KEY_TASK = "-TASK";
     private static final String KEY_TASKS = "-TASKS";
     private static final String KEY_INTERVAL = "-INTERVAL";
@@ -198,19 +199,42 @@ public final class Console {
 
     public static void launch(String[] args) {
         try {
-            System.out.println("Population version " + Launcher.VERSION +
-                               ", Copyright (C) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]." +
-                               System.lineSeparator() +
-                               "This program comes with ABSOLUTELY NO WARRANTY." +
-                               System.lineSeparator() + "This is free software, and you are " +
-                               "welcome to redistribute it under certain conditions.");
+            System.out.println("Population [version " + Launcher.VERSION + "].");
+            System.out.println("Copyright (C) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru].");
+            System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
+            System.out.println("This is free software, and you are welcome to");
+            System.out.println("redistribute it under certain conditions.");
+            System.out.println("To get help, use \"-help\".");
             System.out.println("Initializing...");
             int processors = Runtime.getRuntime().availableProcessors();
             ResourceBundle resources = ResourceBundle
                     .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
             String firstArgument = args[0].toUpperCase();
-            String secondArgument = args[1].toUpperCase();
-            if (Objects.equals(firstArgument, KEY_TASK)) {
+            if (Objects.equals(firstArgument, KEY_HELP)) {
+                printInitialization(0, processors, false);
+                System.out.println("Usage:");
+                System.out.println("-task task_file [result_file]");
+                System.out.println("-tasks [-parallel] task_file1 ... task_fileN");
+                System.out.println("-interval [-parallel] start_task end_task interval_size");
+                System.out.println("License info:");
+                System.out.println(
+                        "This program is free software: you can redistribute it and/or modify");
+                System.out.println(
+                        "it under the terms of the GNU General Public License as published by");
+                System.out.println(
+                        "the Free Software Foundation, either version 3 of the License, or");
+                System.out.println("any later version.");
+                System.out
+                        .println("This program is distributed in the hope that it will be useful,");
+                System.out
+                        .println("but WITHOUT ANY WARRANTY; without even the implied warranty of");
+                System.out.println("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
+                System.out.println("GNU General Public License for more details.");
+                System.out.println(
+                        "You should have received a copy of the GNU General Public License");
+                System.out.println(
+                        "along with this program. If not, see http://www.gnu.org/licenses/.");
+            } else if (Objects.equals(firstArgument, KEY_TASK)) {
                 File inputFile = new File(args[1]);
                 File resultFile;
                 if (args.length < 3) {
@@ -221,6 +245,7 @@ public final class Console {
                 printInitialization(1, processors, false);
                 calculateTask(inputFile, resultFile, resources);
             } else if (Objects.equals(firstArgument, KEY_TASKS)) {
+                String secondArgument = args[1].toUpperCase();
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 File[] tasks = new File[args.length - shift];
@@ -229,6 +254,7 @@ public final class Console {
                 }
                 calculateTasks(tasks, resources, processors, parallel);
             } else if (Objects.equals(firstArgument, KEY_INTERVAL)) {
+                String secondArgument = args[1].toUpperCase();
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 File startFile = new File(args[shift]);
