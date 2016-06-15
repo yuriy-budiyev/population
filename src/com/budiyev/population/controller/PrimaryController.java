@@ -1289,7 +1289,7 @@ public class PrimaryController extends AbstractController {
         Task task = new Task();
         task.setStates(mStates);
         task.setTransitions(mTransitions);
-        Task.writeSettings(task, buildSettings());
+        Task.readSettings(task, buildSettings());
         TaskParser.encode(file, task);
         mTaskFile = file;
         getApplication().setWorkDirectory(file.getParent());

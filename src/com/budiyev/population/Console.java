@@ -152,9 +152,11 @@ public final class Console {
 
     private static List<Double> calculateShifts(Task start, Task end, int size) {
         List<Double> result = new ArrayList<>(start.getTransitions().size());
-        for (int i = 0; i < result.size(); i++) {
-            result.add((end.getTransitions().get(i).getProbability() -
-                        start.getTransitions().get(i).getProbability()) / size);
+        List<Transition> startTransitions = start.getTransitions();
+        List<Transition> endTransitions = end.getTransitions();
+        for (int i = 0; i < startTransitions.size(); i++) {
+            result.add((endTransitions.get(i).getProbability() -
+                        startTransitions.get(i).getProbability()) / size);
         }
         return result;
     }
