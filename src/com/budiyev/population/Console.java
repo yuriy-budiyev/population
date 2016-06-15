@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class Console {
+    private static final String KEY_TASK = "-TASK";
     private static final String KEY_TASKS = "-TASKS";
     private static final String KEY_INTERVAL = "-INTERVAL";
     private static final String KEY_PARALLEL = "-PARALLEL";
@@ -66,7 +67,7 @@ public final class Console {
         System.out.println(stringBuilder.toString());
     }
 
-    private static void calculateTask(File inputFile, File outputFile,
+    private static void calculateTask(File inputFile, File resultFile,
             ResourceBundle resources) throws IOException {
         System.out.println("Calculating: " + inputFile.getName());
         Task task = TaskParser.parse(inputFile);
@@ -75,9 +76,9 @@ public final class Console {
             return;
         }
         Result result = Calculator.calculateSync(task, true, false);
-        Utils.exportResults(outputFile, result, task.getColumnSeparator(),
+        Utils.exportResults(resultFile, result, task.getColumnSeparator(),
                 task.getDecimalSeparator(), task.getLineSeparator(), task.getEncoding(), resources);
-        System.out.println("Done: " + outputFile.getName());
+        System.out.println("Done: " + resultFile.getName());
     }
 
     private static void calculateTask(Task task, ResourceBundle resources) throws IOException {
@@ -209,7 +210,17 @@ public final class Console {
                     .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
             String firstArgument = args[0].toUpperCase();
             String secondArgument = args[1].toUpperCase();
-            if (Objects.equals(firstArgument, KEY_TASKS)) {
+            if (Objects.equals(firstArgument, KEY_TASK)) {
+                File inputFile = new File(args[1]);
+                File resultFile;
+                if (args.length < 3) {
+                    resultFile = buildResultFile(inputFile);
+                } else {
+                    resultFile = new File(args[2]);
+                }
+                printInitialization(1, processors, false);
+                calculateTask(inputFile, resultFile, resources);
+            } else if (Objects.equals(firstArgument, KEY_TASKS)) {
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 File[] tasks = new File[args.length - shift];
@@ -224,11 +235,6 @@ public final class Console {
                 File endFile = new File(args[shift + 1]);
                 int size = Integer.valueOf(args[shift + 2]);
                 calculateTasks(startFile, endFile, size, resources, processors, parallel);
-            } else if (args.length == 2) {
-                File inputFile = new File(args[0]);
-                File outputFile = new File(args[1]);
-                printInitialization(1, processors, false);
-                calculateTask(inputFile, outputFile, resources);
             } else {
                 System.out.println("Invalid arguments.");
             }
