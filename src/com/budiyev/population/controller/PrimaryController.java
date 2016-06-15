@@ -115,7 +115,7 @@ public class PrimaryController extends AbstractController {
     public TableColumn<Transition, Number> mTransitionsTableTypeColumn;
     public TableColumn<Transition, Number> mTransitionsTableModeColumn;
     public TableColumn<Transition, String> mTransitionsTableDescriptionColumn;
-    public TableView<ChartSeries> mChartSettingsTable;
+    public TableView<ChartSeries> mResultsChartSettingsTable;
     public TableColumn<ChartSeries, Boolean> mChartSettingsTableVisibilityColumn;
     public TableColumn<ChartSeries, String> mChartSettingsTableNameColumn;
     public TableColumn<ChartSeries, Number> mChartSettingsTableColorColumn;
@@ -123,6 +123,7 @@ public class PrimaryController extends AbstractController {
     public TableColumn<ChartSeries, Number> mChartSettingsTableThicknessColumn;
     public Label mStartPointLabel;
     public Label mStepsCountLabel;
+    public Label mResultsTablePrecisionLabel;
     public TextField mStepsCountField;
     public TextField mStartPointField;
     public TextField mResultsTablePrecisionField;
@@ -420,8 +421,8 @@ public class PrimaryController extends AbstractController {
                 refreshResultsChart();
             }
         });
-        mChartSettingsTable.setPlaceholder(new Rectangle());
-        mChartSettingsTable.setItems(mResultsChartData);
+        mResultsChartSettingsTable.setPlaceholder(new Rectangle());
+        mResultsChartSettingsTable.setItems(mResultsChartData);
     }
 
     private void initializeResultsChart() {
@@ -1037,6 +1038,38 @@ public class PrimaryController extends AbstractController {
         }
     }
 
+    private void setControlsDisable(boolean value) {
+        mStatesTable.setDisable(value);
+        mTransitionsTable.setDisable(value);
+        mAddStateButton.setDisable(value);
+        mRemoveStateButton.setDisable(value);
+        mMoveStateUpButton.setDisable(value);
+        mMoveStateDownButton.setDisable(value);
+        mAddTransitionButton.setDisable(value);
+        mRemoveTransitionButton.setDisable(value);
+        mMoveTransitionUpButton.setDisable(value);
+        mMoveTransitionDownButton.setDisable(value);
+        mStartPointLabel.setDisable(value);
+        mStartPointField.setDisable(value);
+        mStepsCountLabel.setDisable(value);
+        mStepsCountField.setDisable(value);
+        mCalculateButton.setDisable(value);
+        mClearResultsChartButton.setDisable(value);
+        mClearResultsTableButton.setDisable(value);
+        mExportResultsButton.setDisable(value);
+        mParallel.setDisable(value);
+        mHigherAccuracy.setDisable(value);
+        mAllowNegativeNumbers.setDisable(value);
+        mResultsOnChart.setDisable(value);
+        mResultsInTable.setDisable(value);
+        mResultsChart.setDisable(value);
+        mResultsChartSettingsTable.setDisable(value);
+        mResultsTable.setDisable(value);
+        mResultsTablePrecisionLabel.setDisable(value);
+        mResultsTablePrecisionField.setDisable(value);
+        mApplyResultsTablePrecisionButton.setDisable(value);
+    }
+
     @Override
     public void initialize() {
         Utils.setDefaultTaskSettings(mTaskSettings);
@@ -1077,29 +1110,7 @@ public class PrimaryController extends AbstractController {
         }
         mCalculating = true;
         stepsCount++;
-        mStatesTable.setDisable(true);
-        mTransitionsTable.setDisable(true);
-        mAddStateButton.setDisable(true);
-        mRemoveStateButton.setDisable(true);
-        mMoveStateUpButton.setDisable(true);
-        mMoveStateDownButton.setDisable(true);
-        mAddTransitionButton.setDisable(true);
-        mRemoveTransitionButton.setDisable(true);
-        mMoveTransitionUpButton.setDisable(true);
-        mMoveTransitionDownButton.setDisable(true);
-        mStartPointLabel.setDisable(true);
-        mStartPointField.setDisable(true);
-        mStepsCountLabel.setDisable(true);
-        mStepsCountField.setDisable(true);
-        mCalculateButton.setDisable(true);
-        mClearResultsChartButton.setDisable(true);
-        mClearResultsTableButton.setDisable(true);
-        mExportResultsButton.setDisable(true);
-        mParallel.setDisable(true);
-        mHigherAccuracy.setDisable(true);
-        mAllowNegativeNumbers.setDisable(true);
-        mResultsOnChart.setDisable(true);
-        mResultsInTable.setDisable(true);
+        setControlsDisable(true);
         mCalculationProgressBar.setProgress(0);
         mCalculationProgressBar.setVisible(true);
         Task task = new Task();
@@ -1114,29 +1125,7 @@ public class PrimaryController extends AbstractController {
                 results -> Platform.runLater(() -> {
                     publishResults(results);
                     mCalculationProgressBar.setVisible(false);
-                    mStatesTable.setDisable(false);
-                    mTransitionsTable.setDisable(false);
-                    mAddStateButton.setDisable(false);
-                    mRemoveStateButton.setDisable(false);
-                    mMoveStateUpButton.setDisable(false);
-                    mMoveStateDownButton.setDisable(false);
-                    mAddTransitionButton.setDisable(false);
-                    mRemoveTransitionButton.setDisable(false);
-                    mMoveTransitionUpButton.setDisable(false);
-                    mMoveTransitionDownButton.setDisable(false);
-                    mStartPointLabel.setDisable(false);
-                    mStartPointField.setDisable(false);
-                    mStepsCountLabel.setDisable(false);
-                    mStepsCountField.setDisable(false);
-                    mCalculateButton.setDisable(false);
-                    mClearResultsChartButton.setDisable(false);
-                    mClearResultsTableButton.setDisable(false);
-                    mExportResultsButton.setDisable(false);
-                    mParallel.setDisable(false);
-                    mHigherAccuracy.setDisable(false);
-                    mAllowNegativeNumbers.setDisable(false);
-                    mResultsOnChart.setDisable(false);
-                    mResultsInTable.setDisable(false);
+                    setControlsDisable(false);
                     mCalculating = false;
                 }),
                 progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)));

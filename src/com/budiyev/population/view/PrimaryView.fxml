@@ -161,7 +161,7 @@
                                             <content>
                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                     <children>
-                                                        <TableView fx:id="mChartSettingsTable" editable="true" layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0">
+                                                        <TableView fx:id="mResultsChartSettingsTable" editable="true" layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="49.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0">
                                                             <columns>
                                                                 <TableColumn fx:id="mChartSettingsTableVisibilityColumn" prefWidth="100.0" sortable="false" text="%visibility" />
                                                                 <TableColumn fx:id="mChartSettingsTableNameColumn" prefWidth="150.0" sortable="false" text="%state_name" />
@@ -188,8 +188,8 @@
                                                             <children>
                                                                 <Button fx:id="mClearResultsTableButton" mnemonicParsing="false" onAction="#clearResultsTable" text="%clear" />
                                                                 <Button fx:id="mExportResultsButton" mnemonicParsing="false" onAction="#exportResults" text="%export" />
-                                                                <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                                                                <Label text="%precision" />
+                                                                <Pane HBox.hgrow="ALWAYS" />
+                                                                <Label fx:id="mResultsTablePrecisionLabel" text="%precision" />
                                                                 <TextField fx:id="mResultsTablePrecisionField" onAction="#applyResultsTablePrecision" text="5" />
                                                                 <Button fx:id="mApplyResultsTablePrecisionButton" mnemonicParsing="false" onAction="#applyResultsTablePrecision" text="%apply" />
                                                             </children>
