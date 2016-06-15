@@ -24,10 +24,10 @@ public final class Launcher {
     public static void main(String[] args) {
         if (args.length > 0) {
             sConsoleMode = true;
-            Console.launch(args);
+            Console.main(args);
         } else {
             sConsoleMode = false;
-            PopulationApplication.launch(PopulationApplication.class, args);
+            PopulationApplication.main(args);
         }
     }
 

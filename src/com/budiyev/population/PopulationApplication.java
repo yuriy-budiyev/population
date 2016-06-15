@@ -276,6 +276,10 @@ public final class PopulationApplication extends Application {
         return mResources;
     }
 
+    public static void main(String[] args) {
+        launch(PopulationApplication.class, args);
+    }
+
     private static final class Settings {
         public static final String FILE = ".population";
         public static final String WORK_DIRECTORY = "WorkDirectory";

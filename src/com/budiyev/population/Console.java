@@ -197,7 +197,7 @@ public final class Console {
         System.out.println("Done all.");
     }
 
-    public static void launch(String[] args) {
+    public static void main(String[] args) {
         try {
             System.out.println("Population [version " + Launcher.VERSION + "].");
             System.out.println("Copyright (C) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru].");
