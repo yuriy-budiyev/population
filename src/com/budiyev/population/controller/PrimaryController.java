@@ -1011,7 +1011,7 @@ public class PrimaryController extends AbstractController {
         selectResultsTableRowByStep(selectedStep);
     }
 
-    private void publishResults(Result result) {
+    private void publishResult(Result result) {
         if (mResultsOnChart.isSelected()) {
             int colorsCount = ChartSeries.Color.ARRAY.length - 8;
             int dashesCount = ChartSeries.Dash.ARRAY.length;
@@ -1122,8 +1122,8 @@ public class PrimaryController extends AbstractController {
         task.setAllowNegative(mAllowNegativeNumbers.isSelected());
         task.setParallel(mParallel.isSelected());
         Calculator.calculateAsync(task, mResultsInTable.isSelected(), mResultsOnChart.isSelected(),
-                results -> Platform.runLater(() -> {
-                    publishResults(results);
+                result -> Platform.runLater(() -> {
+                    publishResult(result);
                     mCalculationProgressBar.setVisible(false);
                     setControlsDisable(false);
                     mCalculating = false;
