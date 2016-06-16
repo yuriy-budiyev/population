@@ -83,12 +83,13 @@ public final class Console {
     }
 
     private static void calculateTask(Task task, ResourceBundle resources) throws IOException {
-        System.out.println("Calculating: " + task.getId());
+        int taskNumber = task.getId() + 1;
+        System.out.println("Calculating: " + taskNumber);
         Result result = Calculator.calculateSync(task, true, false);
         Utils.exportResults(buildResultFile(task.getName(), task.getId()), result,
                 task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
                 task.getEncoding(), resources);
-        System.out.println("Done: " + task.getId() + 1);
+        System.out.println("Done: " + taskNumber);
     }
 
     private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
