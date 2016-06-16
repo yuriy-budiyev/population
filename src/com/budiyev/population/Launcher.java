@@ -18,7 +18,7 @@
 package com.budiyev.population;
 
 public final class Launcher {
-    public static final String VERSION = "3.0.2";
+    public static final String VERSION = "3.0.3";
     private static volatile boolean sConsoleMode;
 
     public static void main(String[] args) {
