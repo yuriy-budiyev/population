@@ -504,8 +504,10 @@ public class PrimaryController extends AbstractController {
             double xNUpperBound = Math.ceil(xNLowerBound + zoomAreaWidth);
             double yNLowerBound = Math.floor(yLowerBound + zoomAreaY);
             double yNUpperBound = Math.ceil(yNLowerBound + zoomAreaHeight);
-            xNLowerBound = roundStart(xNLowerBound, zoomAreaWidth);
-            yNLowerBound = roundStart(yNLowerBound, zoomAreaHeight);
+            xNLowerBound = correctLowerBound(xNLowerBound, zoomAreaWidth);
+            xNUpperBound = correctUpperBound(xNUpperBound, zoomAreaWidth);
+            yNLowerBound = correctLowerBound(yNLowerBound, zoomAreaHeight);
+            yNUpperBound = correctUpperBound(yNUpperBound, zoomAreaHeight);
             zoomedBounds[0] = (int) xNLowerBound - 1;
             zoomedBounds[1] = (int) xNUpperBound + 1;
             setResultsChartBounds(zoomedBounds[0], zoomedBounds[1]);
@@ -537,15 +539,27 @@ public class PrimaryController extends AbstractController {
         return (int) (Math.ceil(mResultsChart.getWidth()));
     }
 
-    private double roundStart(double start, double size) {
+    private double correctLowerBound(double lower, double size) {
         if (size > 100) {
-            return start - (start % 10);
+            return lower - (lower % 10);
         } else if (size > 50) {
-            return start - (start % 5);
+            return lower - (lower % 5);
         } else if (size > 10) {
-            return start - (start % 2);
+            return lower - (lower % 2);
         } else {
-            return start;
+            return lower;
+        }
+    }
+
+    private double correctUpperBound(double upper, double size) {
+        if (size > 100) {
+            return upper + 10 - (upper % 10);
+        } else if (size > 50) {
+            return upper + 5 - (upper % 5);
+        } else if (size > 10) {
+            return upper + 2 - (upper % 2);
+        } else {
+            return upper;
         }
     }
 
