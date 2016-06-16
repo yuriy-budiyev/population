@@ -91,6 +91,7 @@ public final class TaskParser {
             return null;
         }
         Task task = new Task();
+        task.setName(file.getAbsolutePath());
         task.setStates(FXCollections.observableArrayList());
         task.setTransitions(FXCollections.observableArrayList());
         boolean readingStates = false;

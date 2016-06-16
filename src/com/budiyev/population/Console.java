@@ -88,7 +88,7 @@ public final class Console {
         Utils.exportResults(buildResultFile(task.getName(), task.getId()), result,
                 task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
                 task.getEncoding(), resources);
-        System.out.println("Done: " + task.getId());
+        System.out.println("Done: " + task.getId() + 1);
     }
 
     private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
@@ -174,9 +174,7 @@ public final class Console {
         }
         startTask.setId(0);
         endTask.setId(size - 1);
-        String startFileAbsolutePath = startFile.getAbsolutePath();
-        startTask.setName(startFileAbsolutePath);
-        endTask.setName(startFileAbsolutePath);
+        endTask.setName(startTask.getName());
         List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
             ExecutorService executor =
