@@ -83,30 +83,31 @@ public final class Console {
     }
 
     private static void calculateTask(Task task, ResourceBundle resources) throws IOException {
-        int taskNumber = task.getId() + 1;
-        System.out.println("Calculating: " + taskNumber);
+        int taskId = task.getId();
+        System.out.println("Calculating: " + taskId);
         Result result = Calculator.calculateSync(task, true, false);
-        Utils.exportResults(buildResultFile(task.getName(), task.getId()), result,
+        Utils.exportResults(buildResultFile(task.getName(), taskId), result,
                 task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
                 task.getEncoding(), resources);
-        System.out.println("Done: " + taskNumber);
+        System.out.println("Done: " + taskId);
     }
 
-    private static void calculateTasks(File[] tasks, ResourceBundle resources, int processors,
+    private static void calculateTasks(List<File> tasks, ResourceBundle resources, int processors,
             boolean parallel) throws ExecutionException, InterruptedException, IOException {
+        int tasksCount = tasks.size();
         if (parallel) {
             ExecutorService executor =
                     Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
-            Future<?>[] futures = new Future<?>[tasks.length];
-            printInitialization(tasks.length, processors, true);
-            for (int i = 0; i < tasks.length; i++) {
-                futures[i] = executor.submit(new CalculateFileAction(tasks[i], resources));
+            List<Future<?>> futures = new ArrayList<>(tasksCount);
+            printInitialization(tasksCount, processors, true);
+            for (File task : tasks) {
+                futures.add(executor.submit(new CalculateFileAction(task, resources)));
             }
             for (Future<?> future : futures) {
                 future.get();
             }
         } else {
-            printInitialization(tasks.length, processors, false);
+            printInitialization(tasksCount, processors, false);
             for (File task : tasks) {
                 calculateTask(task, buildResultFile(task), resources);
             }
@@ -123,7 +124,7 @@ public final class Console {
             return end;
         }
         Task result = new Task();
-        result.setId(position);
+        result.setId(position + 1);
         result.setName(start.getName());
         result.setStates(start.getStates());
         List<Transition> startTransitions = start.getTransitions();
@@ -173,17 +174,17 @@ public final class Console {
             System.out.println("Can't perform calculations. Invalid or missing data.");
             return;
         }
-        startTask.setId(0);
-        endTask.setId(size - 1);
+        startTask.setId(1);
+        endTask.setId(size);
         endTask.setName(startTask.getName());
         List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
             ExecutorService executor =
                     Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
-            Future<?>[] futures = new Future<?>[size];
+            List<Future<?>> futures = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                futures[i] = executor.submit(
-                        new CalculateTaskAction(i, size, startTask, endTask, shifts, resources));
+                futures.add(executor.submit(
+                        new CalculateTaskAction(i, size, startTask, endTask, shifts, resources)));
             }
             for (Future<?> future : futures) {
                 future.get();
@@ -247,9 +248,9 @@ public final class Console {
                 String secondArgument = args[1].toUpperCase();
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
-                File[] tasks = new File[args.length - shift];
+                List<File> tasks = new ArrayList<>(args.length - shift);
                 for (int i = shift; i < args.length; i++) {
-                    tasks[i - shift] = new File(args[i]);
+                    tasks.add(new File(args[i]));
                 }
                 calculateTasks(tasks, resources, processors, parallel);
             } else if (Objects.equals(firstArgument, KEY_INTERVAL)) {
