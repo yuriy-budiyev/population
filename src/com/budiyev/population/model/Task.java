@@ -142,19 +142,13 @@ public class Task {
         mEncoding = encoding;
     }
 
+    /**
+     * Считать настройки из задачи
+     *
+     * @param task     задача
+     * @param settings настройки
+     */
     public static void readSettings(Task task, Map<String, String> settings) {
-        task.setStartPoint(Integer.valueOf(settings.get(Keys.START_POINT)));
-        task.setStepsCount(Integer.valueOf(settings.get(Keys.STEPS_COUNT)));
-        task.setParallel(Boolean.valueOf(settings.get(Keys.PARALLEL)));
-        task.setHigherAccuracy(Boolean.valueOf(settings.get(Keys.HIGHER_ACCURACY)));
-        task.setAllowNegative(Boolean.valueOf(settings.get(Keys.ALLOW_NEGATIVE)));
-        task.setColumnSeparator(settings.get(Keys.COLUMN_SEPARATOR).charAt(0));
-        task.setDecimalSeparator(settings.get(Keys.DECIMAL_SEPARATOR).charAt(0));
-        task.setLineSeparator(settings.get(Keys.LINE_SEPARATOR));
-        task.setEncoding(settings.get(Keys.ENCODING));
-    }
-
-    public static void writeSettings(Task task, Map<String, String> settings) {
         settings.put(Keys.START_POINT, String.valueOf(task.getStartPoint()));
         settings.put(Keys.STEPS_COUNT, String.valueOf(task.getStepsCount()));
         settings.put(Keys.PARALLEL, String.valueOf(task.isParallel()));
@@ -164,6 +158,24 @@ public class Task {
         settings.put(Keys.DECIMAL_SEPARATOR, String.valueOf(task.getDecimalSeparator()));
         settings.put(Keys.LINE_SEPARATOR, task.getLineSeparator());
         settings.put(Keys.ENCODING, task.getEncoding());
+    }
+
+    /**
+     * Записать настройки в задачу
+     *
+     * @param task     задача
+     * @param settings настройки
+     */
+    public static void writeSettings(Task task, Map<String, String> settings) {
+        task.setStartPoint(Integer.valueOf(settings.get(Keys.START_POINT)));
+        task.setStepsCount(Integer.valueOf(settings.get(Keys.STEPS_COUNT)));
+        task.setParallel(Boolean.valueOf(settings.get(Keys.PARALLEL)));
+        task.setHigherAccuracy(Boolean.valueOf(settings.get(Keys.HIGHER_ACCURACY)));
+        task.setAllowNegative(Boolean.valueOf(settings.get(Keys.ALLOW_NEGATIVE)));
+        task.setColumnSeparator(settings.get(Keys.COLUMN_SEPARATOR).charAt(0));
+        task.setDecimalSeparator(settings.get(Keys.DECIMAL_SEPARATOR).charAt(0));
+        task.setLineSeparator(settings.get(Keys.LINE_SEPARATOR));
+        task.setEncoding(settings.get(Keys.ENCODING));
     }
 
     public static final class Keys {

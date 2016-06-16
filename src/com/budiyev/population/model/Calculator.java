@@ -45,13 +45,6 @@ public class Calculator {
     private final boolean mPrepareResultsTableData; // Подготовить результат в табличном виде
     private final boolean mPrepareResultsChartData; // Подготовить результат в графическом виде
     private double mProgress; // Прогресс вычислений
-    /*private final int mTask.getStepsCount(); // Количество шагов
-    private final int mStartPoint; // Начало отсчёта
-    private final boolean mAllowNegative; // Разрешить отрицательные значения
-    private List<State> mInitialStates;
-    private List<Transition> mTask.getTransitions();
-    private final boolean mHigherAccuracy; // Повышенная точность
-    private final boolean mTask.isParallel(); // Параллельно*/
 
     /**
      * Вычислитель
