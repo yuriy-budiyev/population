@@ -504,6 +504,8 @@ public class PrimaryController extends AbstractController {
             double xNUpperBound = Math.ceil(xNLowerBound + zoomAreaWidth);
             double yNLowerBound = Math.floor(yLowerBound + zoomAreaY);
             double yNUpperBound = Math.ceil(yNLowerBound + zoomAreaHeight);
+            xNLowerBound = roundStart(xNLowerBound, zoomAreaWidth);
+            yNLowerBound = roundStart(yNLowerBound, zoomAreaHeight);
             zoomedBounds[0] = (int) xNLowerBound - 1;
             zoomedBounds[1] = (int) xNUpperBound + 1;
             setResultsChartBounds(zoomedBounds[0], zoomedBounds[1]);
@@ -533,6 +535,18 @@ public class PrimaryController extends AbstractController {
 
     private int getResultsChartWidth() {
         return (int) (Math.ceil(mResultsChart.getWidth()));
+    }
+
+    private double roundStart(double start, double size) {
+        if (size > 100) {
+            return start - (start % 10);
+        } else if (size > 50) {
+            return start - (start % 5);
+        } else if (size > 10) {
+            return start - (start % 2);
+        } else {
+            return start;
+        }
     }
 
     private Callback<TableColumn<Transition, Number>, TableCell<Transition, Number>> stateCell() {
@@ -872,7 +886,8 @@ public class PrimaryController extends AbstractController {
     }
 
     private void updateAxisTickUnit(NumberAxis axis) {
-        double tick = Math.ceil(Math.abs(axis.getUpperBound() - axis.getLowerBound()) / 10);
+        double size = Math.abs(axis.getUpperBound() - axis.getLowerBound());
+        double tick = Math.ceil(size / 10);
         if (tick > 100) {
             tick = tick - (tick % 100);
         } else if (tick > 10) {
