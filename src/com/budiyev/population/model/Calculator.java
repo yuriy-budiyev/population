@@ -21,6 +21,7 @@ import com.budiyev.population.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -241,11 +242,11 @@ public class Calculator {
                 totalCount += count;
             }
             if (mTask.isParallel()) {
-                Future<?>[] futures = new Future<?>[mTask.getTransitions().size()];
-                for (int i = 0; i < mTask.getTransitions().size(); i++) {
-                    futures[i] = mExecutor
+                List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
+                for (Transition transition : mTask.getTransitions()) {
+                    futures.add(mExecutor
                             .submit(new TransitionActionNormalAccuracy(step, totalCount,
-                                    mTask.getTransitions().get(i)));
+                                    transition)));
                 }
                 for (Future<?> future : futures) {
                     try {
@@ -278,11 +279,11 @@ public class Calculator {
                 totalCount = totalCount.add(decimalValue(count));
             }
             if (mTask.isParallel()) {
-                Future<?>[] futures = new Future<?>[mTask.getTransitions().size()];
-                for (int i = 0; i < mTask.getTransitions().size(); i++) {
-                    futures[i] = mExecutor
+                List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
+                for (Transition transition : mTask.getTransitions()) {
+                    futures.add(mExecutor
                             .submit(new TransitionActionHigherAccuracy(step, totalCount,
-                                    mTask.getTransitions().get(i)));
+                                    transition)));
                 }
                 for (Future<?> future : futures) {
                     try {
