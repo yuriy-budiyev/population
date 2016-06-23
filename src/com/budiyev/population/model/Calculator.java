@@ -24,6 +24,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Calculator {
@@ -38,6 +40,7 @@ public class Calculator {
     private final double[][] mStates; // Состояния
     private final int[] mStateIds; // Идентификаторы состояний
     private final int mStatesCount; // Количество состояний
+    private final ExecutorService mExecutor; // Исполнитель (для параллельного режима)
     private final ResultCallback mResultCallback; // Обратный вызов результата
     private final ProgressCallback mProgressCallback; // Обратный вызов прогресса вычислений
     private final boolean mPrepareResultsTableData; // Подготовить результат в табличном виде
@@ -68,6 +71,12 @@ public class Calculator {
             State state = states.get(i);
             mStates[0][i] = state.getCount();
             mStateIds[i] = state.getId();
+        }
+        if (mTask.isParallel()) {
+            mExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+                    Utils.THREAD_FACTORY);
+        } else {
+            mExecutor = null;
         }
     }
 
@@ -235,8 +244,9 @@ public class Calculator {
             if (mTask.isParallel()) {
                 List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
                 for (Transition transition : mTask.getTransitions()) {
-                    futures.add(Utils.runAsync(
-                            new TransitionActionNormalAccuracy(step, totalCount, transition)));
+                    futures.add(mExecutor
+                            .submit(new TransitionActionNormalAccuracy(step, totalCount,
+                                    transition)));
                 }
                 for (Future<?> future : futures) {
                     try {
@@ -271,8 +281,9 @@ public class Calculator {
             if (mTask.isParallel()) {
                 List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
                 for (Transition transition : mTask.getTransitions()) {
-                    futures.add(Utils.runAsync(
-                            new TransitionActionHigherAccuracy(step, totalCount, transition)));
+                    futures.add(mExecutor
+                            .submit(new TransitionActionHigherAccuracy(step, totalCount,
+                                    transition)));
                 }
                 for (Future<?> future : futures) {
                     try {

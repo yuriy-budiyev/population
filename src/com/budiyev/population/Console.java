@@ -33,6 +33,8 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class Console {
@@ -94,10 +96,12 @@ public final class Console {
             boolean parallel) throws ExecutionException, InterruptedException, IOException {
         int tasksCount = tasks.size();
         if (parallel) {
+            ExecutorService executor =
+                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(tasksCount);
             printInitialization(tasksCount, processors, true);
             for (File task : tasks) {
-                futures.add(Utils.callAsync(new CalculateFileAction(task, resources)));
+                futures.add(executor.submit(new CalculateFileAction(task, resources)));
             }
             for (Future<?> future : futures) {
                 future.get();
@@ -175,9 +179,11 @@ public final class Console {
         endTask.setName(startTask.getName());
         List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
+            ExecutorService executor =
+                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                futures.add(Utils.callAsync(
+                futures.add(executor.submit(
                         new CalculateTaskAction(i, size, startTask, endTask, shifts, resources)));
             }
             for (Future<?> future : futures) {
