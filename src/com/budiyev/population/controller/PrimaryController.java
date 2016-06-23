@@ -39,10 +39,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -446,15 +443,13 @@ public class PrimaryController extends AbstractController {
             zoomRect.setWidth(Math.abs(x - mouseAnchor.get().getX()));
             zoomRect.setHeight(Math.abs(y - mouseAnchor.get().getY()));
         });
-        final ScheduledExecutorService executor =
-                Executors.newSingleThreadScheduledExecutor(Utils.THREAD_FACTORY);
         final int[] zoomedBounds = new int[2];
         final ScheduledFuture<?>[] refreshChart = new ScheduledFuture<?>[1];
         getStage().widthProperty().addListener((observable, oldValue, newValue) -> {
             if (refreshChart[0] != null) {
                 refreshChart[0].cancel(false);
             }
-            refreshChart[0] = executor.schedule(() -> {
+            refreshChart[0] = Utils.runDelayed(() -> {
                 if (mResultsChartData.size() == 0) {
                     return;
                 }
@@ -464,7 +459,7 @@ public class PrimaryController extends AbstractController {
                     resetResultsChartBounds();
                 }
                 Platform.runLater(PrimaryController.this::refreshResultsChart);
-            }, 500, TimeUnit.MILLISECONDS);
+            }, 500);
         });
         NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
         NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();

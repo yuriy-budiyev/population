@@ -36,7 +36,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -65,7 +72,7 @@ public final class Utils {
                 }
             };
 
-    public static final ThreadFactory THREAD_FACTORY = runnable -> {
+    private static final ThreadFactory THREAD_FACTORY = runnable -> {
         Thread thread = new Thread(runnable, "Population background thread");
         thread.setUncaughtExceptionHandler(UNCAUGHT_EXCEPTION_HANDLER);
         if (!thread.isDaemon()) {
@@ -76,6 +83,12 @@ public final class Utils {
         }
         return thread;
     };
+
+    private static final ExecutorService EXECUTOR = Executors
+            .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), THREAD_FACTORY);
+
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR =
+            Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
 
     private Utils() {
     }
@@ -104,8 +117,20 @@ public final class Utils {
         return stringBuilder.toString();
     }
 
-    public static void runAsync(Runnable runnable) {
-        THREAD_FACTORY.newThread(runnable).start();
+    public static Future<?> runAsync(Runnable runnable) {
+        return EXECUTOR.submit(runnable);
+    }
+
+    public static <T> Future<T> callAsync(Callable<T> callable) {
+        return EXECUTOR.submit(callable);
+    }
+
+    public static ScheduledFuture<?> runDelayed(Runnable runnable, long delay) {
+        return SCHEDULED_EXECUTOR.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+    }
+
+    public static <T> ScheduledFuture<T> callDelayed(Callable<T> callable, long delay) {
+        return SCHEDULED_EXECUTOR.schedule(callable, delay, TimeUnit.MILLISECONDS);
     }
 
     public static String createRepeatingString(char character, int count) {
