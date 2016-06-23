@@ -104,7 +104,8 @@ public final class PopulationApplication extends Application {
         try {
             settingsFile.createNewFile();
             CsvParser.encode(settingsTable, new FileOutputStream(settingsFile), ',', "UTF-8");
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

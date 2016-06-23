@@ -155,7 +155,8 @@ public final class CsvParser {
                     }
                 }
                 mRows.add(new Row(row.toString(), separator));
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 

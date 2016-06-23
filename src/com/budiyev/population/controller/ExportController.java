@@ -187,7 +187,8 @@ public class ExportController extends AbstractExportController {
                     mDecimalSeparatorChoiceBox.getSelectionModel().getSelectedItem().getKey(),
                     mLineSeparatorChoiceBox.getSelectionModel().getSelectedItem().getKey(),
                     mEncodingChoiceBox.getSelectionModel().getSelectedItem(), getResources());
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         close();
     }

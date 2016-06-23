@@ -77,7 +77,8 @@ public final class TaskParser {
             }
             file.createNewFile();
             CsvParser.encode(table, new FileOutputStream(file), SEPARATOR, "UTF-8");
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
