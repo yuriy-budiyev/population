@@ -36,6 +36,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 import javafx.application.Platform;
@@ -77,6 +81,8 @@ public final class Utils {
         return thread;
     };
 
+    private static ExecutorService ASYNC_EXECUTOR = Executors.newCachedThreadPool(THREAD_FACTORY);
+
     private Utils() {
     }
 
@@ -104,8 +110,12 @@ public final class Utils {
         return stringBuilder.toString();
     }
 
-    public static void runAsync(Runnable runnable) {
-        THREAD_FACTORY.newThread(runnable).start();
+    public static Future<?> runAsync(Runnable runnable) {
+        return ASYNC_EXECUTOR.submit(runnable);
+    }
+
+    public static <T> Future<T> callAsync(Callable<T> callable) {
+        return ASYNC_EXECUTOR.submit(callable);
     }
 
     public static String createRepeatingString(char character, int count) {
