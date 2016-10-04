@@ -156,8 +156,8 @@ public final class Utils {
     public static void exportResults(ArrayList<Result> results, File file, char columnSeparator,
             char decimalSeparator, String lineSeparator, String encoding,
             ResourceBundle resources) throws IOException {
-        if (results == null || file == null ||
-            lineSeparator == null || encoding == null || resources == null) {
+        if (results == null || file == null || lineSeparator == null || encoding == null ||
+                resources == null) {
             return;
         }
         int start = Integer.MAX_VALUE;

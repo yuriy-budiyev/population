@@ -494,9 +494,8 @@ public class PrimaryController extends AbstractController {
             }
             double zoomAreaX =
                     applyScale(xScale, zoomRect.getX() - yAxisInScene.getX() - yAxis.getWidth());
-            double zoomAreaY =
-                    applyScale(yScale, xAxisInScene.getY() - zoomRect.getY() - zoomRectHeight -
-                                       chartInScene.getY());
+            double zoomAreaY = applyScale(yScale,
+                    xAxisInScene.getY() - zoomRect.getY() - zoomRectHeight - chartInScene.getY());
             double xLowerBound = xAxis.getLowerBound();
             double yLowerBound = yAxis.getLowerBound();
             yAxis.setAutoRanging(false);
@@ -1134,7 +1133,7 @@ public class PrimaryController extends AbstractController {
             return;
         }
         if (mStates.size() == 0 || mTransitions.size() == 0 || stepsCount < 1 ||
-            stepsCount == Integer.MAX_VALUE) {
+                stepsCount == Integer.MAX_VALUE) {
             return;
         }
         mCalculating = true;

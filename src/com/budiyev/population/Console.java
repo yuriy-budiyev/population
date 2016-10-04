@@ -160,7 +160,7 @@ public final class Console {
         List<Transition> endTransitions = end.getTransitions();
         for (int i = 0; i < startTransitions.size(); i++) {
             result.add((endTransitions.get(i).getProbability() -
-                        startTransitions.get(i).getProbability()) / size);
+                    startTransitions.get(i).getProbability()) / size);
         }
         return result;
     }
@@ -170,7 +170,7 @@ public final class Console {
         Task startTask = TaskParser.parse(startFile);
         Task endTask = TaskParser.parse(endFile);
         if (startTask == null || endTask == null ||
-            startTask.getTransitions().size() != endTask.getTransitions().size()) {
+                startTask.getTransitions().size() != endTask.getTransitions().size()) {
             System.out.println("Can't perform calculations. Invalid or missing data.");
             return;
         }

@@ -44,33 +44,33 @@ public final class TaskParser {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void encode(File file, Task task) {
-        CsvParser.Table table = new CsvParser.Table();
-        table.add(new CsvParser.Row(FORMAT_NAME, FORMAT_VERSION));
-        table.add(new CsvParser.Row(Task.Keys.START_POINT, task.getStartPoint()));
-        table.add(new CsvParser.Row(Task.Keys.STEPS_COUNT, task.getStepsCount()));
-        table.add(new CsvParser.Row(Task.Keys.PARALLEL, task.isParallel()));
-        table.add(new CsvParser.Row(Task.Keys.HIGHER_ACCURACY, task.isHigherAccuracy()));
-        table.add(new CsvParser.Row(Task.Keys.ALLOW_NEGATIVE, task.isAllowNegative()));
-        table.add(new CsvParser.Row(Task.Keys.COLUMN_SEPARATOR, task.getColumnSeparator()));
-        table.add(new CsvParser.Row(Task.Keys.DECIMAL_SEPARATOR, task.getDecimalSeparator()));
-        table.add(new CsvParser.Row(Task.Keys.LINE_SEPARATOR, task.getLineSeparator()));
-        table.add(new CsvParser.Row(Task.Keys.ENCODING, task.getEncoding()));
-        table.add(new CsvParser.Row(KEY_STATES_OPEN));
+        StringTable table = new StringTable();
+        table.add(new StringRow(FORMAT_NAME, FORMAT_VERSION));
+        table.add(new StringRow(Task.Keys.START_POINT, task.getStartPoint()));
+        table.add(new StringRow(Task.Keys.STEPS_COUNT, task.getStepsCount()));
+        table.add(new StringRow(Task.Keys.PARALLEL, task.isParallel()));
+        table.add(new StringRow(Task.Keys.HIGHER_ACCURACY, task.isHigherAccuracy()));
+        table.add(new StringRow(Task.Keys.ALLOW_NEGATIVE, task.isAllowNegative()));
+        table.add(new StringRow(Task.Keys.COLUMN_SEPARATOR, task.getColumnSeparator()));
+        table.add(new StringRow(Task.Keys.DECIMAL_SEPARATOR, task.getDecimalSeparator()));
+        table.add(new StringRow(Task.Keys.LINE_SEPARATOR, task.getLineSeparator()));
+        table.add(new StringRow(Task.Keys.ENCODING, task.getEncoding()));
+        table.add(new StringRow(KEY_STATES_OPEN));
         for (State state : task.getStates()) {
-            table.add(new CsvParser.Row(state.getId(), state.getName(), state.getCount(),
+            table.add(new StringRow(state.getId(), state.getName(), state.getCount(),
                     state.getDescription()));
         }
-        table.add(new CsvParser.Row(KEY_STATES_CLOSE));
-        table.add(new CsvParser.Row(KEY_TRANSITIONS_OPEN));
+        table.add(new StringRow(KEY_STATES_CLOSE));
+        table.add(new StringRow(KEY_TRANSITIONS_OPEN));
         for (Transition transition : task.getTransitions()) {
-            table.add(new CsvParser.Row(transition.getSourceState(),
-                    transition.getSourceCoefficient(), transition.getSourceDelay(),
-                    transition.getOperandState(), transition.getOperandCoefficient(),
-                    transition.getOperandDelay(), transition.getResultState(),
-                    transition.getResultCoefficient(), transition.getProbability(),
-                    transition.getType(), transition.getMode(), transition.getDescription()));
+            table.add(new StringRow(transition.getSourceState(), transition.getSourceCoefficient(),
+                    transition.getSourceDelay(), transition.getOperandState(),
+                    transition.getOperandCoefficient(), transition.getOperandDelay(),
+                    transition.getResultState(), transition.getResultCoefficient(),
+                    transition.getProbability(), transition.getType(), transition.getMode(),
+                    transition.getDescription()));
         }
-        table.add(new CsvParser.Row(KEY_TRANSITIONS_CLOSE));
+        table.add(new StringRow(KEY_TRANSITIONS_CLOSE));
         try {
             if (file.exists()) {
                 file.delete();
@@ -83,7 +83,7 @@ public final class TaskParser {
     }
 
     public static Task parse(File file) {
-        CsvParser.Table table = null;
+        StringTable table = null;
         try {
             table = CsvParser.parse(new FileInputStream(file), SEPARATOR, "UTF-8");
         } catch (FileNotFoundException ignored) {
@@ -97,7 +97,7 @@ public final class TaskParser {
         task.setTransitions(FXCollections.observableArrayList());
         boolean readingStates = false;
         boolean readingTransitions = false;
-        for (CsvParser.Row row : table) {
+        for (StringRow row : table) {
             if (Objects.equals(row.cell(0), KEY_STATES_OPEN)) {
                 readingStates = true;
                 continue;

@@ -1,12 +1,16 @@
 .root {
     -fx-background: #ffffff;
+    -fx-font-size: 14
 }
+
 .chart-series-line {
     -fx-stroke-width: 1;
 }
+
 .axis {
-    -fx-tick-label-font-size: 14;
+    -fx-tick-label-font-size: 16;
 }
+
 .scroll-pane {
     -fx-background-color: transparent;
 }

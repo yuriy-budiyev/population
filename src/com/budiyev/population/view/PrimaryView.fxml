@@ -87,7 +87,7 @@
                                         <TableColumn fx:id="mTransitionsTableOperandDelayColumn" prefWidth="45.0" sortable="false" text="%transition_operand_delay" />
                                         <TableColumn fx:id="mTransitionsTableResultStateColumn" prefWidth="75.0" sortable="false" text="%transition_result_state" />
                                         <TableColumn fx:id="mTransitionsTableResultCoefficientColumn" prefWidth="45.0" sortable="false" text="%transition_result_coefficient" />
-                                        <TableColumn fx:id="mTransitionsTableProbabilityColumn" prefWidth="90.0" sortable="false" text="%transition_probability" />
+                                        <TableColumn fx:id="mTransitionsTableProbabilityColumn" prefWidth="100.0" sortable="false" text="%transition_probability" />
                                         <TableColumn fx:id="mTransitionsTableTypeColumn" prefWidth="75.0" sortable="false" text="%transition_type" />
                                         <TableColumn fx:id="mTransitionsTableModeColumn" prefWidth="75.0" sortable="false" text="%transition_mode" />
                                         <TableColumn fx:id="mTransitionsTableDescriptionColumn" prefWidth="150.0" sortable="false" text="%description" />

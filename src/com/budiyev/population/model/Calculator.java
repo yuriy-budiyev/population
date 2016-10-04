@@ -369,7 +369,7 @@ public class Calculator {
                             transition.getSourceCoefficient() + transition.getOperandCoefficient());
                     value = density / Math.pow(totalCount,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1);
+                                    1);
                     value = applyTransitionCommon(value, density, transition);
                 } else {
                     double sourceDensity = applyCoefficientPower(getState(sourceIndex, sourceState),
@@ -379,7 +379,7 @@ public class Calculator {
                                     transition.getOperandCoefficient());
                     value = sourceDensity * operandDensity / Math.pow(totalCount,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1);
+                                    1);
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
@@ -411,7 +411,7 @@ public class Calculator {
                             transition.getSourceCoefficient() + transition.getOperandCoefficient());
                     value = density / Math.pow(count,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1);
+                                    1);
                     value = applyTransitionCommon(value, density, transition);
                 }
             } else {
@@ -425,7 +425,7 @@ public class Calculator {
                             applyCoefficientPower(operandCount, transition.getOperandCoefficient());
                     value = sourceDensity * operandDensity / Math.pow(sum,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1);
+                                    1);
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
@@ -436,7 +436,7 @@ public class Calculator {
         }
         if (!operandExternal) {
             if (transition.getMode() == TransitionMode.INHIBITOR ||
-                transition.getMode() == TransitionMode.RESIDUAL) {
+                    transition.getMode() == TransitionMode.RESIDUAL) {
                 decrementState(step, operandState, value);
             } else if (transition.getMode() != TransitionMode.RETAINING) {
                 decrementState(step, operandState, value * transition.getOperandCoefficient());
@@ -488,7 +488,7 @@ public class Calculator {
                 BigDecimal density =
                         applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
                                 transition.getSourceCoefficient() +
-                                transition.getOperandCoefficient() - 1);
+                                        transition.getOperandCoefficient() - 1);
                 value = applyTransitionCommon(density, density, transition);
             } else {
                 BigDecimal sourceDensity =
@@ -524,10 +524,10 @@ public class Calculator {
                     BigDecimal density =
                             applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
                                     transition.getSourceCoefficient() +
-                                    transition.getOperandCoefficient());
+                                            transition.getOperandCoefficient());
                     value = divide(density, power(totalCount,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1));
+                                    1));
                     value = applyTransitionCommon(value, density, transition);
                 } else {
                     BigDecimal sourceDensity =
@@ -538,7 +538,7 @@ public class Calculator {
                             transition.getOperandCoefficient());
                     value = divide(multiply(sourceDensity, operandDensity), power(totalCount,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1));
+                                    1));
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
@@ -572,7 +572,7 @@ public class Calculator {
                             transition.getSourceCoefficient() + transition.getOperandCoefficient());
                     value = divide(density, power(count,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1));
+                                    1));
                     value = applyTransitionCommon(value, density, transition);
                 }
             } else {
@@ -586,7 +586,7 @@ public class Calculator {
                             applyCoefficientPower(operandCount, transition.getOperandCoefficient());
                     value = divide(multiply(sourceDensity, operandDensity), power(sum,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                            1));
+                                    1));
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
@@ -598,7 +598,7 @@ public class Calculator {
         }
         if (!operandExternal) {
             if (transition.getMode() == TransitionMode.INHIBITOR ||
-                transition.getMode() == TransitionMode.RESIDUAL) {
+                    transition.getMode() == TransitionMode.RESIDUAL) {
                 decrementState(step, operandState, value);
             } else if (transition.getMode() != TransitionMode.RETAINING) {
                 decrementState(step, operandState,

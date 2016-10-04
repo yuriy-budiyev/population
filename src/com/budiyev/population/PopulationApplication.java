@@ -22,6 +22,8 @@ import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.controller.base.AbstractExportController;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.util.CsvParser;
+import com.budiyev.population.util.StringRow;
+import com.budiyev.population.util.StringTable;
 import com.budiyev.population.util.Utils;
 
 import java.io.File;
@@ -44,8 +46,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public final class PopulationApplication extends Application {
-    private static final int PRIMARY_STAGE_MIN_WIDTH = 750;
-    private static final int PRIMARY_STAGE_MIN_HEIGHT = 450;
+    private static final int PRIMARY_STAGE_MIN_WIDTH = 960;
+    private static final int PRIMARY_STAGE_MIN_HEIGHT = 600;
     private final HashMap<String, String> mSettings = new HashMap<>();
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
@@ -55,14 +57,17 @@ public final class PopulationApplication extends Application {
         if (!settingsFile.exists()) {
             return;
         }
-        CsvParser.Table settingsTable;
+        StringTable settingsTable;
         try {
             settingsTable = CsvParser.parse(new FileInputStream(settingsFile), ',', "UTF-8");
         } catch (FileNotFoundException e) {
             return;
         }
+        if (settingsTable == null) {
+            return;
+        }
         try {
-            for (CsvParser.Row row : settingsTable) {
+            for (StringRow row : settingsTable) {
                 if (Objects.equals(row.cell(0), Settings.WORK_DIRECTORY)) {
                     mSettings.put(Settings.WORK_DIRECTORY, Utils.nullOrString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_X)) {
@@ -90,17 +95,15 @@ public final class PopulationApplication extends Application {
         if (settingsFile.exists()) {
             settingsFile.delete();
         }
-        CsvParser.Table settingsTable = new CsvParser.Table();
-        settingsTable.add(new CsvParser.Row(Settings.WORK_DIRECTORY,
+        StringTable settingsTable = new StringTable();
+        settingsTable.add(new StringRow(Settings.WORK_DIRECTORY,
                 mSettings.get(Settings.WORK_DIRECTORY)));
-        settingsTable.add(new CsvParser.Row(Settings.PRIMARY_STAGE_X, mPrimaryStage.getX()));
-        settingsTable.add(new CsvParser.Row(Settings.PRIMARY_STAGE_Y, mPrimaryStage.getY()));
+        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_X, mPrimaryStage.getX()));
+        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_Y, mPrimaryStage.getY()));
+        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_WIDTH, mPrimaryStage.getWidth()));
+        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_HEIGHT, mPrimaryStage.getHeight()));
         settingsTable
-                .add(new CsvParser.Row(Settings.PRIMARY_STAGE_WIDTH, mPrimaryStage.getWidth()));
-        settingsTable
-                .add(new CsvParser.Row(Settings.PRIMARY_STAGE_HEIGHT, mPrimaryStage.getHeight()));
-        settingsTable.add(new CsvParser.Row(Settings.PRIMARY_STAGE_MAXIMIZED,
-                mPrimaryStage.isMaximized()));
+                .add(new StringRow(Settings.PRIMARY_STAGE_MAXIMIZED, mPrimaryStage.isMaximized()));
         try {
             settingsFile.createNewFile();
             CsvParser.encode(settingsTable, new FileOutputStream(settingsFile), ',', "UTF-8");
