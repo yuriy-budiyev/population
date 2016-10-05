@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -48,7 +49,7 @@ import javafx.stage.StageStyle;
 public final class PopulationApplication extends Application {
     private static final int PRIMARY_STAGE_MIN_WIDTH = 800;
     private static final int PRIMARY_STAGE_MIN_HEIGHT = 480;
-    private final HashMap<String, String> mSettings = new HashMap<>();
+    private final Map<String, String> mSettings = new HashMap<>();
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
 
