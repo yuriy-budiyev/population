@@ -1,6 +1,6 @@
 .root {
     -fx-background: #ffffff;
-    -fx-font-size: 14
+    -fx-font-size: 13
 }
 
 .chart-series-line {
@@ -8,7 +8,7 @@
 }
 
 .axis {
-    -fx-tick-label-font-size: 16;
+    -fx-tick-label-font-size: 15;
 }
 
 .scroll-pane {

@@ -46,8 +46,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public final class PopulationApplication extends Application {
-    private static final int PRIMARY_STAGE_MIN_WIDTH = 960;
-    private static final int PRIMARY_STAGE_MIN_HEIGHT = 600;
+    private static final int PRIMARY_STAGE_MIN_WIDTH = 800;
+    private static final int PRIMARY_STAGE_MIN_HEIGHT = 480;
     private final HashMap<String, String> mSettings = new HashMap<>();
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
