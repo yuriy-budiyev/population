@@ -114,7 +114,7 @@ public final class Utils {
         return ASYNC_EXECUTOR.submit(runnable);
     }
 
-    public static <T> Future<T> callAsync(Callable<T> callable) {
+    public static <T> Future<T> runAsync(Callable<T> callable) {
         return ASYNC_EXECUTOR.submit(callable);
     }
 

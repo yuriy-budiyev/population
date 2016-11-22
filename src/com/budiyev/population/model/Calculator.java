@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Calculator {
     private static final double NORMAL_ACCURACY_PROGRESS_THRESHOLD = 0.005;
@@ -36,6 +38,7 @@ public class Calculator {
      * в режиме повышенной точности
      */
     public static final int HIGHER_ACCURACY_SCALE = 384;
+    private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
     private final int[] mStateIds; // Идентификаторы состояний
@@ -88,8 +91,11 @@ public class Calculator {
      * @return значение состояния
      */
     private double getState(int step, int state) {
-        synchronized (mStates) {
+        mStatesLock.lock();
+        try {
             return mStates[step][state];
+        } finally {
+            mStatesLock.unlock();
         }
     }
 
@@ -101,8 +107,11 @@ public class Calculator {
      * @param value значение
      */
     private void setState(int step, int state, double value) {
-        synchronized (mStates) {
+        mStatesLock.lock();
+        try {
             mStates[step][state] = value;
+        } finally {
+            mStatesLock.unlock();
         }
     }
 
@@ -114,10 +123,13 @@ public class Calculator {
      */
     private void checkStateNegativeness(int step, int state) {
         if (!mTask.isAllowNegative()) {
-            synchronized (mStates) {
+            mStatesLock.lock();
+            try {
                 if (mStates[step][state] < 0) {
                     mStates[step][state] = 0;
                 }
+            } finally {
+                mStatesLock.unlock();
             }
         }
     }
@@ -130,8 +142,11 @@ public class Calculator {
      * @param value значение
      */
     private void incrementState(int step, int state, double value) {
-        synchronized (mStates) {
+        mStatesLock.lock();
+        try {
             mStates[step][state] += value;
+        } finally {
+            mStatesLock.unlock();
         }
     }
 
@@ -143,8 +158,11 @@ public class Calculator {
      * @param value значение
      */
     private void incrementState(int step, int state, BigDecimal value) {
-        synchronized (mStates) {
+        mStatesLock.lock();
+        try {
             mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).add(value));
+        } finally {
+            mStatesLock.unlock();
         }
     }
 
@@ -167,8 +185,11 @@ public class Calculator {
      * @param value значение
      */
     private void decrementState(int step, int state, BigDecimal value) {
-        synchronized (mStates) {
+        mStatesLock.lock();
+        try {
             mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).subtract(value));
+        } finally {
+            mStatesLock.unlock();
         }
     }
 
