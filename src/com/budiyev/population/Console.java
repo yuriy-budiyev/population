@@ -38,11 +38,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class Console {
-    private static final String KEY_HELP = "-HELP";
-    private static final String KEY_TASK = "-TASK";
-    private static final String KEY_TASKS = "-TASKS";
-    private static final String KEY_INTERVAL = "-INTERVAL";
-    private static final String KEY_PARALLEL = "-PARALLEL";
+    private static final String KEY_HELP = "-help";
+    private static final String KEY_TASK = "-task";
+    private static final String KEY_TASKS = "-tasks";
+    private static final String KEY_INTERVAL = "-interval";
+    private static final String KEY_PARALLEL = "-parallel";
 
     private Console() {
     }
@@ -209,8 +209,7 @@ public final class Console {
             int processors = Runtime.getRuntime().availableProcessors();
             ResourceBundle resources = ResourceBundle
                     .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
-            String firstArgument = args[0].toUpperCase();
-            if (Objects.equals(firstArgument, KEY_HELP)) {
+            if (KEY_HELP.equalsIgnoreCase(args[0])) {
                 printInitialization(0, processors, false);
                 System.out.println("Usage:");
                 System.out.println("-task task_file [result_file]");
@@ -234,7 +233,7 @@ public final class Console {
                         "You should have received a copy of the GNU General Public License");
                 System.out.println(
                         "along with this program. If not, see http://www.gnu.org/licenses/.");
-            } else if (Objects.equals(firstArgument, KEY_TASK)) {
+            } else if (KEY_TASK.equalsIgnoreCase(args[0])) {
                 File inputFile = new File(args[1]);
                 File resultFile;
                 if (args.length < 3) {
@@ -244,8 +243,8 @@ public final class Console {
                 }
                 printInitialization(1, processors, false);
                 calculateTask(inputFile, resultFile, resources);
-            } else if (Objects.equals(firstArgument, KEY_TASKS)) {
-                String secondArgument = args[1].toUpperCase();
+            } else if (KEY_TASKS.equalsIgnoreCase(args[0])) {
+                String secondArgument = args[1];
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 List<File> tasks = new ArrayList<>(args.length - shift);
@@ -253,8 +252,8 @@ public final class Console {
                     tasks.add(new File(args[i]));
                 }
                 calculateTasks(tasks, resources, processors, parallel);
-            } else if (Objects.equals(firstArgument, KEY_INTERVAL)) {
-                String secondArgument = args[1].toUpperCase();
+            } else if (KEY_INTERVAL.equalsIgnoreCase(args[0])) {
+                String secondArgument = args[1];
                 boolean parallel = Objects.equals(secondArgument, KEY_PARALLEL);
                 int shift = parallel ? 2 : 1;
                 File startFile = new File(args[shift]);
