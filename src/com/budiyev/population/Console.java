@@ -214,7 +214,7 @@ public final class Console {
                 System.out.println("Usage:");
                 System.out.println("-task task_file [result_file]");
                 System.out.println("-tasks [-parallel] task_file1 ... task_fileN");
-                System.out.println("-interval [-parallel] start_task end_task interval_size");
+                System.out.println("-interval [-parallel] start_task end_task interval_count");
                 System.out.println("License info:");
                 System.out.println(
                         "This program is free software: you can redistribute it and/or modify");
