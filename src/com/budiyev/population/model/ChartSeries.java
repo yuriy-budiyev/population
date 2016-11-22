@@ -36,7 +36,7 @@ public class ChartSeries {
     private static final String[] STROKE_COLORS =
             {"#f3622d", "#fba71b", "#57b757", "#41a9c9", "#4258c9", "#9a42c8", "#c84164", "#888888",
                     "#ffff00", "#ff00ff", "#00ffff", "#ff0000", "#00ff00", "#0000ff", "#000000"};
-    private static final String[] STROKE_THICKNESSES = {"1", "2", "3", "4"};
+    private static final String[] STROKE_THICKNESSES = {"1.25", "2", "3", "4"};
     private static final String[] DASH_ARRAYS = {null, "4 8", "8 8", "16 8"};
     private final XYChart.Series<Number, Number> mData;
     private final int mStartPoint;
