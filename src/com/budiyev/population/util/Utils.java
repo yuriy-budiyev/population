@@ -56,7 +56,7 @@ public final class Utils {
             (thread, throwable) -> {
                 if (Launcher.isConsoleMode()) {
                     System.out.println("Error");
-                    System.out.println(buildErrorText(throwable, Integer.MAX_VALUE));
+                    System.out.println(buildErrorText(throwable));
                 } else {
                     String errorText = buildErrorText(throwable, 10);
                     Platform.runLater(() -> {
@@ -84,6 +84,10 @@ public final class Utils {
     private static ExecutorService ASYNC_EXECUTOR = Executors.newCachedThreadPool(THREAD_FACTORY);
 
     private Utils() {
+    }
+
+    public static String buildErrorText(Throwable throwable) {
+        return buildErrorText(throwable, Integer.MAX_VALUE);
     }
 
     public static String buildErrorText(Throwable throwable, int maxStackTraceSize) {

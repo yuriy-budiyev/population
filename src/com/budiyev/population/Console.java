@@ -266,7 +266,7 @@ public final class Console {
             System.exit(0);
         } catch (Throwable t) {
             System.out.println("Error");
-            System.out.println(Utils.buildErrorText(t, Integer.MAX_VALUE));
+            System.out.println(Utils.buildErrorText(t));
             System.exit(1);
         }
     }
