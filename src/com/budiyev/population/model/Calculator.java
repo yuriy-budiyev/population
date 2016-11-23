@@ -1,17 +1,17 @@
-/**
+/*
  * Population
  * Copyright (C) 2016 Yuriy Budiyev [yuriy.budiyev@yandex.ru]
- * <p>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
- * <p>
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * <p>
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Calculator {
     private static final double NORMAL_ACCURACY_PROGRESS_THRESHOLD = 0.005;
-    private static final double HIGHER_ACCURACY_PROGRESS_THRESHOLD = 0.00005;
+    private static final double HIGHER_ACCURACY_PROGRESS_THRESHOLD = 0.0005;
     /**
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
