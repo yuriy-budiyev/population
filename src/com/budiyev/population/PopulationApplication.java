@@ -180,9 +180,9 @@ public final class PopulationApplication extends Application {
             mPrimaryStage.setMaximized(Boolean.valueOf(setting));
         }
         try {
-            Scene mainScene = new Scene(sceneLoader.load(), 1, 1);
-            mainScene.getStylesheets().add("com/budiyev/population/resource/style.css");
-            mPrimaryStage.setScene(mainScene);
+            Scene primaryScene = new Scene(sceneLoader.load(), 1, 1);
+            primaryScene.getStylesheets().add("com/budiyev/population/resource/style/primary.css");
+            mPrimaryStage.setScene(primaryScene);
             mPrimaryStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -227,7 +227,9 @@ public final class PopulationApplication extends Application {
             }
         });
         try {
-            exportStage.setScene(new Scene(sceneLoader.load(), -1, -1));
+            Scene exportScene = new Scene(sceneLoader.load(), -1, -1);
+            exportScene.getStylesheets().add("com/budiyev/population/resource/style/export.css");
+            exportStage.setScene(exportScene);
             exportStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -258,7 +260,9 @@ public final class PopulationApplication extends Application {
             }
         });
         try {
-            aboutStage.setScene(new Scene(sceneLoader.load(), -1, -1));
+            Scene aboutScene = new Scene(sceneLoader.load(), -1, -1);
+            aboutScene.getStylesheets().add("com/budiyev/population/resource/style/about.css");
+            aboutStage.setScene(aboutScene);
             aboutStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
