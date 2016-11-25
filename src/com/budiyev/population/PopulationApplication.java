@@ -120,20 +120,14 @@ public final class PopulationApplication extends Application {
 
     private void showPrimaryStage(Stage primaryStage) {
         mPrimaryStage = primaryStage;
-        mPrimaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            double floor = Math.floor(newValue.doubleValue());
-            double remainder = floor % 2;
-            if (remainder != 0) {
-                mPrimaryStage.setHeight(floor - remainder);
-            }
-        }); // We need this to avoid JavaFX's drawing blurring in chart legend
         mPrimaryStage.setTitle(mResources.getString("application_name"));
         mPrimaryStage.setMinWidth(PRIMARY_STAGE_MIN_WIDTH);
         mPrimaryStage.setMinHeight(PRIMARY_STAGE_MIN_HEIGHT);
         mPrimaryStage.getIcons()
                 .add(new Image(getClass().getResourceAsStream("resource/icon.png")));
         FXMLLoader sceneLoader =
-                new FXMLLoader(getClass().getResource("view/PrimaryView.fxml"), mResources);
+                new FXMLLoader(getClass().getResource("resource/view/PrimaryView.fxml"),
+                        mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
                 Object controller = controllerClass.newInstance();
@@ -208,7 +202,8 @@ public final class PopulationApplication extends Application {
         exportStage.initOwner(mPrimaryStage.getOwner());
         exportStage.setResizable(false);
         exportStage.setTitle(mResources.getString("export"));
-        FXMLLoader sceneLoader = new FXMLLoader(getClass().getResource("view/ExportView.fxml"));
+        FXMLLoader sceneLoader =
+                new FXMLLoader(getClass().getResource("resource/view/ExportView.fxml"));
         sceneLoader.setResources(mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
@@ -242,7 +237,8 @@ public final class PopulationApplication extends Application {
         aboutStage.initOwner(mPrimaryStage.getOwner());
         aboutStage.setResizable(false);
         aboutStage.setTitle(mResources.getString("about"));
-        FXMLLoader sceneLoader = new FXMLLoader(getClass().getResource("view/AboutView.fxml"));
+        FXMLLoader sceneLoader =
+                new FXMLLoader(getClass().getResource("resource/view/AboutView.fxml"));
         sceneLoader.setResources(mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
