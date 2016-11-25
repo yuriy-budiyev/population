@@ -973,7 +973,7 @@ public class PrimaryController extends AbstractController {
         TableColumn<ArrayList<TableResult>, Number> numberColumn = new TableColumn<>();
         numberColumn.setText(getString("step"));
         numberColumn.setCellFactory(integerCell(x -> true, 0));
-        numberColumn.setPrefWidth(40);
+        numberColumn.setMinWidth(30);
         numberColumn.setSortable(false);
         numberColumn.setEditable(false);
         numberColumn.setCellValueFactory(param -> {
@@ -993,7 +993,7 @@ public class PrimaryController extends AbstractController {
                 TableColumn<ArrayList<TableResult>, Number> valueColumn = new TableColumn<>();
                 valueColumn.setText(headers.get(j));
                 valueColumn.setCellFactory(doubleCell(x -> true, 0, decimalFormat));
-                valueColumn.setPrefWidth(80);
+                valueColumn.setMinWidth(50);
                 final int resultIndex = i;
                 final int stateIndex = j;
                 valueColumn.setCellValueFactory(param -> {
