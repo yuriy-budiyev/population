@@ -47,8 +47,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public final class PopulationApplication extends Application {
-    private static final int PRIMARY_STAGE_MIN_WIDTH = 800;
-    private static final int PRIMARY_STAGE_MIN_HEIGHT = 480;
+    private static final double PRIMARY_STAGE_MIN_WIDTH = 800;
+    private static final double PRIMARY_STAGE_MIN_HEIGHT = 480;
+    private static final double WINDOW_OFFSET = 40;
     private final Map<String, String> mSettings = new HashMap<>();
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
@@ -199,7 +200,8 @@ public final class PopulationApplication extends Application {
     public void showExportDialog(ArrayList<Result> results, HashMap<String, String> taskSettings) {
         Stage exportStage = new Stage(StageStyle.UTILITY);
         exportStage.initModality(Modality.APPLICATION_MODAL);
-        exportStage.initOwner(mPrimaryStage.getOwner());
+        Stage primaryStage = mPrimaryStage;
+        exportStage.initOwner(primaryStage.getOwner());
         exportStage.setResizable(false);
         exportStage.setTitle(mResources.getString("export"));
         FXMLLoader sceneLoader =
@@ -225,6 +227,8 @@ public final class PopulationApplication extends Application {
             Scene exportScene = new Scene(sceneLoader.load(), -1, -1);
             exportScene.getStylesheets().add("com/budiyev/population/resource/style/export.css");
             exportStage.setScene(exportScene);
+            exportStage.setX(primaryStage.getX() + WINDOW_OFFSET);
+            exportStage.setY(primaryStage.getY() + WINDOW_OFFSET);
             exportStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -234,7 +238,8 @@ public final class PopulationApplication extends Application {
     public void showAboutDialog() {
         Stage aboutStage = new Stage(StageStyle.UTILITY);
         aboutStage.initModality(Modality.APPLICATION_MODAL);
-        aboutStage.initOwner(mPrimaryStage.getOwner());
+        Stage primaryStage = mPrimaryStage;
+        aboutStage.initOwner(primaryStage.getOwner());
         aboutStage.setResizable(false);
         aboutStage.setTitle(mResources.getString("about"));
         FXMLLoader sceneLoader =
@@ -259,6 +264,8 @@ public final class PopulationApplication extends Application {
             Scene aboutScene = new Scene(sceneLoader.load(), -1, -1);
             aboutScene.getStylesheets().add("com/budiyev/population/resource/style/about.css");
             aboutStage.setScene(aboutScene);
+            aboutStage.setX(primaryStage.getX() + WINDOW_OFFSET);
+            aboutStage.setY(primaryStage.getY() + WINDOW_OFFSET);
             aboutStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
