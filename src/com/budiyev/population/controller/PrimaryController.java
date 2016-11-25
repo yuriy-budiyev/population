@@ -89,7 +89,7 @@ public class PrimaryController extends AbstractController {
     private final int[] mCurrentChartBounds = {0, 100};
     private volatile boolean mZoomingChart;
     private volatile boolean mCalculating;
-    private int mResultsTablePrecision = 5;
+    private int mResultsTablePrecision = 3;
     private File mTaskFile;
     public MenuItem mClearMenuItem;
     public MenuItem mOpenMenuItem;
@@ -1113,6 +1113,7 @@ public class PrimaryController extends AbstractController {
         initializeTransitionsTable();
         initializeChartSettingsTable();
         initializeResultsChart();
+        showCurrentPrecision();
         mCalculationProgressBar.setVisible(false);
         mResultsTable.setPlaceholder(new Rectangle());
     }

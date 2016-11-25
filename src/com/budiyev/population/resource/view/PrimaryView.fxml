@@ -190,7 +190,7 @@
                                                                 <Button fx:id="mExportResultsButton" mnemonicParsing="false" onAction="#exportResults" text="%export" />
                                                                 <Pane HBox.hgrow="ALWAYS" />
                                                                 <Label fx:id="mResultsTablePrecisionLabel" text="%precision" />
-                                                                <TextField fx:id="mResultsTablePrecisionField" onAction="#applyResultsTablePrecision" text="5" />
+                                                                <TextField fx:id="mResultsTablePrecisionField" onAction="#applyResultsTablePrecision" />
                                                                 <Button fx:id="mApplyResultsTablePrecisionButton" mnemonicParsing="false" onAction="#applyResultsTablePrecision" text="%apply" />
                                                             </children>
                                                         </HBox>
