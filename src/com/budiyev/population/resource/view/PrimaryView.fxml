@@ -30,6 +30,7 @@
                     <items>
                         <MenuItem fx:id="mClearMenuItem" mnemonicParsing="false" onAction="#clearTask" text="%clear" />
                         <MenuItem fx:id="mOpenMenuItem" mnemonicParsing="false" onAction="#openTask" text="%open" />
+                        <MenuItem fx:id="mImportMenuItem" mnemonicParsing="false" onAction="#importTask" text="%import" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem fx:id="mSaveMenuItem" mnemonicParsing="false" onAction="#saveTask" text="%save" />
                         <MenuItem fx:id="mSaveAsMenuItem" mnemonicParsing="false" onAction="#saveTaskAs" text="%save_as" />

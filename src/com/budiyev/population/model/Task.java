@@ -167,11 +167,11 @@ public class Task {
      * @param settings настройки
      */
     public static void writeSettings(Task task, Map<String, String> settings) {
-        task.setStartPoint(Integer.valueOf(settings.get(Keys.START_POINT)));
-        task.setStepsCount(Integer.valueOf(settings.get(Keys.STEPS_COUNT)));
-        task.setParallel(Boolean.valueOf(settings.get(Keys.PARALLEL)));
-        task.setHigherAccuracy(Boolean.valueOf(settings.get(Keys.HIGHER_ACCURACY)));
-        task.setAllowNegative(Boolean.valueOf(settings.get(Keys.ALLOW_NEGATIVE)));
+        task.setStartPoint(Integer.parseInt(settings.get(Keys.START_POINT)));
+        task.setStepsCount(Integer.parseInt(settings.get(Keys.STEPS_COUNT)));
+        task.setParallel(Boolean.parseBoolean(settings.get(Keys.PARALLEL)));
+        task.setHigherAccuracy(Boolean.parseBoolean(settings.get(Keys.HIGHER_ACCURACY)));
+        task.setAllowNegative(Boolean.parseBoolean(settings.get(Keys.ALLOW_NEGATIVE)));
         task.setColumnSeparator(settings.get(Keys.COLUMN_SEPARATOR).charAt(0));
         task.setDecimalSeparator(settings.get(Keys.DECIMAL_SEPARATOR).charAt(0));
         task.setLineSeparator(settings.get(Keys.LINE_SEPARATOR));

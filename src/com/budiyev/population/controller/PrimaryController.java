@@ -93,6 +93,7 @@ public class PrimaryController extends AbstractController {
     private File mTaskFile;
     public MenuItem mClearMenuItem;
     public MenuItem mOpenMenuItem;
+    public MenuItem mImportMenuItem;
     public MenuItem mSaveMenuItem;
     public MenuItem mSaveAsMenuItem;
     public MenuItem mQuitMenuItem;
@@ -631,7 +632,7 @@ public class PrimaryController extends AbstractController {
             @Override
             public Number fromString(String string) {
                 try {
-                    int value = Integer.valueOf(string);
+                    int value = Integer.parseInt(string);
                     if (validator.test(value)) {
                         return value;
                     } else {
@@ -673,7 +674,22 @@ public class PrimaryController extends AbstractController {
     }
 
     private FileChooser getTaskFileChooser(String title) {
+        FileChooser fileChooser = getFileChooser(title);
+        fileChooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter(getString("task"), "*.pmt"));
+        return fileChooser;
+    }
+
+    private FileChooser getImportTaskFileChooser() {
+        FileChooser fileChooser = getFileChooser(getString("import_task"));
+        fileChooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter(getString("text_document"), "*.txt"));
+        return fileChooser;
+    }
+
+    private FileChooser getFileChooser(String title) {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(title);
         String workDirectory = getApplication().getWorkDirectory();
         if (workDirectory != null) {
             File file = new File(workDirectory);
@@ -681,9 +697,6 @@ public class PrimaryController extends AbstractController {
                 fileChooser.setInitialDirectory(file);
             }
         }
-        fileChooser.getExtensionFilters()
-                .add(new FileChooser.ExtensionFilter(getString("task"), "*.pmt"));
-        fileChooser.setTitle(title);
         return fileChooser;
     }
 
@@ -700,12 +713,12 @@ public class PrimaryController extends AbstractController {
     private HashMap<String, String> buildSettings() {
         int startPoint = -1;
         try {
-            startPoint = Integer.valueOf(mStartPointField.getText());
+            startPoint = Integer.parseInt(mStartPointField.getText());
         } catch (NumberFormatException ignored) {
         }
         int stepsCount = -1;
         try {
-            stepsCount = Integer.valueOf(mStepsCountField.getText());
+            stepsCount = Integer.parseInt(mStepsCountField.getText());
         } catch (NumberFormatException ignored) {
         }
         mTaskSettings.put(Task.Keys.START_POINT, String.valueOf(startPoint));
@@ -726,14 +739,15 @@ public class PrimaryController extends AbstractController {
             mStepsCountField.setText(settings.get(Task.Keys.STEPS_COUNT));
         }
         if (settings.containsKey(Task.Keys.PARALLEL)) {
-            mParallel.setSelected(Boolean.valueOf(settings.get(Task.Keys.PARALLEL)));
+            mParallel.setSelected(Boolean.parseBoolean(settings.get(Task.Keys.PARALLEL)));
         }
         if (settings.containsKey(Task.Keys.HIGHER_ACCURACY)) {
-            mHigherAccuracy.setSelected(Boolean.valueOf(settings.get(Task.Keys.HIGHER_ACCURACY)));
+            mHigherAccuracy
+                    .setSelected(Boolean.parseBoolean(settings.get(Task.Keys.HIGHER_ACCURACY)));
         }
         if (settings.containsKey(Task.Keys.ALLOW_NEGATIVE)) {
             mAllowNegativeNumbers
-                    .setSelected(Boolean.valueOf(settings.get(Task.Keys.ALLOW_NEGATIVE)));
+                    .setSelected(Boolean.parseBoolean(settings.get(Task.Keys.ALLOW_NEGATIVE)));
         }
     }
 
@@ -1121,13 +1135,13 @@ public class PrimaryController extends AbstractController {
     public void calculate() {
         int startPoint;
         try {
-            startPoint = Integer.valueOf(mStartPointField.getText());
+            startPoint = Integer.parseInt(mStartPointField.getText());
         } catch (NumberFormatException e) {
             return;
         }
         int stepsCount;
         try {
-            stepsCount = Integer.valueOf(mStepsCountField.getText());
+            stepsCount = Integer.parseInt(mStepsCountField.getText());
         } catch (NumberFormatException e) {
             return;
         }
@@ -1245,18 +1259,40 @@ public class PrimaryController extends AbstractController {
         if (file == null) {
             return;
         }
-        mStates.clear();
-        mTransitions.clear();
-        HashMap<String, String> settings = new HashMap<>();
         Task task = TaskParser.parse(file);
         if (task == null) {
             return;
         }
+        mStates.clear();
+        mTransitions.clear();
         mStates.addAll(task.getStates());
         mTransitions.addAll(task.getTransitions());
+        HashMap<String, String> settings = new HashMap<>();
         Task.readSettings(task, settings);
         readSettings(settings);
         mTaskFile = file;
+        getApplication().setWorkDirectory(file.getParent());
+        setTitle(file);
+    }
+
+    public void importTask() {
+        if (mCalculating) {
+            return;
+        }
+        File file = getImportTaskFileChooser().showOpenDialog(mStatesTable.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+        Task task = TaskParser.parseLegacy(file);
+        if (task == null) {
+            return;
+        }
+        mTaskFile = null;
+        buildSettings();
+        mStates.clear();
+        mTransitions.clear();
+        mStates.addAll(task.getStates());
+        mTransitions.addAll(task.getTransitions());
         getApplication().setWorkDirectory(file.getParent());
         setTitle(file);
     }
@@ -1331,7 +1367,7 @@ public class PrimaryController extends AbstractController {
     public void applyResultsTablePrecision() {
         int precision;
         try {
-            precision = Integer.valueOf(mResultsTablePrecisionField.getText());
+            precision = Integer.parseInt(mResultsTablePrecisionField.getText());
         } catch (NumberFormatException e) {
             showCurrentPrecision();
             return;

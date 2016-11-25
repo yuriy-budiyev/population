@@ -71,18 +71,17 @@ public final class PopulationApplication extends Application {
         try {
             for (StringRow row : settingsTable) {
                 if (Objects.equals(row.cell(0), Settings.WORK_DIRECTORY)) {
-                    mSettings.put(Settings.WORK_DIRECTORY, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.WORK_DIRECTORY, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_X)) {
-                    mSettings.put(Settings.PRIMARY_STAGE_X, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.PRIMARY_STAGE_X, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_Y)) {
-                    mSettings.put(Settings.PRIMARY_STAGE_Y, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.PRIMARY_STAGE_Y, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_WIDTH)) {
-                    mSettings.put(Settings.PRIMARY_STAGE_WIDTH, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.PRIMARY_STAGE_WIDTH, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_HEIGHT)) {
-                    mSettings.put(Settings.PRIMARY_STAGE_HEIGHT, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.PRIMARY_STAGE_HEIGHT, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_MAXIMIZED)) {
-                    mSettings
-                            .put(Settings.PRIMARY_STAGE_MAXIMIZED, Utils.nullOrString(row.cell(1)));
+                    mSettings.put(Settings.PRIMARY_STAGE_MAXIMIZED, emptyIfNullString(row.cell(1)));
                 }
             }
             mSettings.putIfAbsent(Settings.WORK_DIRECTORY, System.getProperty("user.home"));
@@ -144,35 +143,35 @@ public final class PopulationApplication extends Application {
         });
         String setting = mSettings.get(Settings.PRIMARY_STAGE_X);
         if (setting != null) {
-            double value = Double.valueOf(setting);
+            double value = Double.parseDouble(setting);
             if (value > 0) {
                 mPrimaryStage.setX(value);
             }
         }
         setting = mSettings.get(Settings.PRIMARY_STAGE_Y);
         if (setting != null) {
-            double value = Double.valueOf(setting);
+            double value = Double.parseDouble(setting);
             if (value > 0) {
                 mPrimaryStage.setY(value);
             }
         }
         setting = mSettings.get(Settings.PRIMARY_STAGE_WIDTH);
         if (setting != null) {
-            double value = Double.valueOf(setting);
+            double value = Double.parseDouble(setting);
             if (value > PRIMARY_STAGE_MIN_WIDTH) {
                 mPrimaryStage.setWidth(value);
             }
         }
         setting = mSettings.get(Settings.PRIMARY_STAGE_HEIGHT);
         if (setting != null) {
-            double value = Double.valueOf(setting);
+            double value = Double.parseDouble(setting);
             if (value > PRIMARY_STAGE_MIN_HEIGHT) {
                 mPrimaryStage.setHeight(value);
             }
         }
         setting = mSettings.get(Settings.PRIMARY_STAGE_MAXIMIZED);
         if (setting != null) {
-            mPrimaryStage.setMaximized(Boolean.valueOf(setting));
+            mPrimaryStage.setMaximized(Boolean.parseBoolean(setting));
         }
         try {
             Scene primaryScene = new Scene(sceneLoader.load(), 1, 1);
@@ -290,6 +289,14 @@ public final class PopulationApplication extends Application {
 
     public static void main(String[] args) {
         launch(PopulationApplication.class, args);
+    }
+
+    private static String emptyIfNullString(String value) {
+        if ("null".equalsIgnoreCase(value)) {
+            return "";
+        } else {
+            return value;
+        }
     }
 
     private static final class Settings {

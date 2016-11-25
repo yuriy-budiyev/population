@@ -20,15 +20,19 @@ package com.budiyev.population.util;
 import com.budiyev.population.model.State;
 import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;
+import com.budiyev.population.model.TransitionMode;
+import com.budiyev.population.model.TransitionType;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import javafx.collections.FXCollections;
 
 public final class TaskParser {
     private static final String FORMAT_NAME = "PopulationModelingTask";
@@ -93,8 +97,8 @@ public final class TaskParser {
         }
         Task task = new Task();
         task.setName(file.getAbsolutePath());
-        task.setStates(FXCollections.observableArrayList());
-        task.setTransitions(FXCollections.observableArrayList());
+        task.setStates(new ArrayList<>());
+        task.setTransitions(new ArrayList<>());
         boolean readingStates = false;
         boolean readingTransitions = false;
         for (StringRow row : table) {
@@ -111,19 +115,19 @@ public final class TaskParser {
                 readingTransitions = false;
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.START_POINT)) {
-                task.setStartPoint(Integer.valueOf(row.cell(1)));
+                task.setStartPoint(Integer.parseInt(row.cell(1)));
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.STEPS_COUNT)) {
-                task.setStepsCount(Integer.valueOf(row.cell(1)));
+                task.setStepsCount(Integer.parseInt(row.cell(1)));
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.PARALLEL)) {
-                task.setParallel(Boolean.valueOf(row.cell(1)));
+                task.setParallel(Boolean.parseBoolean(row.cell(1)));
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.HIGHER_ACCURACY)) {
-                task.setHigherAccuracy(Boolean.valueOf(row.cell(1)));
+                task.setHigherAccuracy(Boolean.parseBoolean(row.cell(1)));
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.ALLOW_NEGATIVE)) {
-                task.setAllowNegative(Boolean.valueOf(row.cell(1)));
+                task.setAllowNegative(Boolean.parseBoolean(row.cell(1)));
                 continue;
             } else if (Objects.equals(row.cell(0), Task.Keys.COLUMN_SEPARATOR)) {
                 task.setColumnSeparator(row.cell(1).charAt(0));
@@ -139,19 +143,123 @@ public final class TaskParser {
                 continue;
             }
             if (readingStates) {
-                task.getStates().add(new State(Integer.valueOf(row.cell(0)), row.cell(1),
-                        Double.valueOf(row.cell(2)), row.cell(3)));
+                task.getStates().add(new State(Integer.parseInt(row.cell(0)), row.cell(1),
+                        Double.parseDouble(row.cell(2)), row.cell(3)));
             }
             if (readingTransitions) {
-                task.getTransitions().add(new Transition(Integer.valueOf(row.cell(0)),
-                        Double.valueOf(row.cell(1)), Integer.valueOf(row.cell(2)),
-                        Integer.valueOf(row.cell(3)), Double.valueOf(row.cell(4)),
-                        Integer.valueOf(row.cell(5)), Integer.valueOf(row.cell(6)),
-                        Double.valueOf(row.cell(7)), Double.valueOf(row.cell(8)),
-                        Integer.valueOf(row.cell(9)), Integer.valueOf(row.cell(10)), row.cell(11)));
+                task.getTransitions().add(new Transition(Integer.parseInt(row.cell(0)),
+                        Double.parseDouble(row.cell(1)), Integer.parseInt(row.cell(2)),
+                        Integer.parseInt(row.cell(3)), Double.parseDouble(row.cell(4)),
+                        Integer.parseInt(row.cell(5)), Integer.parseInt(row.cell(6)),
+                        Double.parseDouble(row.cell(7)), Double.parseDouble(row.cell(8)),
+                        Integer.parseInt(row.cell(9)), Integer.parseInt(row.cell(10)),
+                        row.cell(11)));
             }
         }
         return task;
     }
 
+    public static Task parseLegacy(File file) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file)))) {
+            Task task = new Task();
+            task.setName(file.getAbsolutePath());
+            int statesCount = Integer.parseInt(reader.readLine());
+            List<State> states = new ArrayList<>(statesCount);
+            task.setStates(states);
+            for (int i = 0; i < statesCount; i++) {
+                State state = new State();
+                state.setName(reader.readLine());
+                state.setCount(Double.parseDouble(reader.readLine().replace(',', '.')));
+                states.add(state);
+            }
+            int transitionsCount = Integer.parseInt(reader.readLine()) - 1;
+            List<Transition> transitions = new ArrayList<>(transitionsCount);
+            task.setTransitions(transitions);
+            for (int i = 0; i < transitionsCount; i++) {
+                Transition transition = new Transition();
+                transition.setSourceState(findState(reader.readLine(), states));
+                transition.setOperandState(findState(reader.readLine(), states));
+                transition.setResultState(findState(reader.readLine(), states));
+                double intensity = Double.parseDouble(reader.readLine().replace(',', '.'));
+                if (intensity > 1d) {
+                    transition.setProbability(1d);
+                    transition.setResultCoefficient(intensity);
+                } else {
+                    transition.setProbability(intensity);
+                }
+                int modeAndType = Integer.parseInt(reader.readLine());
+                transition.setMode(getTransitionMode(modeAndType));
+                transition.setType(getTransitionType(modeAndType));
+                transition.setSourceDelay(getDelay(reader.readLine()));
+                transition.setOperandDelay(getDelay(reader.readLine()));
+                transitions.add(transition);
+            }
+            return task;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static int findState(String name, List<State> states) {
+        if ("*".equals(name)) {
+            return State.EXTERNAL;
+        }
+        for (State state : states) {
+            if (Objects.equals(name, state.getName())) {
+                return state.getId();
+            }
+        }
+        return 0;
+    }
+
+    private static int getTransitionMode(int modeAndType) {
+        switch (modeAndType / 3) {
+            case 1: {
+                return TransitionMode.RETAINING;
+            }
+            case 2: {
+                return TransitionMode.REMOVING;
+            }
+            case 3: {
+                return TransitionMode.RESIDUAL;
+            }
+            case 4: {
+                return TransitionMode.INHIBITOR;
+            }
+            default: {
+                return TransitionMode.SIMPLE;
+            }
+        }
+    }
+
+    private static int getTransitionType(int modeAndType) {
+        switch (modeAndType) {
+            case 1:
+            case 4:
+            case 7:
+            case 10:
+            case 13: {
+                return TransitionType.SOLUTE;
+            }
+            case 2:
+            case 5:
+            case 8:
+            case 11:
+            case 14: {
+                return TransitionType.BLEND;
+            }
+            default: {
+                return TransitionType.LINEAR;
+            }
+        }
+    }
+
+    private static int getDelay(String string) {
+        if (string.trim().length() != 0) {
+            return Integer.parseInt(string);
+        } else {
+            return 0;
+        }
+    }
 }

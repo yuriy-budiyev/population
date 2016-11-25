@@ -34,7 +34,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -54,6 +53,8 @@ public final class Utils {
 
     public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
             (thread, throwable) -> {
+                System.out.println(buildErrorText(throwable));
+
                 if (Launcher.isConsoleMode()) {
                     System.out.println("Error");
                     System.out.println(buildErrorText(throwable));
@@ -146,14 +147,6 @@ public final class Utils {
         observableList.clear();
         observableList.addAll(temp);
         temp.clear();
-    }
-
-    public static String nullOrString(String value) {
-        if (Objects.equals("null", value)) {
-            return "";
-        } else {
-            return value;
-        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

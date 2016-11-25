@@ -258,7 +258,7 @@ public final class Console {
                 int shift = parallel ? 2 : 1;
                 File startFile = new File(args[shift]);
                 File endFile = new File(args[shift + 1]);
-                int size = Integer.valueOf(args[shift + 2]);
+                int size = Integer.parseInt(args[shift + 2]);
                 calculateTasks(startFile, endFile, size, resources, processors, parallel);
             } else {
                 System.out.println("Invalid arguments.");
