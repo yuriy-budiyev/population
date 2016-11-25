@@ -230,23 +230,24 @@ public class Calculator {
      * @param threshold минимальное изменение прогресса, на которое стоит реагировать
      */
     private void callbackProgress(int step, double threshold) {
-        if (mProgressCallback != null) {
-            final double progress;
-            boolean needUpdate;
-            if (step == 0 || mTask.getStepsCount() == 0) {
-                progress = 0;
-                needUpdate = true;
-            } else if (step == mTask.getStepsCount() - 1 || mTask.getStepsCount() == 1) {
-                progress = 1;
-                needUpdate = true;
-            } else {
-                progress = (double) step / (double) (mTask.getStepsCount() - 1);
-                needUpdate = progress - mProgress > threshold;
-            }
-            if (needUpdate) {
-                mProgress = progress;
-                mProgressCallback.onProgressUpdate(progress);
-            }
+        if (mProgressCallback == null) {
+            return;
+        }
+        final double progress;
+        boolean needUpdate;
+        if (step == 0 || mTask.getStepsCount() == 0) {
+            progress = 0;
+            needUpdate = true;
+        } else if (step == mTask.getStepsCount() - 1 || mTask.getStepsCount() == 1) {
+            progress = 1;
+            needUpdate = true;
+        } else {
+            progress = (double) step / (double) (mTask.getStepsCount() - 1);
+            needUpdate = progress - mProgress > threshold;
+        }
+        if (needUpdate) {
+            mProgress = progress;
+            mProgressCallback.onProgressUpdate(progress);
         }
     }
 
@@ -255,16 +256,13 @@ public class Calculator {
      */
     private Result calculateNormalAccuracy() {
         callbackProgress(0, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
-        for (int step = 1; step < mTask.getStepsCount(); step++) {
-            double totalCount = 0;
-            for (int state = 0; state < mStatesCount; state++) {
-                double count = getState(step - 1, state);
-                setState(step, state, count);
-                totalCount += count;
-            }
-            if (mTask.isParallel()) {
-                List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
-                for (Transition transition : mTask.getTransitions()) {
+        List<Transition> transitions = mTask.getTransitions();
+        int stepsCount = mTask.getStepsCount();
+        if (mTask.isParallel()) {
+            List<Future<?>> futures = new ArrayList<>(transitions.size());
+            for (int step = 1; step < stepsCount; step++) {
+                double totalCount = getTotalCount(step);
+                for (Transition transition : transitions) {
                     futures.add(mExecutor
                             .submit(new TransitionActionNormalAccuracy(step, totalCount,
                                     transition)));
@@ -276,12 +274,17 @@ public class Calculator {
                         throw new RuntimeException(e);
                     }
                 }
-            } else {
-                for (Transition transition : mTask.getTransitions()) {
+                futures.clear();
+                callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+            }
+        } else {
+            for (int step = 1; step < stepsCount; step++) {
+                double totalCount = getTotalCount(step);
+                for (Transition transition : transitions) {
                     transitionNormalAccuracy(step, totalCount, transition);
                 }
+                callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
             }
-            callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
         }
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(),
                 mPrepareResultsTableData, mPrepareResultsChartData);
@@ -292,16 +295,13 @@ public class Calculator {
      */
     private Result calculateHigherAccuracy() {
         callbackProgress(0, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
-        for (int step = 1; step < mTask.getStepsCount(); step++) {
-            BigDecimal totalCount = decimalValue(0);
-            for (int state = 0; state < mStatesCount; state++) {
-                double count = getState(step - 1, state);
-                setState(step, state, count);
-                totalCount = totalCount.add(decimalValue(count));
-            }
-            if (mTask.isParallel()) {
-                List<Future<?>> futures = new ArrayList<>(mTask.getTransitions().size());
-                for (Transition transition : mTask.getTransitions()) {
+        List<Transition> transitions = mTask.getTransitions();
+        int stepsCount = mTask.getStepsCount();
+        if (mTask.isParallel()) {
+            List<Future<?>> futures = new ArrayList<>(transitions.size());
+            for (int step = 1; step < stepsCount; step++) {
+                BigDecimal totalCount = getTotalCountBig(step);
+                for (Transition transition : transitions) {
                     futures.add(mExecutor
                             .submit(new TransitionActionHigherAccuracy(step, totalCount,
                                     transition)));
@@ -313,15 +313,40 @@ public class Calculator {
                         throw new RuntimeException(e);
                     }
                 }
-            } else {
-                for (Transition transition : mTask.getTransitions()) {
+                futures.clear();
+                callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+            }
+        } else {
+            for (int step = 1; step < stepsCount; step++) {
+                BigDecimal totalCount = getTotalCountBig(step);
+                for (Transition transition : transitions) {
                     transitionHigherAccuracy(step, totalCount, transition);
                 }
+                callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
             }
-            callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
         }
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(),
                 mPrepareResultsTableData, mPrepareResultsChartData);
+    }
+
+    private double getTotalCount(int step) {
+        double totalCount = 0;
+        for (int state = 0; state < mStatesCount; state++) {
+            double count = getState(step - 1, state);
+            setState(step, state, count);
+            totalCount += count;
+        }
+        return totalCount;
+    }
+
+    private BigDecimal getTotalCountBig(int step) {
+        BigDecimal totalCount = decimalValue(0);
+        for (int state = 0; state < mStatesCount; state++) {
+            double count = getState(step - 1, state);
+            setState(step, state, count);
+            totalCount = totalCount.add(decimalValue(count));
+        }
+        return totalCount;
     }
 
     /**
@@ -653,8 +678,8 @@ public class Calculator {
     /**
      * Выполнение расчётов асинхронно
      */
-    public void calculateAsync() {
-        Utils.runAsync(() -> {
+    public Future<Result> calculateAsync() {
+        return Utils.runAsync(() -> {
             Result result;
             if (mTask.isHigherAccuracy()) {
                 result = calculateHigherAccuracy();
@@ -662,6 +687,7 @@ public class Calculator {
                 result = calculateNormalAccuracy();
             }
             callbackResults(result);
+            return result;
         });
     }
 

@@ -161,7 +161,7 @@ public final class TaskParser {
 
     public static Task parseLegacy(File file) {
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(file)))) {
+                new InputStreamReader(new FileInputStream(file), "windows-1251"))) {
             Task task = new Task();
             task.setName(file.getAbsolutePath());
             int statesCount = Integer.parseInt(reader.readLine());
