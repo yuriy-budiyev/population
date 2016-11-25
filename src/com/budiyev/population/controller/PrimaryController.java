@@ -78,7 +78,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 public class PrimaryController extends AbstractController {
-    private static final int MAX_DISPLAYING_DATA_SIZE = 1000001;
     private final ObservableList<State> mStates = FXCollections.observableArrayList();
     private final ObservableList<Number> mStatesIdList = FXCollections.observableArrayList();
     private final HashMap<Number, State> mStatesIdMap = new HashMap<>();
@@ -1015,7 +1014,6 @@ public class PrimaryController extends AbstractController {
         } else {
             dataSize = Math.abs(end - start);
         }
-        dataSize = dataSize < MAX_DISPLAYING_DATA_SIZE ? dataSize : MAX_DISPLAYING_DATA_SIZE;
         end = start + dataSize;
         ArrayList<ArrayList<TableResult>> table = new ArrayList<>();
         for (int i = start; i < end; i++) {
