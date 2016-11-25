@@ -188,9 +188,15 @@ public final class TaskParser {
                 } else {
                     transition.setProbability(intensity);
                 }
-                int modeAndType = Integer.parseInt(reader.readLine());
-                transition.setMode(getTransitionMode(modeAndType));
-                transition.setType(getTransitionType(modeAndType));
+                String typeAndModeString = reader.readLine();
+                if (typeAndModeString.trim().length() == 0) {
+                    transition.setType(TransitionType.LINEAR);
+                    transition.setMode(TransitionMode.SIMPLE);
+                } else {
+                    int typeAndMode = Integer.parseInt(typeAndModeString);
+                    transition.setType(getTransitionType(typeAndMode));
+                    transition.setMode(getTransitionMode(typeAndMode));
+                }
                 transition.setSourceDelay(getDelay(reader.readLine()));
                 transition.setOperandDelay(getDelay(reader.readLine()));
                 transitions.add(transition);
@@ -213,8 +219,8 @@ public final class TaskParser {
         return 0;
     }
 
-    private static int getTransitionMode(int modeAndType) {
-        switch (modeAndType / 3) {
+    private static int getTransitionMode(int typeAndMode) {
+        switch (typeAndMode / 3) {
             case 1: {
                 return TransitionMode.RETAINING;
             }
@@ -233,8 +239,8 @@ public final class TaskParser {
         }
     }
 
-    private static int getTransitionType(int modeAndType) {
-        switch (modeAndType) {
+    private static int getTransitionType(int typeAndMode) {
+        switch (typeAndMode) {
             case 1:
             case 4:
             case 7:
