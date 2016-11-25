@@ -80,11 +80,11 @@ import javafx.util.StringConverter;
 public class PrimaryController extends AbstractController {
     private final ObservableList<State> mStates = FXCollections.observableArrayList();
     private final ObservableList<Number> mStatesIdList = FXCollections.observableArrayList();
-    private final HashMap<Number, State> mStatesIdMap = new HashMap<>();
     private final ObservableList<Transition> mTransitions = FXCollections.observableArrayList();
-    private final HashMap<String, String> mTaskSettings = new HashMap<>();
     private final ObservableList<ChartSeries> mResultsChartData =
             FXCollections.observableArrayList();
+    private final HashMap<Number, State> mStatesIdMap = new HashMap<>();
+    private final HashMap<String, String> mTaskSettings = new HashMap<>();
     private final ArrayList<Result> mResultsTableData = new ArrayList<>();
     private final int[] mCurrentChartBounds = {0, 100};
     private volatile boolean mZoomingChart;
