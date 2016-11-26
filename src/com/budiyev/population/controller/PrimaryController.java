@@ -1134,6 +1134,26 @@ public class PrimaryController extends AbstractController {
     }
 
     public void calculate() {
+        if (mStates.size() == 0) {
+            getApplication().showAlert(getString("error"), null, getString("states_missing"),
+                    Alert.AlertType.WARNING);
+            return;
+        }
+        if (mTransitions.size() == 0) {
+            getApplication().showAlert(getString("error"), null, getString("transitions_missing"),
+                    Alert.AlertType.WARNING);
+            return;
+        }
+        for (Transition transition : mTransitions) {
+            if (transition.getSourceState() == State.UNDEFINED ||
+                    transition.getOperandState() == State.UNDEFINED ||
+                    transition.getResultState() == State.UNDEFINED) {
+                getApplication()
+                        .showAlert(getString("error"), null, getString("transitions_incorrect"),
+                                Alert.AlertType.WARNING);
+                return;
+            }
+        }
         int startPoint;
         try {
             startPoint = Integer.parseInt(mStartPointField.getText());
@@ -1155,26 +1175,6 @@ public class PrimaryController extends AbstractController {
             getApplication().showAlert(getString("error"), null, getString("steps_count_invalid"),
                     Alert.AlertType.WARNING);
             return;
-        }
-        if (mStates.size() == 0) {
-            getApplication().showAlert(getString("error"), null, getString("states_missing"),
-                    Alert.AlertType.WARNING);
-            return;
-        }
-        if (mTransitions.size() == 0) {
-            getApplication().showAlert(getString("error"), null, getString("transitions_missing"),
-                    Alert.AlertType.WARNING);
-            return;
-        }
-        for (Transition transition : mTransitions) {
-            if (transition.getSourceState() == State.UNDEFINED ||
-                    transition.getOperandState() == State.UNDEFINED ||
-                    transition.getResultState() == State.UNDEFINED) {
-                getApplication()
-                        .showAlert(getString("error"), null, getString("transitions_incorrect"),
-                                Alert.AlertType.WARNING);
-                return;
-            }
         }
         mCalculating = true;
         stepsCount++;

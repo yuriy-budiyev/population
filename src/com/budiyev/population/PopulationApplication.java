@@ -309,6 +309,8 @@ public final class PopulationApplication extends Application {
         Stage primaryStage = mPrimaryStage;
         Platform.runLater(() -> {
             Alert alert = new Alert(type, text, ButtonType.CLOSE);
+            alert.getDialogPane().getStylesheets()
+                    .add("com/budiyev/population/resource/style/alert.css");
             alert.setX(primaryStage.getX() + WINDOW_OFFSET);
             alert.setY(primaryStage.getY() + WINDOW_OFFSET);
             alert.initStyle(StageStyle.UTILITY);
