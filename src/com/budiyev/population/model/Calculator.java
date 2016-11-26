@@ -17,8 +17,6 @@
  */
 package com.budiyev.population.model;
 
-import com.budiyev.population.util.Utils;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -27,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -46,6 +45,7 @@ public class Calculator {
     private final ExecutorService mExecutor; // Исполнитель (для параллельного режима)
     private final ResultCallback mResultCallback; // Обратный вызов результата
     private final ProgressCallback mProgressCallback; // Обратный вызов прогресса вычислений
+    private final ThreadFactory mThreadFactory; // Фабрика потоков
     private final boolean mPrepareResultsTableData; // Подготовить результат в табличном виде
     private final boolean mPrepareResultsChartData; // Подготовить результат в графическом виде
     private double mProgress; // Прогресс вычислений
@@ -58,9 +58,11 @@ public class Calculator {
      * @param prepareResultsChartData подготовить результат в графическом виде
      * @param resultCallback          обратный вызов результата
      * @param progressCallback        обратный вызов прогресса вычислений
+     * @param threadFactory           Фабрика потоков для асинхронных и параллельных вычислений
      */
     private Calculator(Task task, boolean prepareResultsTableData, boolean prepareResultsChartData,
-            ResultCallback resultCallback, ProgressCallback progressCallback) {
+            ResultCallback resultCallback, ProgressCallback progressCallback,
+            ThreadFactory threadFactory) {
         mTask = task;
         List<State> states = mTask.getStates();
         mStatesCount = states.size();
@@ -75,9 +77,10 @@ public class Calculator {
             mStates[0][i] = state.getCount();
             mStateIds[i] = state.getId();
         }
+        mThreadFactory = threadFactory;
         if (mTask.isParallel()) {
-            mExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-                    Utils.THREAD_FACTORY);
+            mExecutor = Executors
+                    .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
         } else {
             mExecutor = null;
         }
@@ -678,8 +681,8 @@ public class Calculator {
     /**
      * Выполнение расчётов асинхронно
      */
-    public Future<Result> calculateAsync() {
-        return Utils.runAsync(() -> {
+    public void calculateAsync() {
+        mThreadFactory.newThread(() -> {
             Result result;
             if (mTask.isHigherAccuracy()) {
                 result = calculateHigherAccuracy();
@@ -687,8 +690,7 @@ public class Calculator {
                 result = calculateNormalAccuracy();
             }
             callbackResults(result);
-            return result;
-        });
+        }).start();
     }
 
     /**
@@ -1116,12 +1118,13 @@ public class Calculator {
      * @param task                    задача
      * @param prepareResultsTableData подготовить результат для вывода в табличном виде
      * @param prepareResultsChartData подготовить результат для вывода в графическом виде
+     * @param threadFactory           Фабрика потоков для асинхронных и параллельных вычислений
      * @return результаты вычислений
      */
     public static Result calculateSync(Task task, boolean prepareResultsTableData,
-            boolean prepareResultsChartData) {
-        return new Calculator(task, prepareResultsTableData, prepareResultsChartData, null, null)
-                .calculateSync();
+            boolean prepareResultsChartData, ThreadFactory threadFactory) {
+        return new Calculator(task, prepareResultsTableData, prepareResultsChartData, null, null,
+                threadFactory).calculateSync();
     }
 
     /**
@@ -1132,12 +1135,13 @@ public class Calculator {
      * @param prepareResultsChartData подготовить результат для вывода в графическом виде
      * @param resultCallback          обратный вызов результата
      * @param progressCallback        обратный вызов прогресса вычислений
+     * @param threadFactory           Фабрика потоков для асинхронных и параллельных вычислений
      */
     public static void calculateAsync(Task task, boolean prepareResultsTableData,
             boolean prepareResultsChartData, ResultCallback resultCallback,
-            ProgressCallback progressCallback) {
+            ProgressCallback progressCallback, ThreadFactory threadFactory) {
         new Calculator(task, prepareResultsTableData, prepareResultsChartData, resultCallback,
-                progressCallback).calculateAsync();
+                progressCallback, threadFactory).calculateAsync();
     }
 
     /**

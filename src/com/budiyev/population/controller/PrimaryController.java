@@ -57,6 +57,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -446,10 +447,10 @@ public class PrimaryController extends AbstractController {
             zoomRect.setWidth(Math.abs(x - mouseAnchor.get().getX()));
             zoomRect.setHeight(Math.abs(y - mouseAnchor.get().getY()));
         });
-        final ScheduledExecutorService executor =
-                Executors.newSingleThreadScheduledExecutor(Utils.THREAD_FACTORY);
-        final int[] zoomedBounds = new int[2];
-        final ScheduledFuture<?>[] refreshChart = new ScheduledFuture<?>[1];
+        ScheduledExecutorService executor =
+                Executors.newSingleThreadScheduledExecutor(getApplication().getThreadFactory());
+        int[] zoomedBounds = new int[2];
+        ScheduledFuture<?>[] refreshChart = new ScheduledFuture<?>[1];
         getStage().widthProperty().addListener((observable, oldValue, newValue) -> {
             if (refreshChart[0] != null) {
                 refreshChart[0].cancel(false);
@@ -1137,17 +1138,43 @@ public class PrimaryController extends AbstractController {
         try {
             startPoint = Integer.parseInt(mStartPointField.getText());
         } catch (NumberFormatException e) {
+            getApplication().showAlert(getString("error"), null, getString("start_point_invalid"),
+                    Alert.AlertType.WARNING);
             return;
         }
         int stepsCount;
         try {
             stepsCount = Integer.parseInt(mStepsCountField.getText());
+            if (stepsCount < 1 || stepsCount == Integer.MAX_VALUE) {
+                getApplication()
+                        .showAlert(getString("error"), null, getString("steps_count_invalid"),
+                                Alert.AlertType.WARNING);
+                return;
+            }
         } catch (NumberFormatException e) {
+            getApplication().showAlert(getString("error"), null, getString("steps_count_invalid"),
+                    Alert.AlertType.WARNING);
             return;
         }
-        if (mStates.size() == 0 || mTransitions.size() == 0 || stepsCount < 1 ||
-                stepsCount == Integer.MAX_VALUE) {
+        if (mStates.size() == 0) {
+            getApplication().showAlert(getString("error"), null, getString("states_missing"),
+                    Alert.AlertType.WARNING);
             return;
+        }
+        if (mTransitions.size() == 0) {
+            getApplication().showAlert(getString("error"), null, getString("transitions_missing"),
+                    Alert.AlertType.WARNING);
+            return;
+        }
+        for (Transition transition : mTransitions) {
+            if (transition.getSourceState() == State.UNDEFINED ||
+                    transition.getOperandState() == State.UNDEFINED ||
+                    transition.getResultState() == State.UNDEFINED) {
+                getApplication()
+                        .showAlert(getString("error"), null, getString("transitions_incorrect"),
+                                Alert.AlertType.WARNING);
+                return;
+            }
         }
         mCalculating = true;
         stepsCount++;
@@ -1169,7 +1196,8 @@ public class PrimaryController extends AbstractController {
                     setControlsDisable(false);
                     mCalculating = false;
                 }),
-                progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)));
+                progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)),
+                getApplication().getThreadFactory());
     }
 
     public void addState() {

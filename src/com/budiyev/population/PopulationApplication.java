@@ -22,6 +22,7 @@ import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.controller.base.AbstractExportController;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.util.CsvParser;
+import com.budiyev.population.util.PopulationThreadFactory;
 import com.budiyev.population.util.StringRow;
 import com.budiyev.population.util.StringTable;
 import com.budiyev.population.util.Utils;
@@ -37,10 +38,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.ThreadFactory;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -53,6 +58,15 @@ public final class PopulationApplication extends Application {
     private final Map<String, String> mSettings = new HashMap<>();
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
+
+    private final Thread.UncaughtExceptionHandler mUncaughtExceptionHandler =
+            (thread, throwable) -> {
+                showAlert("Error", "An unexpected error occurred",
+                        Utils.buildErrorText(throwable, 10), Alert.AlertType.ERROR);
+            };
+
+    private final ThreadFactory mThreadFactory =
+            new PopulationThreadFactory(mUncaughtExceptionHandler);
 
     private void loadSettings() {
         File settingsFile = new File(System.getProperty("user.home"), Settings.FILE);
@@ -185,7 +199,7 @@ public final class PopulationApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Thread.currentThread().setUncaughtExceptionHandler(Utils.UNCAUGHT_EXCEPTION_HANDLER);
+        Thread.currentThread().setUncaughtExceptionHandler(mUncaughtExceptionHandler);
         loadSettings();
         initializeResources();
         showPrimaryStage(primaryStage);
@@ -285,6 +299,23 @@ public final class PopulationApplication extends Application {
 
     public ResourceBundle getResources() {
         return mResources;
+    }
+
+    public ThreadFactory getThreadFactory() {
+        return mThreadFactory;
+    }
+
+    public void showAlert(String title, String header, String text, Alert.AlertType type) {
+        Stage primaryStage = mPrimaryStage;
+        Platform.runLater(() -> {
+            Alert alert = new Alert(type, text, ButtonType.CLOSE);
+            alert.setX(primaryStage.getX() + WINDOW_OFFSET);
+            alert.setY(primaryStage.getY() + WINDOW_OFFSET);
+            alert.initStyle(StageStyle.UTILITY);
+            alert.setTitle(title);
+            alert.setHeaderText(header);
+            alert.showAndWait();
+        });
     }
 
     public static void main(String[] args) {

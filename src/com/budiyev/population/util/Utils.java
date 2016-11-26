@@ -17,7 +17,6 @@
  */
 package com.budiyev.population.util;
 
-import com.budiyev.population.Launcher;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.model.TableResult;
@@ -35,54 +34,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 
-import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.StageStyle;
 
 public final class Utils {
     public static final String DECIMAL_FORMAT_COMMON =
             buildDecimalFormat(Calculator.HIGHER_ACCURACY_SCALE);
-
-    public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
-            (thread, throwable) -> {
-                System.out.println(buildErrorText(throwable));
-
-                if (Launcher.isConsoleMode()) {
-                    System.out.println("Error");
-                    System.out.println(buildErrorText(throwable));
-                } else {
-                    String errorText = buildErrorText(throwable, 10);
-                    Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, errorText, ButtonType.CLOSE);
-                        alert.initStyle(StageStyle.UTILITY);
-                        alert.setTitle("Error");
-                        alert.setHeaderText("An unexpected error occurred");
-                        alert.showAndWait();
-                    });
-                }
-            };
-
-    public static final ThreadFactory THREAD_FACTORY = runnable -> {
-        Thread thread = new Thread(runnable, "Population background thread");
-        thread.setUncaughtExceptionHandler(UNCAUGHT_EXCEPTION_HANDLER);
-        if (!thread.isDaemon()) {
-            thread.setDaemon(true);
-        }
-        if (thread.getPriority() != Thread.NORM_PRIORITY) {
-            thread.setPriority(Thread.NORM_PRIORITY);
-        }
-        return thread;
-    };
-
-    private static ExecutorService ASYNC_EXECUTOR = Executors.newCachedThreadPool(THREAD_FACTORY);
 
     private Utils() {
     }
@@ -113,14 +70,6 @@ public final class Utils {
             }
         }
         return stringBuilder.toString();
-    }
-
-    public static Future<?> runAsync(Runnable runnable) {
-        return ASYNC_EXECUTOR.submit(runnable);
-    }
-
-    public static <T> Future<T> runAsync(Callable<T> callable) {
-        return ASYNC_EXECUTOR.submit(callable);
     }
 
     public static String createRepeatingString(char character, int count) {

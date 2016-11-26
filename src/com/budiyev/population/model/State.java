@@ -26,6 +26,7 @@ import javafx.beans.property.StringProperty;
 
 public class State {
     public static final int EXTERNAL = -1;
+    public static final int UNDEFINED = 0;
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
     private final int mId;
     private final StringProperty mName;
@@ -33,7 +34,7 @@ public class State {
     private final StringProperty mDescription;
 
     public State() {
-        ID_COUNTER.compareAndSet(Integer.MAX_VALUE, 0);
+        ID_COUNTER.compareAndSet(Integer.MAX_VALUE, UNDEFINED);
         mId = ID_COUNTER.incrementAndGet();
         mName = new SimpleStringProperty("");
         mCount = new SimpleDoubleProperty();

@@ -21,6 +21,7 @@ import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;
+import com.budiyev.population.util.PopulationThreadFactory;
 import com.budiyev.population.util.TaskParser;
 import com.budiyev.population.util.Utils;
 
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 public final class Console {
     private static final String KEY_HELP = "-help";
@@ -43,6 +45,15 @@ public final class Console {
     private static final String KEY_TASKS = "-tasks";
     private static final String KEY_INTERVAL = "-interval";
     private static final String KEY_PARALLEL = "-parallel";
+
+    public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
+            (thread, throwable) -> {
+                System.out.println("Error");
+                System.out.println(Utils.buildErrorText(throwable));
+            };
+
+    private static final ThreadFactory THREAD_FACTORY =
+            new PopulationThreadFactory(UNCAUGHT_EXCEPTION_HANDLER);
 
     private Console() {
     }
@@ -76,7 +87,7 @@ public final class Console {
             System.out.println("Can't load: " + inputFile.getName());
             return;
         }
-        Result result = Calculator.calculateSync(task, true, false);
+        Result result = Calculator.calculateSync(task, true, false, THREAD_FACTORY);
         Utils.exportResults(resultFile, result, task.getColumnSeparator(),
                 task.getDecimalSeparator(), task.getLineSeparator(), task.getEncoding(), resources);
         System.out.println("Done: " + resultFile.getName());
@@ -85,7 +96,7 @@ public final class Console {
     private static void calculateTask(Task task, ResourceBundle resources) throws IOException {
         int taskId = task.getId();
         System.out.println("Calculating: " + taskId);
-        Result result = Calculator.calculateSync(task, true, false);
+        Result result = Calculator.calculateSync(task, true, false, THREAD_FACTORY);
         Utils.exportResults(buildResultFile(task.getName(), taskId), result,
                 task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
                 task.getEncoding(), resources);
@@ -96,8 +107,7 @@ public final class Console {
             boolean parallel) throws ExecutionException, InterruptedException, IOException {
         int tasksCount = tasks.size();
         if (parallel) {
-            ExecutorService executor =
-                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
+            ExecutorService executor = Executors.newFixedThreadPool(processors, THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(tasksCount);
             printInitialization(tasksCount, processors, true);
             for (File task : tasks) {
@@ -179,8 +189,7 @@ public final class Console {
         endTask.setName(startTask.getName());
         List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
-            ExecutorService executor =
-                    Executors.newFixedThreadPool(processors, Utils.THREAD_FACTORY);
+            ExecutorService executor = Executors.newFixedThreadPool(processors, THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 futures.add(executor.submit(
