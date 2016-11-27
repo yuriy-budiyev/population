@@ -65,7 +65,8 @@ public final class PopulationApplication extends Application {
                 ResourceBundle resources = getResources();
                 showAlert(resources.getString("alert_error"),
                         resources.getString("alert_unexpected_error"),
-                        Utils.buildErrorText(throwable, 10), Alert.AlertType.ERROR);
+                        Utils.buildErrorText(throwable, 10, resources.getString("stack_trace")),
+                        Alert.AlertType.ERROR);
             };
 
     private final ThreadFactory mThreadFactory =
