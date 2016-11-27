@@ -1135,22 +1135,22 @@ public class PrimaryController extends AbstractController {
 
     public void calculate() {
         if (mStates.size() == 0) {
-            getApplication().showAlert(getString("error"), null, getString("states_missing"),
+            getApplication().showAlert(getString("alert_error"), null, getString("states_missing"),
                     Alert.AlertType.WARNING);
             return;
         }
         if (mTransitions.size() == 0) {
-            getApplication().showAlert(getString("error"), null, getString("transitions_missing"),
-                    Alert.AlertType.WARNING);
+            getApplication()
+                    .showAlert(getString("alert_error"), null, getString("transitions_missing"),
+                            Alert.AlertType.WARNING);
             return;
         }
         for (Transition transition : mTransitions) {
             if (transition.getSourceState() == State.UNDEFINED ||
                     transition.getOperandState() == State.UNDEFINED ||
                     transition.getResultState() == State.UNDEFINED) {
-                getApplication()
-                        .showAlert(getString("error"), null, getString("transitions_incorrect"),
-                                Alert.AlertType.WARNING);
+                getApplication().showAlert(getString("alert_error"), null,
+                        getString("transitions_incorrect"), Alert.AlertType.WARNING);
                 return;
             }
         }
@@ -1158,8 +1158,9 @@ public class PrimaryController extends AbstractController {
         try {
             startPoint = Integer.parseInt(mStartPointField.getText());
         } catch (NumberFormatException e) {
-            getApplication().showAlert(getString("error"), null, getString("start_point_invalid"),
-                    Alert.AlertType.WARNING);
+            getApplication()
+                    .showAlert(getString("alert_error"), null, getString("start_point_invalid"),
+                            Alert.AlertType.WARNING);
             return;
         }
         int stepsCount;
@@ -1167,13 +1168,14 @@ public class PrimaryController extends AbstractController {
             stepsCount = Integer.parseInt(mStepsCountField.getText());
             if (stepsCount < 1 || stepsCount == Integer.MAX_VALUE) {
                 getApplication()
-                        .showAlert(getString("error"), null, getString("steps_count_invalid"),
+                        .showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
                                 Alert.AlertType.WARNING);
                 return;
             }
         } catch (NumberFormatException e) {
-            getApplication().showAlert(getString("error"), null, getString("steps_count_invalid"),
-                    Alert.AlertType.WARNING);
+            getApplication()
+                    .showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
+                            Alert.AlertType.WARNING);
             return;
         }
         mCalculating = true;

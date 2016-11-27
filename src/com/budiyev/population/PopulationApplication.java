@@ -45,6 +45,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -61,7 +62,9 @@ public final class PopulationApplication extends Application {
 
     private final Thread.UncaughtExceptionHandler mUncaughtExceptionHandler =
             (thread, throwable) -> {
-                showAlert("Error", "An unexpected error occurred",
+                ResourceBundle resources = getResources();
+                showAlert(resources.getString("alert_error"),
+                        resources.getString("alert_unexpected_error"),
                         Utils.buildErrorText(throwable, 10), Alert.AlertType.ERROR);
             };
 
@@ -305,10 +308,10 @@ public final class PopulationApplication extends Application {
         return mThreadFactory;
     }
 
-    public void showAlert(String title, String header, String text, Alert.AlertType type) {
+    public void showAlert(String title, String header, String content, Alert.AlertType type) {
         Stage primaryStage = mPrimaryStage;
         Platform.runLater(() -> {
-            Alert alert = new Alert(type, text, ButtonType.CLOSE);
+            Alert alert = new Alert(type);
             alert.getDialogPane().getStylesheets()
                     .add("com/budiyev/population/resource/style/alert.css");
             alert.setX(primaryStage.getX() + WINDOW_OFFSET);
@@ -316,6 +319,10 @@ public final class PopulationApplication extends Application {
             alert.initStyle(StageStyle.UTILITY);
             alert.setTitle(title);
             alert.setHeaderText(header);
+            alert.setContentText(content);
+            alert.getButtonTypes().clear();
+            alert.getButtonTypes().add(new ButtonType(getResources().getString("alert_close"),
+                    ButtonBar.ButtonData.OK_DONE));
             alert.showAndWait();
         });
     }
