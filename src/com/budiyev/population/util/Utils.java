@@ -34,6 +34,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javafx.collections.ObservableList;
 
@@ -42,6 +47,12 @@ public final class Utils {
             buildDecimalFormat(Calculator.HIGHER_ACCURACY_SCALE);
 
     private Utils() {
+    }
+
+    public static ExecutorService newExecutor(ThreadFactory threadFactory) {
+        int processors = Runtime.getRuntime().availableProcessors();
+        return new ThreadPoolExecutor(processors, processors, 0, TimeUnit.NANOSECONDS,
+                new LinkedBlockingQueue<>(), threadFactory);
     }
 
     public static String buildErrorText(Throwable throwable) {

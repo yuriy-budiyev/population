@@ -35,7 +35,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -107,7 +106,7 @@ public final class Console {
             boolean parallel) throws ExecutionException, InterruptedException, IOException {
         int tasksCount = tasks.size();
         if (parallel) {
-            ExecutorService executor = Executors.newFixedThreadPool(processors, THREAD_FACTORY);
+            ExecutorService executor = Utils.newExecutor(THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(tasksCount);
             printInitialization(tasksCount, processors, true);
             for (File task : tasks) {
@@ -176,7 +175,7 @@ public final class Console {
     }
 
     private static void calculateTasks(File startFile, File endFile, int size,
-            ResourceBundle resources, int processors, boolean parallel) throws Exception {
+            ResourceBundle resources, boolean parallel) throws Exception {
         Task startTask = TaskParser.parse(startFile);
         Task endTask = TaskParser.parse(endFile);
         if (startTask == null || endTask == null ||
@@ -189,7 +188,7 @@ public final class Console {
         endTask.setName(startTask.getName());
         List<Double> shifts = calculateShifts(startTask, endTask, size);
         if (parallel) {
-            ExecutorService executor = Executors.newFixedThreadPool(processors, THREAD_FACTORY);
+            ExecutorService executor = Utils.newExecutor(THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 futures.add(executor.submit(
@@ -268,7 +267,7 @@ public final class Console {
                 File startFile = new File(args[shift]);
                 File endFile = new File(args[shift + 1]);
                 int size = Integer.parseInt(args[shift + 2]);
-                calculateTasks(startFile, endFile, size, resources, processors, parallel);
+                calculateTasks(startFile, endFile, size, resources, parallel);
             } else {
                 System.out.println("Invalid arguments.");
             }

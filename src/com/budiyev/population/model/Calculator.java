@@ -17,13 +17,14 @@
  */
 package com.budiyev.population.model;
 
+import com.budiyev.population.util.Utils;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Lock;
@@ -79,8 +80,7 @@ public class Calculator {
         }
         mThreadFactory = threadFactory;
         if (mTask.isParallel()) {
-            mExecutor = Executors
-                    .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+            mExecutor = Utils.newExecutor(threadFactory);
         } else {
             mExecutor = null;
         }
