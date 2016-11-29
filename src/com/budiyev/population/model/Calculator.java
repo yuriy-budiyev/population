@@ -37,7 +37,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    private static final int HIGHER_ACCURACY_SCALE = 768;
+    private static final int HIGHER_ACCURACY_SCALE = 512;
     private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
@@ -266,6 +266,15 @@ public class Calculator {
         return -1;
     }
 
+    private void clearBigStates() {
+        for (int i = 0; i < mStatesBig.length; i++) {
+            for (int j = 0; j < mStatesBig[i].length; j++) {
+                mStatesBig[i][j] = null;
+            }
+            mStatesBig[i] = null;
+        }
+    }
+
     /**
      * Выполнение обратного вызова результата, если он задан
      *
@@ -384,6 +393,7 @@ public class Calculator {
                 callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
             }
         }
+        clearBigStates();
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(),
                 mPrepareResultsTableData, mPrepareResultsChartData);
     }
