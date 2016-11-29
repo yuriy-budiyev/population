@@ -37,7 +37,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    public static final int HIGHER_ACCURACY_SCALE = 384;
+    public static final int HIGHER_ACCURACY_SCALE = 768;
     private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
@@ -124,6 +124,11 @@ public class Calculator {
 
     private void copyPreviousStepBig(int step, int currentStep) {
         int index = currentStep - step;
+        if (index == 0) {
+            for (int i = mStatesBig.length - 1; i >= 1; i--) {
+                System.arraycopy(mStatesBig[i - 1], 0, mStatesBig[i], 0, mStatesBig[i].length);
+            }
+        }
         for (int state = 0; state < mStatesCount; state++) {
             BigDecimal value = mStatesBig[index + 1][state];
             mStatesBig[index][state] = value;

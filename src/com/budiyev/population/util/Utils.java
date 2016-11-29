@@ -17,7 +17,6 @@
  */
 package com.budiyev.population.util;
 
-import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.model.TableResult;
 import com.budiyev.population.model.Task;
@@ -43,8 +42,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.collections.ObservableList;
 
 public final class Utils {
-    public static final String DECIMAL_FORMAT_COMMON =
-            buildDecimalFormat(Calculator.HIGHER_ACCURACY_SCALE);
+    public static final int MAX_PRECISION = 325;
+    public static final String DECIMAL_FORMAT_COMMON = buildDecimalFormat(MAX_PRECISION);
 
     private Utils() {
     }
