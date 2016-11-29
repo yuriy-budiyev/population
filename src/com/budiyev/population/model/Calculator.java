@@ -37,7 +37,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    public static final int HIGHER_ACCURACY_SCALE = 768;
+    private static final int HIGHER_ACCURACY_SCALE = 768;
     private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
