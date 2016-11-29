@@ -37,7 +37,7 @@ public class Calculator {
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
      */
-    private static final int HIGHER_ACCURACY_SCALE = 512;
+    private static final int HIGHER_ACCURACY_SCALE = 384;
     private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
@@ -1029,6 +1029,9 @@ public class Calculator {
      * @return результат
      */
     public static BigDecimal power(BigDecimal u, long exponent, int scale) {
+        if (u.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
         if (exponent < 0) {
             return BigDecimal.ONE.divide(power(u, -exponent, scale), scale, RoundingMode.HALF_EVEN);
         }
@@ -1051,6 +1054,9 @@ public class Calculator {
      * @return результат
      */
     public static BigDecimal power(BigDecimal u, double exponent, int scale) {
+        if (u.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
         if (exponent % 1 == 0 && exponent <= Long.MAX_VALUE) {
             return power(u, (long) exponent, scale);
         }
@@ -1066,6 +1072,9 @@ public class Calculator {
      * @return результат
      */
     public static BigDecimal root(BigDecimal u, long index, int scale) {
+        if (u.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
         int s = scale + 1;
         BigDecimal a = u;
         BigDecimal b = decimalValue(index);
@@ -1124,6 +1133,10 @@ public class Calculator {
      * @return результат
      */
     public static BigDecimal naturalLogarithm(BigDecimal u, int scale) {
+        if (u.signum() <= 0) {
+            throw new IllegalArgumentException(
+                    "Natural logarithm is defined only on positive values.");
+        }
         int a = u.toString().length() - u.scale() - 1;
         if (a < 3) {
             return naturalLogarithm0(u, scale);
