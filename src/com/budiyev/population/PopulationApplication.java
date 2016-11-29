@@ -62,6 +62,7 @@ public final class PopulationApplication extends Application {
 
     private final Thread.UncaughtExceptionHandler mUncaughtExceptionHandler =
             (thread, throwable) -> {
+                throwable.printStackTrace();
                 ResourceBundle resources = getResources();
                 showAlert(resources.getString("alert_error"),
                         resources.getString("alert_unexpected_error"),

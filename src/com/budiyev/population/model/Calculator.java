@@ -41,6 +41,7 @@ public class Calculator {
     private final Lock mStatesLock = new ReentrantLock();
     private final Task mTask;
     private final double[][] mStates; // Состояния
+    private final BigDecimal[][] mStatesBig; // Состояния для режима повышенной точности
     private final int[] mStateIds; // Идентификаторы состояний
     private final int mStatesCount; // Количество состояний
     private final ExecutorService mExecutor; // Исполнитель (для параллельного режима)
@@ -78,11 +79,55 @@ public class Calculator {
             mStates[0][i] = state.getCount();
             mStateIds[i] = state.getId();
         }
+        if (mTask.isHigherAccuracy()) {
+            int maxDelay = 0;
+            for (Transition transition : mTask.getTransitions()) {
+                maxDelay = Math.max(maxDelay, transition.getSourceDelay());
+                maxDelay = Math.max(maxDelay, transition.getOperandDelay());
+            }
+            mStatesBig = new BigDecimal[maxDelay + 2][mStatesCount];
+            for (int i = 0; i < mStatesCount; i++) {
+                BigDecimal value = decimalValue(states.get(i).getCount());
+                mStatesBig[0][i] = value;
+                mStatesBig[1][i] = value;
+            }
+        } else {
+            mStatesBig = null;
+        }
         mThreadFactory = threadFactory;
         if (mTask.isParallel()) {
             mExecutor = Utils.newExecutor(threadFactory);
         } else {
             mExecutor = null;
+        }
+    }
+
+    private double getTotalCount(int step) {
+        double totalCount = 0;
+        for (int state = 0; state < mStatesCount; state++) {
+            totalCount += mStates[step][state];
+        }
+        return totalCount;
+    }
+
+    private void copyPreviousStep(int step) {
+        System.arraycopy(mStates[step - 1], 0, mStates[step], 0, mStatesCount);
+    }
+
+    private BigDecimal getTotalCountBig(int step, int currentStep) {
+        BigDecimal totalCount = BigDecimal.ZERO;
+        for (int state = 0; state < mStatesCount; state++) {
+            totalCount = totalCount.add(mStatesBig[currentStep - step][state]);
+        }
+        return totalCount;
+    }
+
+    private void copyPreviousStepBig(int step, int currentStep) {
+        int index = currentStep - step;
+        for (int state = 0; state < mStatesCount; state++) {
+            BigDecimal value = mStatesBig[index + 1][state];
+            mStatesBig[index][state] = value;
+            mStates[step][state] = doubleValue(value);
         }
     }
 
@@ -102,17 +147,10 @@ public class Calculator {
         }
     }
 
-    /**
-     * Установка значения заданного состояния для заднного шага
-     *
-     * @param step  шаг
-     * @param state идентификатор состояния
-     * @param value значение
-     */
-    private void setState(int step, int state, double value) {
+    private BigDecimal getStateBig(int step, int currentStep, int state) {
         mStatesLock.lock();
         try {
-            mStates[step][state] = value;
+            return mStatesBig[currentStep - step][state];
         } finally {
             mStatesLock.unlock();
         }
@@ -128,6 +166,23 @@ public class Calculator {
         if (!mTask.isAllowNegative()) {
             mStatesLock.lock();
             try {
+                if (mStates[step][state] < 0) {
+                    mStates[step][state] = 0;
+                }
+            } finally {
+                mStatesLock.unlock();
+            }
+        }
+    }
+
+    private void checkStateNegativenessBig(int step, int currentStep, int state) {
+        if (!mTask.isAllowNegative()) {
+            mStatesLock.lock();
+            try {
+                int index = currentStep - step;
+                if (mStatesBig[index][state].compareTo(BigDecimal.ZERO) < 0) {
+                    mStatesBig[index][state] = BigDecimal.ZERO;
+                }
                 if (mStates[step][state] < 0) {
                     mStates[step][state] = 0;
                 }
@@ -153,17 +208,13 @@ public class Calculator {
         }
     }
 
-    /**
-     * Увеличение значения заданного состояния на заданном шаге на заданное значение
-     *
-     * @param step  номер шага
-     * @param state идентификатор состояния
-     * @param value значение
-     */
-    private void incrementState(int step, int state, BigDecimal value) {
+    private void incrementStateBig(int step, int currentStep, int state, BigDecimal value) {
         mStatesLock.lock();
         try {
-            mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).add(value));
+            int index = currentStep - step;
+            BigDecimal result = mStatesBig[index][state].add(value);
+            mStatesBig[index][state] = result;
+            mStates[step][state] = doubleValue(result);
         } finally {
             mStatesLock.unlock();
         }
@@ -180,17 +231,13 @@ public class Calculator {
         incrementState(step, state, -value);
     }
 
-    /**
-     * Уменьшение значения заданного состояния на заданном шаге на заданное значение
-     *
-     * @param step  номер шага
-     * @param state идентификатор состояния
-     * @param value значение
-     */
-    private void decrementState(int step, int state, BigDecimal value) {
+    private void decrementStateBig(int step, int currentStep, int state, BigDecimal value) {
         mStatesLock.lock();
         try {
-            mStates[step][state] = doubleValue(decimalValue(mStates[step][state]).subtract(value));
+            int index = currentStep - step;
+            BigDecimal result = mStatesBig[index][state].subtract(value);
+            mStatesBig[index][state] = result;
+            mStates[step][state] = doubleValue(result);
         } finally {
             mStatesLock.unlock();
         }
@@ -264,6 +311,7 @@ public class Calculator {
         if (mTask.isParallel()) {
             List<Future<?>> futures = new ArrayList<>(transitions.size());
             for (int step = 1; step < stepsCount; step++) {
+                copyPreviousStep(step);
                 double totalCount = getTotalCount(step);
                 for (Transition transition : transitions) {
                     futures.add(mExecutor
@@ -282,6 +330,7 @@ public class Calculator {
             }
         } else {
             for (int step = 1; step < stepsCount; step++) {
+                copyPreviousStep(step);
                 double totalCount = getTotalCount(step);
                 for (Transition transition : transitions) {
                     transitionNormalAccuracy(step, totalCount, transition);
@@ -303,7 +352,8 @@ public class Calculator {
         if (mTask.isParallel()) {
             List<Future<?>> futures = new ArrayList<>(transitions.size());
             for (int step = 1; step < stepsCount; step++) {
-                BigDecimal totalCount = getTotalCountBig(step);
+                copyPreviousStepBig(step, step);
+                BigDecimal totalCount = getTotalCountBig(step, step);
                 for (Transition transition : transitions) {
                     futures.add(mExecutor
                             .submit(new TransitionActionHigherAccuracy(step, totalCount,
@@ -321,7 +371,8 @@ public class Calculator {
             }
         } else {
             for (int step = 1; step < stepsCount; step++) {
-                BigDecimal totalCount = getTotalCountBig(step);
+                copyPreviousStepBig(step, step);
+                BigDecimal totalCount = getTotalCountBig(step, step);
                 for (Transition transition : transitions) {
                     transitionHigherAccuracy(step, totalCount, transition);
                 }
@@ -330,26 +381,6 @@ public class Calculator {
         }
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(),
                 mPrepareResultsTableData, mPrepareResultsChartData);
-    }
-
-    private double getTotalCount(int step) {
-        double totalCount = 0;
-        for (int state = 0; state < mStatesCount; state++) {
-            double count = getState(step - 1, state);
-            setState(step, state, count);
-            totalCount += count;
-        }
-        return totalCount;
-    }
-
-    private BigDecimal getTotalCountBig(int step) {
-        BigDecimal totalCount = decimalValue(0);
-        for (int state = 0; state < mStatesCount; state++) {
-            double count = getState(step - 1, state);
-            setState(step, state, count);
-            totalCount = totalCount.add(decimalValue(count));
-        }
-        return totalCount;
     }
 
     /**
@@ -521,7 +552,7 @@ public class Calculator {
         if (transition.getType() == TransitionType.LINEAR) {
             if (sourceExternal) {
                 BigDecimal operandDensity =
-                        applyCoefficientLinear(decimalValue(getState(operandIndex, operandState)),
+                        applyCoefficientLinear(getStateBig(operandIndex, step, operandState),
                                 transition.getOperandCoefficient());
                 value = multiply(operandDensity, decimalValue(transition.getProbability()));
                 if (transition.getMode() == TransitionMode.RESIDUAL) {
@@ -529,22 +560,21 @@ public class Calculator {
                             multiply(value, decimalValue(transition.getOperandCoefficient())));
                 }
             } else if (operandExternal) {
-                value = multiply(
-                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
-                                transition.getSourceCoefficient()),
+                value = multiply(applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
+                        transition.getSourceCoefficient()),
                         decimalValue(transition.getProbability()));
             } else if (sourceState == operandState) {
                 BigDecimal density =
-                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
+                        applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
                                 transition.getSourceCoefficient() +
                                         transition.getOperandCoefficient() - 1);
                 value = applyTransitionCommon(density, density, transition);
             } else {
                 BigDecimal sourceDensity =
-                        applyCoefficientLinear(decimalValue(getState(sourceIndex, sourceState)),
+                        applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
                                 transition.getSourceCoefficient());
                 BigDecimal operandDensity =
-                        applyCoefficientLinear(decimalValue(getState(operandIndex, operandState)),
+                        applyCoefficientLinear(getStateBig(operandIndex, step, operandState),
                                 transition.getOperandCoefficient());
                 value = applyTransitionCommon(sourceDensity.min(operandDensity), operandDensity,
                         transition);
@@ -552,9 +582,9 @@ public class Calculator {
         } else if (transition.getType() == TransitionType.SOLUTE) {
             if (totalCount.compareTo(BigDecimal.ZERO) > 0) {
                 if (sourceExternal) {
-                    BigDecimal operandDensity = applyCoefficientPower(
-                            decimalValue(getState(operandIndex, operandState)),
-                            transition.getOperandCoefficient());
+                    BigDecimal operandDensity =
+                            applyCoefficientPower(getStateBig(operandIndex, step, operandState),
+                                    transition.getOperandCoefficient());
                     value = operandDensity;
                     if (transition.getOperandCoefficient() > 1) {
                         value = divide(value,
@@ -562,7 +592,7 @@ public class Calculator {
                     }
                     value = applyTransitionCommon(value, operandDensity, transition);
                 } else if (operandExternal) {
-                    value = applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                    value = applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
                             transition.getSourceCoefficient());
                     if (transition.getSourceCoefficient() > 1) {
                         value = divide(value,
@@ -571,7 +601,7 @@ public class Calculator {
                     value = multiply(value, decimalValue(transition.getProbability()));
                 } else if (sourceState == operandState) {
                     BigDecimal density =
-                            applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                            applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
                                     transition.getSourceCoefficient() +
                                             transition.getOperandCoefficient());
                     value = divide(density, power(totalCount,
@@ -580,11 +610,11 @@ public class Calculator {
                     value = applyTransitionCommon(value, density, transition);
                 } else {
                     BigDecimal sourceDensity =
-                            applyCoefficientPower(decimalValue(getState(sourceIndex, sourceState)),
+                            applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
                                     transition.getSourceCoefficient());
-                    BigDecimal operandDensity = applyCoefficientPower(
-                            decimalValue(getState(operandIndex, operandState)),
-                            transition.getOperandCoefficient());
+                    BigDecimal operandDensity =
+                            applyCoefficientPower(getStateBig(operandIndex, step, operandState),
+                                    transition.getOperandCoefficient());
                     value = divide(multiply(sourceDensity, operandDensity), power(totalCount,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient() -
                                     1));
@@ -593,7 +623,7 @@ public class Calculator {
             }
         } else if (transition.getType() == TransitionType.BLEND) {
             if (sourceExternal) {
-                BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
+                BigDecimal operandCount = getStateBig(operandIndex, step, operandState);
                 if (operandCount.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal operandDensity =
                             applyCoefficientPower(operandCount, transition.getOperandCoefficient());
@@ -605,7 +635,7 @@ public class Calculator {
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             } else if (operandExternal) {
-                BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
+                BigDecimal sourceCount = getStateBig(sourceIndex, step, sourceState);
                 if (sourceCount.compareTo(BigDecimal.ZERO) > 0) {
                     value = applyCoefficientPower(sourceCount, transition.getSourceCoefficient());
                     if (transition.getSourceCoefficient() > 1) {
@@ -615,7 +645,7 @@ public class Calculator {
                     value = multiply(value, decimalValue(transition.getProbability()));
                 }
             } else if (sourceState == operandState) {
-                BigDecimal count = decimalValue(getState(sourceIndex, sourceState));
+                BigDecimal count = getStateBig(sourceIndex, step, sourceState);
                 if (count.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal density = applyCoefficientPower(count,
                             transition.getSourceCoefficient() + transition.getOperandCoefficient());
@@ -625,8 +655,8 @@ public class Calculator {
                     value = applyTransitionCommon(value, density, transition);
                 }
             } else {
-                BigDecimal sourceCount = decimalValue(getState(sourceIndex, sourceState));
-                BigDecimal operandCount = decimalValue(getState(operandIndex, operandState));
+                BigDecimal sourceCount = getStateBig(sourceIndex, step, sourceState);
+                BigDecimal operandCount = getStateBig(operandIndex, step, operandState);
                 BigDecimal sum = sourceCount.add(operandCount);
                 if (sum.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal sourceDensity =
@@ -641,24 +671,24 @@ public class Calculator {
             }
         }
         if (!sourceExternal && transition.getMode() == TransitionMode.REMOVING) {
-            decrementState(step, sourceState,
+            decrementStateBig(step, step, sourceState,
                     multiply(value, decimalValue(transition.getSourceCoefficient())));
-            checkStateNegativeness(step, sourceState);
+            checkStateNegativenessBig(step, step, sourceState);
         }
         if (!operandExternal) {
             if (transition.getMode() == TransitionMode.INHIBITOR ||
                     transition.getMode() == TransitionMode.RESIDUAL) {
-                decrementState(step, operandState, value);
+                decrementStateBig(step, step, operandState, value);
             } else if (transition.getMode() != TransitionMode.RETAINING) {
-                decrementState(step, operandState,
+                decrementStateBig(step, step, operandState,
                         multiply(value, decimalValue(transition.getOperandCoefficient())));
             }
-            checkStateNegativeness(step, operandState);
+            checkStateNegativenessBig(step, step, operandState);
         }
         if (!resultExternal) {
-            incrementState(step, resultState,
+            incrementStateBig(step, step, resultState,
                     multiply(value, decimalValue(transition.getResultCoefficient())));
-            checkStateNegativeness(step, resultState);
+            checkStateNegativenessBig(step, step, resultState);
         }
     }
 
