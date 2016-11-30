@@ -36,10 +36,10 @@ public class Calculator {
      * в режиме повышенной точности
      */
     private static final int HIGHER_ACCURACY_SCALE = 384;
-    private final Lock mStatesLock = new ReentrantLock();
-    private final Task mTask;
+    private final Task mTask; // Задача
     private final double[][] mStates; // Состояния
     private final BigDecimal[][] mStatesBig; // Состояния для режима повышенной точности
+    private final Lock mStatesLock = new ReentrantLock();
     private final int[] mStateIds; // Идентификаторы состояний
     private final int mStatesCount; // Количество состояний
     private final ExecutorService mExecutor; // Исполнитель (для параллельного режима)
@@ -48,7 +48,7 @@ public class Calculator {
     private final ThreadFactory mThreadFactory; // Фабрика потоков
     private final boolean mPrepareResultsTableData; // Подготовить результат в табличном виде
     private final boolean mPrepareResultsChartData; // Подготовить результат в графическом виде
-    private double mProgress; // Прогресс вычислений
+    private volatile double mProgress; // Прогресс вычислений
 
     /**
      * Вычислитель
@@ -64,36 +64,40 @@ public class Calculator {
             ResultCallback resultCallback, ProgressCallback progressCallback,
             ThreadFactory threadFactory) {
         mTask = task;
-        List<State> states = mTask.getStates();
-        mStatesCount = states.size();
         mPrepareResultsTableData = prepareResultsTableData;
         mPrepareResultsChartData = prepareResultsChartData;
         mResultCallback = resultCallback;
         mProgressCallback = progressCallback;
-        mStates = new double[mTask.getStepsCount()][mStatesCount];
-        mStateIds = new int[mStatesCount];
-        for (int i = 0; i < mStatesCount; i++) {
-            State state = states.get(i);
-            mStates[0][i] = state.getCount();
-            mStateIds[i] = state.getId();
+        mThreadFactory = threadFactory;
+        List<State> statesList = task.getStates();
+        int statesCount = statesList.size();
+        mStatesCount = statesCount;
+        double[][] states = new double[task.getStepsCount()][statesCount];
+        int[] stateIds = new int[statesCount];
+        for (int i = 0; i < statesCount; i++) {
+            State state = statesList.get(i);
+            states[0][i] = state.getCount();
+            stateIds[i] = state.getId();
         }
-        if (mTask.isHigherAccuracy()) {
+        mStates = states;
+        mStateIds = stateIds;
+        if (task.isHigherAccuracy()) {
             int maxDelay = 0;
-            for (Transition transition : mTask.getTransitions()) {
+            for (Transition transition : task.getTransitions()) {
                 maxDelay = Math.max(maxDelay, transition.getSourceDelay());
                 maxDelay = Math.max(maxDelay, transition.getOperandDelay());
             }
-            mStatesBig = new BigDecimal[maxDelay + 2][mStatesCount];
-            for (int i = 0; i < mStatesCount; i++) {
-                BigDecimal value = decimalValue(states.get(i).getCount());
-                mStatesBig[0][i] = value;
-                mStatesBig[1][i] = value;
+            BigDecimal[][] statesBig = new BigDecimal[maxDelay + 2][statesCount];
+            for (int i = 0; i < statesCount; i++) {
+                BigDecimal value = decimalValue(statesList.get(i).getCount());
+                statesBig[0][i] = value;
+                statesBig[1][i] = value;
             }
+            mStatesBig = statesBig;
         } else {
             mStatesBig = null;
         }
-        mThreadFactory = threadFactory;
-        if (mTask.isParallel()) {
+        if (task.isParallel()) {
             mExecutor = Utils.newExecutor(threadFactory);
         } else {
             mExecutor = null;
@@ -294,7 +298,7 @@ public class Calculator {
         if (mProgressCallback == null) {
             return;
         }
-        final double progress;
+        double progress;
         boolean needUpdate;
         if (step == 0 || mTask.getStepsCount() == 0) {
             progress = 0;
