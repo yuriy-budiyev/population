@@ -44,6 +44,8 @@ import javafx.collections.ObservableList;
 public final class Utils {
     public static final int MAX_PRECISION = 325;
     public static final String DECIMAL_FORMAT_COMMON = buildDecimalFormat(MAX_PRECISION);
+    private static final String QUOTE = "\"";
+    private static final String DOUBLE_QUOTE = "\"\"";
 
     private Utils() {
     }
@@ -130,8 +132,6 @@ public final class Utils {
                 start = startPoint;
             }
         }
-        String quote = "\"";
-        String doubleQuote = "\"\"";
         if (file.exists()) {
             file.delete();
         }
@@ -140,13 +140,13 @@ public final class Utils {
         formatter.getDecimalFormatSymbols().setDecimalSeparator(decimalSeparator);
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), encoding))) {
-            writer.append(quote).append(resources.getString("step")).append(quote)
+            writer.append(QUOTE).append(resources.getString("step")).append(QUOTE)
                     .append(columnSeparator);
             for (int i = 0; i < results.size(); i++) {
                 ArrayList<String> headers = results.get(i).getDataNames();
                 for (int j = 0; j < headers.size(); j++) {
-                    writer.append(quote).append(headers.get(j).replace(quote, doubleQuote))
-                            .append(quote);
+                    writer.append(QUOTE).append(headers.get(j).replace(QUOTE, DOUBLE_QUOTE))
+                            .append(QUOTE);
                     if (i != results.size() - 1 || j != headers.size() - 1) {
                         writer.append(columnSeparator);
                     }
@@ -164,9 +164,9 @@ public final class Utils {
                     if (localIndex >= 0 && localIndex < data.size()) {
                         TableResult localResult = data.get(localIndex);
                         for (int k = 0; k < localResult.valueCount(); k++) {
-                            rowBuilder.append(quote)
+                            rowBuilder.append(QUOTE)
                                     .append(formatter.format(localResult.getValue(k)))
-                                    .append(quote);
+                                    .append(QUOTE);
                             if (j != results.size() - 1 || k != localResult.valueCount() - 1) {
                                 rowBuilder.append(columnSeparator);
                             }
@@ -178,7 +178,7 @@ public final class Utils {
                     } else {
                         int size = result.getDataNames().size();
                         for (int k = 0; k < size; k++) {
-                            rowBuilder.append(quote).append("---").append(quote);
+                            rowBuilder.append(QUOTE).append("---").append(QUOTE);
                             if (j != results.size() - 1 || k != size - 1) {
                                 rowBuilder.append(columnSeparator);
                             }
@@ -186,8 +186,8 @@ public final class Utils {
                     }
                 }
                 if (!empty) {
-                    writer.append(quote).append(String.valueOf(firstExistent.getNumber()))
-                            .append(quote).append(columnSeparator).append(rowBuilder.toString())
+                    writer.append(QUOTE).append(String.valueOf(firstExistent.getNumber()))
+                            .append(QUOTE).append(columnSeparator).append(rowBuilder.toString())
                             .append(lineSeparator);
                 }
             }
