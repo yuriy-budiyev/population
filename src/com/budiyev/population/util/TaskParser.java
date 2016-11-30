@@ -182,8 +182,8 @@ public final class TaskParser {
                 transition.setOperandState(findState(reader.readLine(), states));
                 transition.setResultState(findState(reader.readLine(), states));
                 double intensity = Double.parseDouble(reader.readLine().replace(',', '.'));
-                if (intensity > 1d) {
-                    transition.setProbability(1d);
+                if (intensity > 1) {
+                    transition.setProbability(1);
                     transition.setResultCoefficient(intensity);
                 } else {
                     transition.setProbability(intensity);
@@ -216,7 +216,7 @@ public final class TaskParser {
                 return state.getId();
             }
         }
-        return 0;
+        return State.UNDEFINED;
     }
 
     private static int getTransitionMode(int typeAndMode) {

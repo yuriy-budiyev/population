@@ -31,8 +31,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Calculator {
-    private static final double NORMAL_ACCURACY_PROGRESS_THRESHOLD = 0.005;
-    private static final double HIGHER_ACCURACY_PROGRESS_THRESHOLD = 0.0005;
     /**
      * Количество десяничных знаков после разделителя в вещественных числах
      * в режиме повышенной точности
@@ -290,10 +288,9 @@ public class Calculator {
     /**
      * Выполнение обратного вызова прогресса вычислений, если это необходимо и он задан
      *
-     * @param step      номер шага
-     * @param threshold минимальное изменение прогресса, на которое стоит реагировать
+     * @param step номер шага
      */
-    private void callbackProgress(int step, double threshold) {
+    private void callbackProgress(int step) {
         if (mProgressCallback == null) {
             return;
         }
@@ -307,7 +304,7 @@ public class Calculator {
             needUpdate = true;
         } else {
             progress = (double) step / (double) (mTask.getStepsCount() - 1);
-            needUpdate = progress - mProgress > threshold;
+            needUpdate = progress - mProgress > 0.005;
         }
         if (needUpdate) {
             mProgress = progress;
@@ -319,7 +316,7 @@ public class Calculator {
      * Вычисление с обычной точностью
      */
     private Result calculateNormalAccuracy() {
-        callbackProgress(0, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+        callbackProgress(0);
         List<Transition> transitions = mTask.getTransitions();
         int stepsCount = mTask.getStepsCount();
         if (mTask.isParallel()) {
@@ -340,7 +337,7 @@ public class Calculator {
                     }
                 }
                 futures.clear();
-                callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+                callbackProgress(step);
             }
         } else {
             for (int step = 1; step < stepsCount; step++) {
@@ -349,7 +346,7 @@ public class Calculator {
                 for (Transition transition : transitions) {
                     transitionNormalAccuracy(step, totalCount, transition);
                 }
-                callbackProgress(step, NORMAL_ACCURACY_PROGRESS_THRESHOLD);
+                callbackProgress(step);
             }
         }
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(),
@@ -360,7 +357,7 @@ public class Calculator {
      * Вычисление с повышенной точностью
      */
     private Result calculateHigherAccuracy() {
-        callbackProgress(0, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+        callbackProgress(0);
         List<Transition> transitions = mTask.getTransitions();
         int stepsCount = mTask.getStepsCount();
         if (mTask.isParallel()) {
@@ -381,7 +378,7 @@ public class Calculator {
                     }
                 }
                 futures.clear();
-                callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+                callbackProgress(step);
             }
         } else {
             for (int step = 1; step < stepsCount; step++) {
@@ -390,7 +387,7 @@ public class Calculator {
                 for (Transition transition : transitions) {
                     transitionHigherAccuracy(step, totalCount, transition);
                 }
-                callbackProgress(step, HIGHER_ACCURACY_PROGRESS_THRESHOLD);
+                callbackProgress(step);
             }
         }
         clearBigStates();
