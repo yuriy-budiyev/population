@@ -101,9 +101,12 @@ public final class PopulationApplication extends Application {
                     mSettings.put(Settings.PRIMARY_STAGE_HEIGHT, emptyIfNullString(row.cell(1)));
                 } else if (Objects.equals(row.cell(0), Settings.PRIMARY_STAGE_MAXIMIZED)) {
                     mSettings.put(Settings.PRIMARY_STAGE_MAXIMIZED, emptyIfNullString(row.cell(1)));
+                } else if (Objects.equals(row.cell(0), Settings.LOCALE)) {
+                    mSettings.put(Settings.LOCALE, emptyIfNullString(row.cell(1)));
                 }
             }
             mSettings.putIfAbsent(Settings.WORK_DIRECTORY, System.getProperty("user.home"));
+            mSettings.putIfAbsent(Settings.LOCALE, Locale.getDefault().getLanguage());
         } catch (Exception e) {
             mSettings.clear();
         }
@@ -116,14 +119,13 @@ public final class PopulationApplication extends Application {
             settingsFile.delete();
         }
         StringTable settingsTable = new StringTable();
-        settingsTable.add(new StringRow(Settings.WORK_DIRECTORY,
-                mSettings.get(Settings.WORK_DIRECTORY)));
-        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_X, mPrimaryStage.getX()));
-        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_Y, mPrimaryStage.getY()));
-        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_WIDTH, mPrimaryStage.getWidth()));
-        settingsTable.add(new StringRow(Settings.PRIMARY_STAGE_HEIGHT, mPrimaryStage.getHeight()));
-        settingsTable
-                .add(new StringRow(Settings.PRIMARY_STAGE_MAXIMIZED, mPrimaryStage.isMaximized()));
+        settingsTable.add(Settings.LOCALE, mSettings.get(Settings.LOCALE));
+        settingsTable.add(Settings.WORK_DIRECTORY, mSettings.get(Settings.WORK_DIRECTORY));
+        settingsTable.add(Settings.PRIMARY_STAGE_X, mPrimaryStage.getX());
+        settingsTable.add(Settings.PRIMARY_STAGE_Y, mPrimaryStage.getY());
+        settingsTable.add(Settings.PRIMARY_STAGE_WIDTH, mPrimaryStage.getWidth());
+        settingsTable.add(Settings.PRIMARY_STAGE_HEIGHT, mPrimaryStage.getHeight());
+        settingsTable.add(Settings.PRIMARY_STAGE_MAXIMIZED, mPrimaryStage.isMaximized());
         try {
             settingsFile.createNewFile();
             CsvParser.encode(settingsTable, new FileOutputStream(settingsFile), ',', "UTF-8");
@@ -133,8 +135,11 @@ public final class PopulationApplication extends Application {
     }
 
     private void initializeResources() {
-        mResources = ResourceBundle
-                .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
+        String languageTag = mSettings.get(Settings.LOCALE);
+        System.out.println("locale: " + languageTag);
+        Locale locale = Locale.forLanguageTag(languageTag);
+        System.out.println("locale: " + locale);
+        mResources = ResourceBundle.getBundle("com.budiyev.population.resource.strings", locale);
     }
 
     private void showPrimaryStage(Stage primaryStage) {
@@ -349,6 +354,7 @@ public final class PopulationApplication extends Application {
         public static final String PRIMARY_STAGE_WIDTH = "PrimaryStageWidth";
         public static final String PRIMARY_STAGE_HEIGHT = "PrimaryStageHeight";
         public static final String PRIMARY_STAGE_MAXIMIZED = "PrimaryStageMaximized";
+        public static final String LOCALE = "Locale";
 
         private Settings() {
         }
