@@ -135,11 +135,8 @@ public final class PopulationApplication extends Application {
     }
 
     private void initializeResources() {
-        String languageTag = mSettings.get(Settings.LOCALE);
-        System.out.println("locale: " + languageTag);
-        Locale locale = Locale.forLanguageTag(languageTag);
-        System.out.println("locale: " + locale);
-        mResources = ResourceBundle.getBundle("com.budiyev.population.resource.strings", locale);
+        mResources = ResourceBundle.getBundle("com.budiyev.population.resource.strings",
+                Locale.forLanguageTag(mSettings.get(Settings.LOCALE)));
     }
 
     private void showPrimaryStage(Stage primaryStage) {
