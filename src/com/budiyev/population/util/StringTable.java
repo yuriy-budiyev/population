@@ -24,8 +24,10 @@
 package com.budiyev.population.util;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,9 +35,11 @@ import java.util.Objects;
  *
  * @see CsvParser#parse(InputStream, char, String)
  * @see CsvParser#parse(String, char)
+ * @see CsvParser#encode(StringTable, OutputStream, char, String)
+ * @see CsvParser#encode(StringTable, char)
  */
 public class StringTable implements Iterable<StringRow> {
-    private final ArrayList<StringRow> mRows = new ArrayList<>();
+    private final List<StringRow> mRows = new ArrayList<>();
 
     public StringTable() {
     }
@@ -280,11 +284,7 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public int hashCode() {
-        int hashCode = Integer.MAX_VALUE;
-        for (StringRow row : mRows) {
-            hashCode ^= row.hashCode();
-        }
-        return hashCode;
+        return mRows.hashCode();
     }
 
     @Override
@@ -294,8 +294,8 @@ public class StringTable implements Iterable<StringRow> {
         } else {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("StringTable [");
-            for (StringRow row : mRows) {
-                stringBuilder.append(System.lineSeparator()).append(row);
+            for (int i = 0, s = mRows.size(); i < s; i++) {
+                stringBuilder.append(System.lineSeparator()).append(mRows.get(i));
             }
             return stringBuilder.append(']').toString();
         }

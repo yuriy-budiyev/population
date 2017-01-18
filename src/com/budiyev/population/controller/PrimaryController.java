@@ -17,6 +17,7 @@
  */
 package com.budiyev.population.controller;
 
+import com.budiyev.population.PopulationApplication;
 import com.budiyev.population.controller.base.AbstractController;
 import com.budiyev.population.model.Calculator;
 import com.budiyev.population.model.ChartSeries;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -98,6 +100,8 @@ public class PrimaryController extends AbstractController {
     public MenuItem mSaveMenuItem;
     public MenuItem mSaveAsMenuItem;
     public MenuItem mQuitMenuItem;
+    public MenuItem mLangRussianMenuItem;
+    public MenuItem mLangEnglishMenuItem;
     public MenuItem mAboutMenuItem;
     public TableView<State> mStatesTable;
     public TableColumn<State, String> mStatesTableNameColumn;
@@ -1427,5 +1431,22 @@ public class PrimaryController extends AbstractController {
 
     public void quit() {
         Platform.exit();
+    }
+
+    public void selectLangRussian() {
+        selectLanguage("ru");
+    }
+
+    public void selectLangEnglish() {
+        selectLanguage("en");
+    }
+
+    private void selectLanguage(String langTag) {
+        PopulationApplication application = getApplication();
+        if (application.selectLanguage(langTag)) {
+            ResourceBundle resources = getResources();
+            application.showAlert(resources.getString("lang"), null,
+                    resources.getString("lang_change"), Alert.AlertType.INFORMATION);
+        }
     }
 }

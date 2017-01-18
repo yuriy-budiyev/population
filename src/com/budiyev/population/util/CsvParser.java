@@ -23,7 +23,6 @@
  */
 package com.budiyev.population.util;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,13 +49,13 @@ public final class CsvParser {
      * @param table        Table
      * @param outputStream Stream to save result
      * @param separator    Column separator
-     * @param encoding     Text encoding
+     * @param charset      Charset name
      * @return true if success, false otherwise
      */
     public static boolean encode(StringTable table, OutputStream outputStream, char separator,
-            String encoding) {
+            String charset) {
         try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, encoding))) {
+                new OutputStreamWriter(outputStream, charset))) {
             for (StringRow row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
@@ -104,12 +103,11 @@ public final class CsvParser {
      *
      * @param inputStream Source data stream
      * @param separator   Column separator
-     * @param encoding    Text encoding
+     * @param charset     Charset name
      * @return Table
      */
-    public static StringTable parse(InputStream inputStream, char separator, String encoding) {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, encoding))) {
+    public static StringTable parse(InputStream inputStream, char separator, String charset) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
             StringTable table = new StringTable();
             StringBuilder row = new StringBuilder();
             boolean inQuotes = false;

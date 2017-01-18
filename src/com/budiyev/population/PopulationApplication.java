@@ -331,6 +331,10 @@ public final class PopulationApplication extends Application {
         });
     }
 
+    public boolean selectLanguage(String langTag) {
+        return !Objects.equals(mSettings.put(Settings.LOCALE, langTag), langTag);
+    }
+
     public static void main(String[] args) {
         launch(PopulationApplication.class, args);
     }

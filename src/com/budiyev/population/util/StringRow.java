@@ -24,8 +24,10 @@
 package com.budiyev.population.util;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,10 +35,12 @@ import java.util.Objects;
  *
  * @see CsvParser#parse(InputStream, char, String)
  * @see CsvParser#parse(String, char)
+ * @see CsvParser#encode(StringTable, OutputStream, char, String)
+ * @see CsvParser#encode(StringTable, char)
  */
 public class StringRow implements Iterable<String> {
     private static final String EMPTY = "";
-    private final ArrayList<String> mCells = new ArrayList<>();
+    private final List<String> mCells = new ArrayList<>();
 
     public StringRow() {
     }
@@ -190,11 +194,7 @@ public class StringRow implements Iterable<String> {
 
     @Override
     public int hashCode() {
-        int hashCode = Integer.MAX_VALUE;
-        for (String cell : mCells) {
-            hashCode ^= cell.hashCode();
-        }
-        return hashCode;
+        return mCells.hashCode();
     }
 
     @Override
@@ -207,7 +207,7 @@ public class StringRow implements Iterable<String> {
             for (int i = 0, s = mCells.size(); i < s; i++) {
                 stringBuilder.append(mCells.get(i));
                 if (i < s - 1) {
-                    stringBuilder.append(", ");
+                    stringBuilder.append("; ");
                 }
             }
             return stringBuilder.append(']').toString();
