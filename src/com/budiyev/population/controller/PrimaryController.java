@@ -18,9 +18,10 @@
 package com.budiyev.population.controller;
 
 import com.budiyev.population.PopulationApplication;
+import com.budiyev.population.component.Calculator;
+import com.budiyev.population.component.ChartSeries;
+import com.budiyev.population.component.TickLabelFormatter;
 import com.budiyev.population.controller.base.AbstractController;
-import com.budiyev.population.model.Calculator;
-import com.budiyev.population.model.ChartSeries;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.model.State;
 import com.budiyev.population.model.TableResult;
@@ -473,6 +474,9 @@ public class PrimaryController extends AbstractController {
         });
         NumberAxis xAxis = (NumberAxis) mResultsChart.getXAxis();
         NumberAxis yAxis = (NumberAxis) mResultsChart.getYAxis();
+        TickLabelFormatter tickLabelFormatter = new TickLabelFormatter();
+        xAxis.setTickLabelFormatter(tickLabelFormatter);
+        yAxis.setTickLabelFormatter(tickLabelFormatter);
         xAxis.setAutoRanging(false);
         xAxis.setUpperBound(100);
         xAxis.setTickUnit(10);

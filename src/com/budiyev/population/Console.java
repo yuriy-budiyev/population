@@ -17,7 +17,7 @@
  */
 package com.budiyev.population;
 
-import com.budiyev.population.model.Calculator;
+import com.budiyev.population.component.Calculator;
 import com.budiyev.population.model.Result;
 import com.budiyev.population.model.Task;
 import com.budiyev.population.model.Transition;

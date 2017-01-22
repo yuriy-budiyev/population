@@ -15,8 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package com.budiyev.population.model;
+package com.budiyev.population.component;
 
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.State;
+import com.budiyev.population.model.Task;
+import com.budiyev.population.model.Transition;
+import com.budiyev.population.model.TransitionMode;
+import com.budiyev.population.model.TransitionType;
 import com.budiyev.population.util.Utils;
 
 import java.math.BigDecimal;
@@ -300,14 +306,15 @@ public class Calculator {
         }
         double progress;
         boolean needUpdate;
-        if (step == 0 || mTask.getStepsCount() == 0) {
+        int stepsCount = mTask.getStepsCount();
+        if (step == 0 || stepsCount == 0) {
             progress = 0;
             needUpdate = true;
-        } else if (step == mTask.getStepsCount() - 1 || mTask.getStepsCount() == 1) {
+        } else if (step == stepsCount - 1 || stepsCount == 1) {
             progress = 1;
             needUpdate = true;
         } else {
-            progress = (double) step / (double) (mTask.getStepsCount() - 1);
+            progress = (double) step / (double) (stepsCount - 1);
             needUpdate = progress - mProgress > 0.005;
         }
         if (needUpdate) {
@@ -418,96 +425,96 @@ public class Calculator {
         }
         int sourceIndex = delay(step - 1, transition.getSourceDelay());
         int operandIndex = delay(step - 1, transition.getOperandDelay());
+        int transitionType = transition.getType();
+        int transitionMode = transition.getMode();
+        double sourceCoefficient = transition.getSourceCoefficient();
+        double operandCoefficient = transition.getOperandCoefficient();
+        double probability = transition.getProbability();
         double value = 0;
-        if (transition.getType() == TransitionType.LINEAR) {
+        if (transitionType == TransitionType.LINEAR) {
             if (sourceExternal) {
                 double operandDensity = applyCoefficientLinear(getState(operandIndex, operandState),
-                        transition.getOperandCoefficient());
-                value = operandDensity * transition.getProbability();
-                if (transition.getMode() == TransitionMode.RESIDUAL) {
-                    value = operandDensity - value * transition.getOperandCoefficient();
+                        operandCoefficient);
+                value = operandDensity * probability;
+                if (transitionMode == TransitionMode.RESIDUAL) {
+                    value = operandDensity - value * operandCoefficient;
                 }
             } else if (operandExternal) {
                 value = applyCoefficientLinear(getState(sourceIndex, sourceState),
-                        transition.getSourceCoefficient()) * transition.getProbability();
+                        sourceCoefficient) * probability;
             } else if (sourceState == operandState) {
                 double density = applyCoefficientLinear(getState(sourceIndex, sourceState),
-                        transition.getSourceCoefficient() + transition.getOperandCoefficient() - 1);
+                        sourceCoefficient + operandCoefficient - 1);
                 value = applyTransitionCommon(density, density, transition);
             } else {
                 double sourceDensity = applyCoefficientLinear(getState(sourceIndex, sourceState),
-                        transition.getSourceCoefficient());
+                        sourceCoefficient);
                 double operandDensity = applyCoefficientLinear(getState(operandIndex, operandState),
-                        transition.getOperandCoefficient());
+                        operandCoefficient);
                 value = applyTransitionCommon(Math.min(sourceDensity, operandDensity),
                         operandDensity, transition);
             }
-        } else if (transition.getType() == TransitionType.SOLUTE) {
+        } else if (transitionType == TransitionType.SOLUTE) {
             if (totalCount > 0) {
                 if (sourceExternal) {
                     double operandDensity =
                             applyCoefficientPower(getState(operandIndex, operandState),
-                                    transition.getOperandCoefficient());
+                                    operandCoefficient);
                     value = operandDensity;
-                    if (transition.getOperandCoefficient() > 1) {
-                        value /= Math.pow(totalCount, transition.getOperandCoefficient() - 1);
+                    if (operandCoefficient > 1) {
+                        value /= Math.pow(totalCount, operandCoefficient - 1);
                     }
                     value = applyTransitionCommon(value, operandDensity, transition);
                 } else if (operandExternal) {
                     value = applyCoefficientPower(getState(sourceIndex, sourceState),
-                            transition.getSourceCoefficient());
-                    if (transition.getSourceCoefficient() > 1) {
-                        value /= Math.pow(totalCount, transition.getSourceCoefficient() - 1);
+                            sourceCoefficient);
+                    if (sourceCoefficient > 1) {
+                        value /= Math.pow(totalCount, sourceCoefficient - 1);
                     }
-                    value *= transition.getProbability();
+                    value *= probability;
                 } else if (sourceState == operandState) {
                     double density = applyCoefficientPower(getState(sourceIndex, sourceState),
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient());
-                    value = density / Math.pow(totalCount,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1);
+                            sourceCoefficient + operandCoefficient);
+                    value = density /
+                            Math.pow(totalCount, sourceCoefficient + operandCoefficient - 1);
                     value = applyTransitionCommon(value, density, transition);
                 } else {
                     double sourceDensity = applyCoefficientPower(getState(sourceIndex, sourceState),
-                            transition.getSourceCoefficient());
+                            sourceCoefficient);
                     double operandDensity =
                             applyCoefficientPower(getState(operandIndex, operandState),
-                                    transition.getOperandCoefficient());
-                    value = sourceDensity * operandDensity / Math.pow(totalCount,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1);
+                                    operandCoefficient);
+                    value = sourceDensity * operandDensity /
+                            Math.pow(totalCount, sourceCoefficient + operandCoefficient - 1);
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
-        } else if (transition.getType() == TransitionType.BLEND) {
+        } else if (transitionType == TransitionType.BLEND) {
             if (sourceExternal) {
                 double operandCount = getState(operandIndex, operandState);
                 if (operandCount > 0) {
-                    double operandDensity =
-                            applyCoefficientPower(operandCount, transition.getOperandCoefficient());
+                    double operandDensity = applyCoefficientPower(operandCount, operandCoefficient);
                     value = operandDensity;
-                    if (transition.getOperandCoefficient() > 1) {
-                        value /= Math.pow(operandCount, transition.getOperandCoefficient() - 1);
+                    if (operandCoefficient > 1) {
+                        value /= Math.pow(operandCount, operandCoefficient - 1);
                     }
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             } else if (operandExternal) {
                 double sourceCount = getState(sourceIndex, sourceState);
                 if (sourceCount > 0) {
-                    value = applyCoefficientPower(sourceCount, transition.getSourceCoefficient());
-                    if (transition.getSourceCoefficient() > 1) {
-                        value /= Math.pow(sourceCount, transition.getSourceCoefficient() - 1);
+                    value = applyCoefficientPower(sourceCount, sourceCoefficient);
+                    if (sourceCoefficient > 1) {
+                        value /= Math.pow(sourceCount, sourceCoefficient - 1);
                     }
-                    value *= transition.getProbability();
+                    value *= probability;
                 }
             } else if (sourceState == operandState) {
                 double count = getState(sourceIndex, sourceState);
                 if (count > 0) {
-                    double density = applyCoefficientPower(count,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient());
-                    value = density / Math.pow(count,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1);
+                    double density =
+                            applyCoefficientPower(count, sourceCoefficient + operandCoefficient);
+                    value = density / Math.pow(count, sourceCoefficient + operandCoefficient - 1);
                     value = applyTransitionCommon(value, density, transition);
                 }
             } else {
@@ -515,27 +522,24 @@ public class Calculator {
                 double operandCount = getState(operandIndex, operandState);
                 double sum = sourceCount + operandCount;
                 if (sum > 0) {
-                    double sourceDensity =
-                            applyCoefficientPower(sourceCount, transition.getSourceCoefficient());
-                    double operandDensity =
-                            applyCoefficientPower(operandCount, transition.getOperandCoefficient());
-                    value = sourceDensity * operandDensity / Math.pow(sum,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1);
+                    double sourceDensity = applyCoefficientPower(sourceCount, sourceCoefficient);
+                    double operandDensity = applyCoefficientPower(operandCount, operandCoefficient);
+                    value = sourceDensity * operandDensity /
+                            Math.pow(sum, sourceCoefficient + operandCoefficient - 1);
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
         }
-        if (!sourceExternal && transition.getMode() == TransitionMode.REMOVING) {
-            decrementState(step, sourceState, value * transition.getSourceCoefficient());
+        if (!sourceExternal && transitionMode == TransitionMode.REMOVING) {
+            decrementState(step, sourceState, value * sourceCoefficient);
             checkStateNegativeness(step, sourceState);
         }
         if (!operandExternal) {
-            if (transition.getMode() == TransitionMode.INHIBITOR ||
-                    transition.getMode() == TransitionMode.RESIDUAL) {
+            if (transitionMode == TransitionMode.INHIBITOR ||
+                    transitionMode == TransitionMode.RESIDUAL) {
                 decrementState(step, operandState, value);
-            } else if (transition.getMode() != TransitionMode.RETAINING) {
-                decrementState(step, operandState, value * transition.getOperandCoefficient());
+            } else if (transitionMode != TransitionMode.RETAINING) {
+                decrementState(step, operandState, value * operandCoefficient);
             }
             checkStateNegativeness(step, operandState);
         }
@@ -564,110 +568,105 @@ public class Calculator {
         }
         int sourceIndex = delay(step - 1, transition.getSourceDelay());
         int operandIndex = delay(step - 1, transition.getOperandDelay());
+        int transitionType = transition.getType();
+        int transitionMode = transition.getMode();
+        double sourceCoefficient = transition.getSourceCoefficient();
+        double operandCoefficient = transition.getOperandCoefficient();
+        double probability = transition.getProbability();
         BigDecimal value = BigDecimal.ZERO;
-        if (transition.getType() == TransitionType.LINEAR) {
+        if (transitionType == TransitionType.LINEAR) {
             if (sourceExternal) {
                 BigDecimal operandDensity =
                         applyCoefficientLinear(getStateBig(operandIndex, step, operandState),
-                                transition.getOperandCoefficient());
-                value = multiply(operandDensity, decimalValue(transition.getProbability()));
-                if (transition.getMode() == TransitionMode.RESIDUAL) {
-                    value = operandDensity.subtract(
-                            multiply(value, decimalValue(transition.getOperandCoefficient())));
+                                operandCoefficient);
+                value = multiply(operandDensity, decimalValue(probability));
+                if (transitionMode == TransitionMode.RESIDUAL) {
+                    value = operandDensity
+                            .subtract(multiply(value, decimalValue(operandCoefficient)));
                 }
             } else if (operandExternal) {
                 value = multiply(applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
-                        transition.getSourceCoefficient()),
-                        decimalValue(transition.getProbability()));
+                        sourceCoefficient), decimalValue(probability));
             } else if (sourceState == operandState) {
                 BigDecimal density =
                         applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
-                                transition.getSourceCoefficient() +
-                                        transition.getOperandCoefficient() - 1);
+                                sourceCoefficient + operandCoefficient - 1);
                 value = applyTransitionCommon(density, density, transition);
             } else {
                 BigDecimal sourceDensity =
                         applyCoefficientLinear(getStateBig(sourceIndex, step, sourceState),
-                                transition.getSourceCoefficient());
+                                sourceCoefficient);
                 BigDecimal operandDensity =
                         applyCoefficientLinear(getStateBig(operandIndex, step, operandState),
-                                transition.getOperandCoefficient());
+                                operandCoefficient);
                 value = applyTransitionCommon(sourceDensity.min(operandDensity), operandDensity,
                         transition);
             }
-        } else if (transition.getType() == TransitionType.SOLUTE) {
+        } else if (transitionType == TransitionType.SOLUTE) {
             if (totalCount.compareTo(BigDecimal.ZERO) > 0) {
                 if (sourceExternal) {
                     BigDecimal operandDensity =
                             applyCoefficientPower(getStateBig(operandIndex, step, operandState),
-                                    transition.getOperandCoefficient());
+                                    operandCoefficient);
                     value = operandDensity;
-                    if (transition.getOperandCoefficient() > 1) {
-                        value = divide(value,
-                                power(totalCount, transition.getOperandCoefficient() - 1));
+                    if (operandCoefficient > 1) {
+                        value = divide(value, power(totalCount, operandCoefficient - 1));
                     }
                     value = applyTransitionCommon(value, operandDensity, transition);
                 } else if (operandExternal) {
                     value = applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
-                            transition.getSourceCoefficient());
-                    if (transition.getSourceCoefficient() > 1) {
-                        value = divide(value,
-                                power(totalCount, transition.getSourceCoefficient() - 1));
+                            sourceCoefficient);
+                    if (sourceCoefficient > 1) {
+                        value = divide(value, power(totalCount, sourceCoefficient - 1));
                     }
-                    value = multiply(value, decimalValue(transition.getProbability()));
+                    value = multiply(value, decimalValue(probability));
                 } else if (sourceState == operandState) {
                     BigDecimal density =
                             applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
-                                    transition.getSourceCoefficient() +
-                                            transition.getOperandCoefficient());
-                    value = divide(density, power(totalCount,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1));
+                                    sourceCoefficient + operandCoefficient);
+                    value = divide(density,
+                            power(totalCount, sourceCoefficient + operandCoefficient - 1));
                     value = applyTransitionCommon(value, density, transition);
                 } else {
                     BigDecimal sourceDensity =
                             applyCoefficientPower(getStateBig(sourceIndex, step, sourceState),
-                                    transition.getSourceCoefficient());
+                                    sourceCoefficient);
                     BigDecimal operandDensity =
                             applyCoefficientPower(getStateBig(operandIndex, step, operandState),
-                                    transition.getOperandCoefficient());
-                    value = divide(multiply(sourceDensity, operandDensity), power(totalCount,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1));
+                                    operandCoefficient);
+                    value = divide(multiply(sourceDensity, operandDensity),
+                            power(totalCount, sourceCoefficient + operandCoefficient - 1));
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
-        } else if (transition.getType() == TransitionType.BLEND) {
+        } else if (transitionType == TransitionType.BLEND) {
             if (sourceExternal) {
                 BigDecimal operandCount = getStateBig(operandIndex, step, operandState);
                 if (operandCount.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal operandDensity =
-                            applyCoefficientPower(operandCount, transition.getOperandCoefficient());
+                            applyCoefficientPower(operandCount, operandCoefficient);
                     value = operandDensity;
-                    if (transition.getOperandCoefficient() > 1) {
-                        value = divide(value,
-                                power(operandCount, transition.getOperandCoefficient() - 1));
+                    if (operandCoefficient > 1) {
+                        value = divide(value, power(operandCount, operandCoefficient - 1));
                     }
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             } else if (operandExternal) {
                 BigDecimal sourceCount = getStateBig(sourceIndex, step, sourceState);
                 if (sourceCount.compareTo(BigDecimal.ZERO) > 0) {
-                    value = applyCoefficientPower(sourceCount, transition.getSourceCoefficient());
-                    if (transition.getSourceCoefficient() > 1) {
-                        value = divide(value,
-                                power(sourceCount, transition.getSourceCoefficient() - 1));
+                    value = applyCoefficientPower(sourceCount, sourceCoefficient);
+                    if (sourceCoefficient > 1) {
+                        value = divide(value, power(sourceCount, sourceCoefficient - 1));
                     }
-                    value = multiply(value, decimalValue(transition.getProbability()));
+                    value = multiply(value, decimalValue(probability));
                 }
             } else if (sourceState == operandState) {
                 BigDecimal count = getStateBig(sourceIndex, step, sourceState);
                 if (count.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal density = applyCoefficientPower(count,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient());
-                    value = divide(density, power(count,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1));
+                    BigDecimal density =
+                            applyCoefficientPower(count, sourceCoefficient + operandCoefficient);
+                    value = divide(density,
+                            power(count, sourceCoefficient + operandCoefficient - 1));
                     value = applyTransitionCommon(value, density, transition);
                 }
             } else {
@@ -676,28 +675,27 @@ public class Calculator {
                 BigDecimal sum = sourceCount.add(operandCount);
                 if (sum.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal sourceDensity =
-                            applyCoefficientPower(sourceCount, transition.getSourceCoefficient());
+                            applyCoefficientPower(sourceCount, sourceCoefficient);
                     BigDecimal operandDensity =
-                            applyCoefficientPower(operandCount, transition.getOperandCoefficient());
-                    value = divide(multiply(sourceDensity, operandDensity), power(sum,
-                            transition.getSourceCoefficient() + transition.getOperandCoefficient() -
-                                    1));
+                            applyCoefficientPower(operandCount, operandCoefficient);
+                    value = divide(multiply(sourceDensity, operandDensity),
+                            power(sum, sourceCoefficient + operandCoefficient - 1));
                     value = applyTransitionCommon(value, operandDensity, transition);
                 }
             }
         }
-        if (!sourceExternal && transition.getMode() == TransitionMode.REMOVING) {
+        if (!sourceExternal && transitionMode == TransitionMode.REMOVING) {
             decrementStateBig(step, step, sourceState,
-                    multiply(value, decimalValue(transition.getSourceCoefficient())));
+                    multiply(value, decimalValue(sourceCoefficient)));
             checkStateNegativenessBig(step, step, sourceState);
         }
         if (!operandExternal) {
-            if (transition.getMode() == TransitionMode.INHIBITOR ||
-                    transition.getMode() == TransitionMode.RESIDUAL) {
+            if (transitionMode == TransitionMode.INHIBITOR ||
+                    transitionMode == TransitionMode.RESIDUAL) {
                 decrementStateBig(step, step, operandState, value);
-            } else if (transition.getMode() != TransitionMode.RETAINING) {
+            } else if (transitionMode != TransitionMode.RETAINING) {
                 decrementStateBig(step, step, operandState,
-                        multiply(value, decimalValue(transition.getOperandCoefficient())));
+                        multiply(value, decimalValue(operandCoefficient)));
             }
             checkStateNegativenessBig(step, step, operandState);
         }
@@ -806,12 +804,13 @@ public class Calculator {
      */
     private static BigDecimal applyTransitionCommon(BigDecimal u, BigDecimal operandDensity,
             Transition transition) {
-        if (transition.getMode() == TransitionMode.INHIBITOR) {
+        int mode = transition.getMode();
+        if (mode == TransitionMode.INHIBITOR) {
             u = operandDensity
                     .subtract(multiply(u, decimalValue(transition.getOperandCoefficient())));
         }
         u = multiply(u, decimalValue(transition.getProbability()));
-        if (transition.getMode() == TransitionMode.RESIDUAL) {
+        if (mode == TransitionMode.RESIDUAL) {
             u = operandDensity
                     .subtract(multiply(u, decimalValue(transition.getOperandCoefficient())));
         }
@@ -823,11 +822,12 @@ public class Calculator {
      */
     private static double applyTransitionCommon(double u, double operandDensity,
             Transition transition) {
-        if (transition.getMode() == TransitionMode.INHIBITOR) {
+        int mode = transition.getMode();
+        if (mode == TransitionMode.INHIBITOR) {
             u = operandDensity - u * transition.getOperandCoefficient();
         }
         u *= transition.getProbability();
-        if (transition.getMode() == TransitionMode.RESIDUAL) {
+        if (mode == TransitionMode.RESIDUAL) {
             u = operandDensity - u * transition.getOperandCoefficient();
         }
         return u;
