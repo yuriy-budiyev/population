@@ -105,8 +105,6 @@ public final class PopulationApplication extends Application {
                     mSettings.put(Settings.LOCALE, emptyIfNullString(row.cell(1)));
                 }
             }
-            mSettings.putIfAbsent(Settings.WORK_DIRECTORY, System.getProperty("user.home"));
-            mSettings.putIfAbsent(Settings.LOCALE, Locale.getDefault().getLanguage());
         } catch (Exception e) {
             mSettings.clear();
         }
@@ -132,6 +130,11 @@ public final class PopulationApplication extends Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void initializeSettings() {
+        mSettings.putIfAbsent(Settings.WORK_DIRECTORY, System.getProperty("user.home"));
+        mSettings.putIfAbsent(Settings.LOCALE, Locale.getDefault().getLanguage());
     }
 
     private void initializeResources() {
@@ -208,6 +211,7 @@ public final class PopulationApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         Thread.currentThread().setUncaughtExceptionHandler(mUncaughtExceptionHandler);
         loadSettings();
+        initializeSettings();
         initializeResources();
         showPrimaryStage(primaryStage);
     }
