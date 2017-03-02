@@ -175,7 +175,8 @@ public final class Console {
     }
 
     private static void calculateTasks(File startFile, File endFile, int size,
-            ResourceBundle resources, boolean parallel) throws Exception {
+            ResourceBundle resources, boolean parallel) throws ExecutionException,
+            InterruptedException, IOException {
         Task startTask = TaskParser.parse(startFile);
         Task endTask = TaskParser.parse(endFile);
         if (startTask == null || endTask == null ||

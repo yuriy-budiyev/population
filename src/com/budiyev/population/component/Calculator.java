@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -341,11 +342,7 @@ public class Calculator {
                                     transition)));
                 }
                 for (Future<?> future : futures) {
-                    try {
-                        future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
+                    await(future);
                 }
                 futures.clear();
                 callbackProgress(step);
@@ -382,11 +379,7 @@ public class Calculator {
                                     transition)));
                 }
                 for (Future<?> future : futures) {
-                    try {
-                        future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
+                    await(future);
                 }
                 futures.clear();
                 callbackProgress(step);
@@ -735,6 +728,20 @@ public class Calculator {
             }
             callbackResults(result);
         }).start();
+    }
+
+    /**
+     * Подождать выполнение задачи
+     *
+     * @param future Объект {@link Future} данной задачи
+     */
+    private static void await(Future<?> future) {
+        try {
+            future.get();
+        } catch (InterruptedException | CancellationException ignored) {
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e.getCause());
+        }
     }
 
     /**
