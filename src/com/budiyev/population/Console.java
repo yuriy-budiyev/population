@@ -17,14 +17,6 @@
  */
 package com.budiyev.population;
 
-import com.budiyev.population.component.Calculator;
-import com.budiyev.population.model.Result;
-import com.budiyev.population.model.Task;
-import com.budiyev.population.model.Transition;
-import com.budiyev.population.util.PopulationThreadFactory;
-import com.budiyev.population.util.TaskParser;
-import com.budiyev.population.util.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +30,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
+import com.budiyev.population.component.Calculator;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.Task;
+import com.budiyev.population.model.Transition;
+import com.budiyev.population.util.PopulationThreadFactory;
+import com.budiyev.population.util.TaskParser;
+import com.budiyev.population.util.Utils;
+
 public final class Console {
     private static final String KEY_HELP = "-help";
     private static final String KEY_TASK = "-task";
@@ -45,14 +45,12 @@ public final class Console {
     private static final String KEY_INTERVAL = "-interval";
     private static final String KEY_PARALLEL = "-parallel";
 
-    public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER =
-            (thread, throwable) -> {
-                System.out.println("Error");
-                System.out.println(Utils.buildErrorText(throwable));
-            };
+    public static final Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = (thread, throwable) -> {
+        System.out.println("Error");
+        System.out.println(Utils.buildErrorText(throwable));
+    };
 
-    private static final ThreadFactory THREAD_FACTORY =
-            new PopulationThreadFactory(UNCAUGHT_EXCEPTION_HANDLER);
+    private static final ThreadFactory THREAD_FACTORY = new PopulationThreadFactory(UNCAUGHT_EXCEPTION_HANDLER);
 
     private Console() {
     }
@@ -78,8 +76,7 @@ public final class Console {
         System.out.println(stringBuilder.toString());
     }
 
-    private static void calculateTask(File inputFile, File resultFile,
-            ResourceBundle resources) throws IOException {
+    private static void calculateTask(File inputFile, File resultFile, ResourceBundle resources) throws IOException {
         System.out.println("Calculating: " + inputFile.getName());
         Task task = TaskParser.parse(inputFile);
         if (task == null) {
@@ -87,8 +84,8 @@ public final class Console {
             return;
         }
         Result result = Calculator.calculateSync(task, true, false, THREAD_FACTORY);
-        Utils.exportResults(resultFile, result, task.getColumnSeparator(),
-                task.getDecimalSeparator(), task.getLineSeparator(), task.getEncoding(), resources);
+        Utils.exportResults(resultFile, result, task.getColumnSeparator(), task.getDecimalSeparator(),
+                task.getLineSeparator(), task.getEncoding(), resources);
         System.out.println("Done: " + resultFile.getName());
     }
 
@@ -96,14 +93,13 @@ public final class Console {
         int taskId = task.getId();
         System.out.println("Calculating: " + taskId);
         Result result = Calculator.calculateSync(task, true, false, THREAD_FACTORY);
-        Utils.exportResults(buildResultFile(task.getName(), taskId), result,
-                task.getColumnSeparator(), task.getDecimalSeparator(), task.getLineSeparator(),
-                task.getEncoding(), resources);
+        Utils.exportResults(buildResultFile(task.getName(), taskId), result, task.getColumnSeparator(),
+                task.getDecimalSeparator(), task.getLineSeparator(), task.getEncoding(), resources);
         System.out.println("Done: " + taskId);
     }
 
-    private static void calculateTasks(List<File> tasks, ResourceBundle resources, int processors,
-            boolean parallel) throws ExecutionException, InterruptedException, IOException {
+    private static void calculateTasks(List<File> tasks, ResourceBundle resources, int processors, boolean parallel)
+            throws ExecutionException, InterruptedException, IOException {
         int tasksCount = tasks.size();
         if (parallel) {
             ExecutorService executor = Utils.newExecutor(THREAD_FACTORY);
@@ -124,8 +120,7 @@ public final class Console {
         System.out.println("Done all.");
     }
 
-    private static Task buildTask(Task start, Task end, List<Double> shifts, int position,
-            int size) {
+    private static Task buildTask(Task start, Task end, List<Double> shifts, int position, int size) {
         if (position == 0) {
             return start;
         }
@@ -140,14 +135,13 @@ public final class Console {
         List<Transition> resultTransitions = new ArrayList<>(startTransitions.size());
         for (int i = 0; i < startTransitions.size(); i++) {
             Transition startTransition = startTransitions.get(i);
-            Transition resultTransition = new Transition(startTransition.getSourceState(),
-                    startTransition.getSourceCoefficient(), startTransition.getSourceDelay(),
-                    startTransition.getOperandState(), startTransition.getOperandCoefficient(),
-                    startTransition.getOperandDelay(), startTransition.getResultState(),
-                    startTransition.getResultCoefficient(),
-                    startTransition.getProbability() + position * shifts.get(i),
-                    startTransition.getType(), startTransition.getMode(),
-                    startTransition.getDescription());
+            Transition resultTransition =
+                    new Transition(startTransition.getSourceState(), startTransition.getSourceCoefficient(),
+                            startTransition.getSourceDelay(), startTransition.getOperandState(),
+                            startTransition.getOperandCoefficient(), startTransition.getOperandDelay(),
+                            startTransition.getResultState(), startTransition.getResultCoefficient(),
+                            startTransition.getProbability() + position * shifts.get(i), startTransition.getType(),
+                            startTransition.getMode(), startTransition.getDescription());
             resultTransitions.add(resultTransition);
         }
         result.setTransitions(resultTransitions);
@@ -168,15 +162,13 @@ public final class Console {
         List<Transition> startTransitions = start.getTransitions();
         List<Transition> endTransitions = end.getTransitions();
         for (int i = 0; i < startTransitions.size(); i++) {
-            result.add((endTransitions.get(i).getProbability() -
-                    startTransitions.get(i).getProbability()) / size);
+            result.add((endTransitions.get(i).getProbability() - startTransitions.get(i).getProbability()) / size);
         }
         return result;
     }
 
-    private static void calculateTasks(File startFile, File endFile, int size,
-            ResourceBundle resources, boolean parallel) throws ExecutionException,
-            InterruptedException, IOException {
+    private static void calculateTasks(File startFile, File endFile, int size, ResourceBundle resources,
+            boolean parallel) throws ExecutionException, InterruptedException, IOException {
         Task startTask = TaskParser.parse(startFile);
         Task endTask = TaskParser.parse(endFile);
         if (startTask == null || endTask == null ||
@@ -192,8 +184,7 @@ public final class Console {
             ExecutorService executor = Utils.newExecutor(THREAD_FACTORY);
             List<Future<?>> futures = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                futures.add(executor.submit(
-                        new CalculateTaskAction(i, size, startTask, endTask, shifts, resources)));
+                futures.add(executor.submit(new CalculateTaskAction(i, size, startTask, endTask, shifts, resources)));
             }
             for (Future<?> future : futures) {
                 future.get();
@@ -216,8 +207,8 @@ public final class Console {
             System.out.println("To get help, use \"-help\".");
             System.out.println("Initializing...");
             int processors = Runtime.getRuntime().availableProcessors();
-            ResourceBundle resources = ResourceBundle
-                    .getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
+            ResourceBundle resources =
+                    ResourceBundle.getBundle("com.budiyev.population.resource.strings", Locale.getDefault());
             if (KEY_HELP.equalsIgnoreCase(args[0])) {
                 printInitialization(0, processors, false);
                 System.out.println("Usage:");
@@ -225,23 +216,16 @@ public final class Console {
                 System.out.println("-tasks [-parallel] task_file1 ... task_fileN");
                 System.out.println("-interval [-parallel] start_task end_task interval_count");
                 System.out.println("License info:");
-                System.out.println(
-                        "This program is free software: you can redistribute it and/or modify");
-                System.out.println(
-                        "it under the terms of the GNU General Public License as published by");
-                System.out.println(
-                        "the Free Software Foundation, either version 3 of the License, or");
+                System.out.println("This program is free software: you can redistribute it and/or modify");
+                System.out.println("it under the terms of the GNU General Public License as published by");
+                System.out.println("the Free Software Foundation, either version 3 of the License, or");
                 System.out.println("any later version.");
-                System.out
-                        .println("This program is distributed in the hope that it will be useful,");
-                System.out
-                        .println("but WITHOUT ANY WARRANTY; without even the implied warranty of");
+                System.out.println("This program is distributed in the hope that it will be useful,");
+                System.out.println("but WITHOUT ANY WARRANTY; without even the implied warranty of");
                 System.out.println("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the");
                 System.out.println("GNU General Public License for more details.");
-                System.out.println(
-                        "You should have received a copy of the GNU General Public License");
-                System.out.println(
-                        "along with this program. If not, see http://www.gnu.org/licenses/.");
+                System.out.println("You should have received a copy of the GNU General Public License");
+                System.out.println("along with this program. If not, see http://www.gnu.org/licenses/.");
             } else if (KEY_TASK.equalsIgnoreCase(args[0])) {
                 File inputFile = new File(args[1]);
                 File resultFile;
@@ -304,8 +288,8 @@ public final class Console {
         private final List<Double> mShifts;
         private final ResourceBundle mResources;
 
-        private CalculateTaskAction(int position, int size, Task startTask, Task endTask,
-                List<Double> shifts, ResourceBundle resources) {
+        private CalculateTaskAction(int position, int size, Task startTask, Task endTask, List<Double> shifts,
+                ResourceBundle resources) {
             mPosition = position;
             mSize = size;
             mStartTask = startTask;

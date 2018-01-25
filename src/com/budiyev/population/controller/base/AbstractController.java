@@ -17,11 +17,10 @@
  */
 package com.budiyev.population.controller.base;
 
-import com.budiyev.population.PopulationApplication;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.budiyev.population.PopulationApplication;
 import javafx.fxml.Initializable;
 import javafx.stage.Stage;
 

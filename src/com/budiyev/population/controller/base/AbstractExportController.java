@@ -17,10 +17,10 @@
  */
 package com.budiyev.population.controller.base;
 
-import com.budiyev.population.model.Result;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.budiyev.population.model.Result;
 
 public abstract class AbstractExportController extends AbstractController {
     private ArrayList<Result> mResults;

@@ -34,8 +34,8 @@ import javafx.scene.shape.Path;
 
 public class ChartSeries {
     private static final String[] STROKE_COLORS =
-            {"#f3622d", "#fba71b", "#57b757", "#41a9c9", "#4258c9", "#9a42c8", "#c84164", "#888888",
-                    "#ffff00", "#ff00ff", "#00ffff", "#ff0000", "#00ff00", "#0000ff", "#000000"};
+            {"#f3622d", "#fba71b", "#57b757", "#41a9c9", "#4258c9", "#9a42c8", "#c84164", "#888888", "#ffff00",
+                    "#ff00ff", "#00ffff", "#ff0000", "#00ff00", "#0000ff", "#000000"};
     private static final String[] STROKE_THICKNESSES = {"2", "3", "4"};
     private static final String[] DASH_ARRAYS = {null, "4 8", "8 8", "16 8"};
     private final XYChart.Series<Number, Number> mData;
@@ -47,8 +47,8 @@ public class ChartSeries {
     private Path mLinePath;
     private Label mLegendLabel;
 
-    public ChartSeries(XYChart.Series<Number, Number> data, int startPoint, int color, int dash,
-            int thickness, boolean visible) {
+    public ChartSeries(XYChart.Series<Number, Number> data, int startPoint, int color, int dash, int thickness,
+            boolean visible) {
         mData = data;
         mStartPoint = startPoint;
         mVisibility = new SimpleBooleanProperty(visible);
@@ -196,10 +196,9 @@ public class ChartSeries {
         public static final int BLUE = 13;
         public static final int BLACK = 14;
         public static final Number[] ARRAY =
-                {BLACK, GRAY, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN, RED_ORANGE, LIGHT_ORANGE,
-                        SOFT_GREEN, LIGHT_BLUE, VIOLET_BLUE, DARK_PURPLE, DARK_PINK};
-        public static final ObservableList<Number> LIST =
-                FXCollections.observableList(Arrays.asList(ARRAY));
+                {BLACK, GRAY, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN, RED_ORANGE, LIGHT_ORANGE, SOFT_GREEN, LIGHT_BLUE,
+                        VIOLET_BLUE, DARK_PURPLE, DARK_PINK};
+        public static final ObservableList<Number> LIST = FXCollections.observableList(Arrays.asList(ARRAY));
 
         private Color() {
         }
@@ -264,8 +263,7 @@ public class ChartSeries {
         public static final int MEDIUM = 2;
         public static final int LARGE = 3;
         public static final Number[] ARRAY = {NONE, SMALL, MEDIUM, LARGE};
-        public static final ObservableList<Number> LIST =
-                FXCollections.observableList(Arrays.asList(ARRAY));
+        public static final ObservableList<Number> LIST = FXCollections.observableList(Arrays.asList(ARRAY));
 
         private Dash() {
         }
@@ -296,8 +294,7 @@ public class ChartSeries {
         public static final int MEDIUM = 1;
         public static final int THICK = 2;
         public static final Number[] ARRAY = {THIN, MEDIUM, THICK};
-        public static final ObservableList<Number> LIST =
-                FXCollections.observableList(Arrays.asList(ARRAY));
+        public static final ObservableList<Number> LIST = FXCollections.observableList(Arrays.asList(ARRAY));
 
         private Thickness() {
         }

@@ -17,21 +17,6 @@
  */
 package com.budiyev.population.controller;
 
-import com.budiyev.population.PopulationApplication;
-import com.budiyev.population.component.Calculator;
-import com.budiyev.population.component.ChartSeries;
-import com.budiyev.population.component.TickLabelFormatter;
-import com.budiyev.population.controller.base.AbstractController;
-import com.budiyev.population.model.Result;
-import com.budiyev.population.model.State;
-import com.budiyev.population.model.TableResult;
-import com.budiyev.population.model.Task;
-import com.budiyev.population.model.Transition;
-import com.budiyev.population.model.TransitionMode;
-import com.budiyev.population.model.TransitionType;
-import com.budiyev.population.util.TaskParser;
-import com.budiyev.population.util.Utils;
-
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -49,6 +34,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.budiyev.population.PopulationApplication;
+import com.budiyev.population.component.Calculator;
+import com.budiyev.population.component.ChartSeries;
+import com.budiyev.population.component.TickLabelFormatter;
+import com.budiyev.population.controller.base.AbstractController;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.State;
+import com.budiyev.population.model.TableResult;
+import com.budiyev.population.model.Task;
+import com.budiyev.population.model.Transition;
+import com.budiyev.population.model.TransitionMode;
+import com.budiyev.population.model.TransitionType;
+import com.budiyev.population.util.TaskParser;
+import com.budiyev.population.util.Utils;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -85,8 +84,7 @@ public class PrimaryController extends AbstractController {
     private final ObservableList<State> mStates = FXCollections.observableArrayList();
     private final ObservableList<Number> mStatesIdList = FXCollections.observableArrayList();
     private final ObservableList<Transition> mTransitions = FXCollections.observableArrayList();
-    private final ObservableList<ChartSeries> mResultsChartData =
-            FXCollections.observableArrayList();
+    private final ObservableList<ChartSeries> mResultsChartData = FXCollections.observableArrayList();
     private final HashMap<Number, State> mStatesIdMap = new HashMap<>();
     private final HashMap<String, String> mTaskSettings = new HashMap<>();
     private final ArrayList<Result> mResultsTableData = new ArrayList<>();
@@ -158,46 +156,40 @@ public class PrimaryController extends AbstractController {
 
     private void initializeStatesTable() {
         mStatesIdList.add(State.EXTERNAL);
-        mStatesTableNameColumn
-                .setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<String>() {
-                    @Override
-                    public String toString(String object) {
-                        return Utils.isNullOrEmpty(object) ? getString("unnamed") : object;
-                    }
+        mStatesTableNameColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<String>() {
+            @Override
+            public String toString(String object) {
+                return Utils.isNullOrEmpty(object) ? getString("unnamed") : object;
+            }
 
-                    @Override
-                    public String fromString(String string) {
-                        return string;
-                    }
-                }));
+            @Override
+            public String fromString(String string) {
+                return string;
+            }
+        }));
         mStatesTableNameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         mStatesTableNameColumn.setOnEditCommit(event -> {
             String value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setName(value);
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setName(value);
                 Utils.refreshList(mStatesIdList);
                 Utils.refreshList(mTransitions);
             }
         });
-        mStatesTableCountColumn
-                .setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
+        mStatesTableCountColumn.setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
         mStatesTableCountColumn.setCellValueFactory(param -> param.getValue().countProperty());
         mStatesTableCountColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setCount(value.doubleValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setCount(value.doubleValue());
             }
         });
         mStatesTableDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        mStatesTableDescriptionColumn
-                .setCellValueFactory(param -> param.getValue().descriptionProperty());
+        mStatesTableDescriptionColumn.setCellValueFactory(param -> param.getValue().descriptionProperty());
         mStatesTableDescriptionColumn.setOnEditCommit(event -> {
             String value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setDescription(value);
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setDescription(value);
             }
         });
         mStatesTable.setItems(mStates);
@@ -223,17 +215,14 @@ public class PrimaryController extends AbstractController {
 
     private void initializeTransitionsTable() {
         mTransitionsTableSourceStateColumn.setCellFactory(stateCell());
-        mTransitionsTableSourceStateColumn
-                .setCellValueFactory(param -> param.getValue().sourceStateProperty());
+        mTransitionsTableSourceStateColumn.setCellValueFactory(param -> param.getValue().sourceStateProperty());
         mTransitionsTableSourceStateColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setSourceState(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setSourceState(value.intValue());
             }
         });
-        mTransitionsTableSourceCoefficientColumn
-                .setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
+        mTransitionsTableSourceCoefficientColumn.setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableSourceCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().sourceCoefficientProperty());
         mTransitionsTableSourceCoefficientColumn.setOnEditCommit(event -> {
@@ -244,18 +233,15 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableSourceDelayColumn.setCellFactory(integerCell(x -> x >= 0, 0));
-        mTransitionsTableSourceDelayColumn
-                .setCellValueFactory(param -> param.getValue().sourceDelayProperty());
+        mTransitionsTableSourceDelayColumn.setCellValueFactory(param -> param.getValue().sourceDelayProperty());
         mTransitionsTableSourceDelayColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setSourceDelay(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setSourceDelay(value.intValue());
             }
         });
         mTransitionsTableOperandStateColumn.setCellFactory(stateCell());
-        mTransitionsTableOperandStateColumn
-                .setCellValueFactory(param -> param.getValue().operandStateProperty());
+        mTransitionsTableOperandStateColumn.setCellValueFactory(param -> param.getValue().operandStateProperty());
         mTransitionsTableOperandStateColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
@@ -275,8 +261,7 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableOperandDelayColumn.setCellFactory(integerCell(x -> x >= 0, 0));
-        mTransitionsTableOperandDelayColumn
-                .setCellValueFactory(param -> param.getValue().operandDelayProperty());
+        mTransitionsTableOperandDelayColumn.setCellValueFactory(param -> param.getValue().operandDelayProperty());
         mTransitionsTableOperandDelayColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
@@ -285,17 +270,14 @@ public class PrimaryController extends AbstractController {
             }
         });
         mTransitionsTableResultStateColumn.setCellFactory(stateCell());
-        mTransitionsTableResultStateColumn
-                .setCellValueFactory(param -> param.getValue().resultStateProperty());
+        mTransitionsTableResultStateColumn.setCellValueFactory(param -> param.getValue().resultStateProperty());
         mTransitionsTableResultStateColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setResultState(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setResultState(value.intValue());
             }
         });
-        mTransitionsTableResultCoefficientColumn
-                .setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
+        mTransitionsTableResultCoefficientColumn.setCellFactory(doubleCell(x -> x > 0, 1, Utils.DECIMAL_FORMAT_COMMON));
         mTransitionsTableResultCoefficientColumn
                 .setCellValueFactory(param -> param.getValue().resultCoefficientProperty());
         mTransitionsTableResultCoefficientColumn.setOnEditCommit(event -> {
@@ -305,10 +287,8 @@ public class PrimaryController extends AbstractController {
                         .setResultCoefficient(value.doubleValue());
             }
         });
-        mTransitionsTableProbabilityColumn
-                .setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
-        mTransitionsTableProbabilityColumn
-                .setCellValueFactory(param -> param.getValue().probabilityProperty());
+        mTransitionsTableProbabilityColumn.setCellFactory(doubleCell(x -> x >= 0, 0, Utils.DECIMAL_FORMAT_COMMON));
+        mTransitionsTableProbabilityColumn.setCellValueFactory(param -> param.getValue().probabilityProperty());
         mTransitionsTableProbabilityColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
@@ -321,8 +301,7 @@ public class PrimaryController extends AbstractController {
         mTransitionsTableTypeColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setType(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setType(value.intValue());
             }
         });
         mTransitionsTableModeColumn.setCellFactory(modeCell());
@@ -330,18 +309,15 @@ public class PrimaryController extends AbstractController {
         mTransitionsTableModeColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setMode(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setMode(value.intValue());
             }
         });
         mTransitionsTableDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        mTransitionsTableDescriptionColumn
-                .setCellValueFactory(param -> param.getValue().descriptionProperty());
+        mTransitionsTableDescriptionColumn.setCellValueFactory(param -> param.getValue().descriptionProperty());
         mTransitionsTableDescriptionColumn.setOnEditCommit(event -> {
             String value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setDescription(value);
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setDescription(value);
             }
         });
         mTransitionsTable.setPlaceholder(new Rectangle());
@@ -349,59 +325,51 @@ public class PrimaryController extends AbstractController {
     }
 
     private void initializeChartSettingsTable() {
-        mChartSettingsTableVisibilityColumn
-                .setCellFactory(CheckBoxTableCell.forTableColumn(null, null));
-        mChartSettingsTableVisibilityColumn
-                .setCellValueFactory(param -> param.getValue().visibilityProperty());
+        mChartSettingsTableVisibilityColumn.setCellFactory(CheckBoxTableCell.forTableColumn(null, null));
+        mChartSettingsTableVisibilityColumn.setCellValueFactory(param -> param.getValue().visibilityProperty());
         mChartSettingsTableNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         mChartSettingsTableNameColumn.setCellValueFactory(param -> param.getValue().nameProperty());
         mChartSettingsTableNameColumn.setOnEditCommit(event -> {
             String value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setName(value);
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setName(value);
             }
         });
-        mChartSettingsTableColorColumn
-                .setCellFactory(ChoiceBoxTableCell.forTableColumn(new StringConverter<Number>() {
-                    @Override
-                    public String toString(Number object) {
-                        return ChartSeries.Color.getName(object.intValue(), getResources());
-                    }
+        mChartSettingsTableColorColumn.setCellFactory(ChoiceBoxTableCell.forTableColumn(new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) {
+                return ChartSeries.Color.getName(object.intValue(), getResources());
+            }
 
-                    @Override
-                    public Number fromString(String string) {
-                        return null;
-                    }
-                }, ChartSeries.Color.LIST));
-        mChartSettingsTableColorColumn
-                .setCellValueFactory(param -> param.getValue().colorProperty());
+            @Override
+            public Number fromString(String string) {
+                return null;
+            }
+        }, ChartSeries.Color.LIST));
+        mChartSettingsTableColorColumn.setCellValueFactory(param -> param.getValue().colorProperty());
         mChartSettingsTableColorColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setColor(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setColor(value.intValue());
                 refreshResultsChart();
             }
         });
-        mChartSettingsTableDashColumn
-                .setCellFactory(ChoiceBoxTableCell.forTableColumn(new StringConverter<Number>() {
-                    @Override
-                    public String toString(Number object) {
-                        return ChartSeries.Dash.getName(object.intValue(), getResources());
-                    }
+        mChartSettingsTableDashColumn.setCellFactory(ChoiceBoxTableCell.forTableColumn(new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) {
+                return ChartSeries.Dash.getName(object.intValue(), getResources());
+            }
 
-                    @Override
-                    public Number fromString(String string) {
-                        return null;
-                    }
-                }, ChartSeries.Dash.LIST));
+            @Override
+            public Number fromString(String string) {
+                return null;
+            }
+        }, ChartSeries.Dash.LIST));
         mChartSettingsTableDashColumn.setCellValueFactory(param -> param.getValue().dashProperty());
         mChartSettingsTableDashColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setDash(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setDash(value.intValue());
                 refreshResultsChart();
             }
         });
@@ -417,13 +385,11 @@ public class PrimaryController extends AbstractController {
                         return null;
                     }
                 }, ChartSeries.Thickness.LIST));
-        mChartSettingsTableThicknessColumn
-                .setCellValueFactory(param -> param.getValue().thicknessProperty());
+        mChartSettingsTableThicknessColumn.setCellValueFactory(param -> param.getValue().thicknessProperty());
         mChartSettingsTableThicknessColumn.setOnEditCommit(event -> {
             Number value = event.getNewValue();
             if (value != null) {
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setThickness(value.intValue());
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setThickness(value.intValue());
                 refreshResultsChart();
             }
         });
@@ -501,10 +467,9 @@ public class PrimaryController extends AbstractController {
                 zoomRect.setHeight(0);
                 return;
             }
-            double zoomAreaX =
-                    applyScale(xScale, zoomRect.getX() - yAxisInScene.getX() - yAxis.getWidth());
-            double zoomAreaY = applyScale(yScale,
-                    xAxisInScene.getY() - zoomRect.getY() - zoomRectHeight - chartInScene.getY());
+            double zoomAreaX = applyScale(xScale, zoomRect.getX() - yAxisInScene.getX() - yAxis.getWidth());
+            double zoomAreaY =
+                    applyScale(yScale, xAxisInScene.getY() - zoomRect.getY() - zoomRectHeight - chartInScene.getY());
             double xLowerBound = xAxis.getLowerBound();
             double yLowerBound = yAxis.getLowerBound();
             yAxis.setAutoRanging(false);
@@ -627,8 +592,8 @@ public class PrimaryController extends AbstractController {
         }, TransitionMode.MODES);
     }
 
-    private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> integerCell(
-            Predicate<Integer> validator, int defaultValue) {
+    private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> integerCell(Predicate<Integer> validator,
+            int defaultValue) {
         return TextFieldTableCell.forTableColumn(new StringConverter<Number>() {
             @Override
             public String toString(Number object) {
@@ -654,8 +619,8 @@ public class PrimaryController extends AbstractController {
         });
     }
 
-    private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> doubleCell(
-            Predicate<Double> validator, double defaultValue, String format) {
+    private <T> Callback<TableColumn<T, Number>, TableCell<T, Number>> doubleCell(Predicate<Double> validator,
+            double defaultValue, String format) {
         DecimalFormat formatter = new DecimalFormat(format);
         return TextFieldTableCell.forTableColumn(new StringConverter<Number>() {
             @Override
@@ -684,15 +649,13 @@ public class PrimaryController extends AbstractController {
 
     private FileChooser getTaskFileChooser(String title) {
         FileChooser fileChooser = getFileChooser(title);
-        fileChooser.getExtensionFilters()
-                .add(new FileChooser.ExtensionFilter(getString("task"), "*.pmt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(getString("task"), "*.pmt"));
         return fileChooser;
     }
 
     private FileChooser getImportTaskFileChooser() {
         FileChooser fileChooser = getFileChooser(getString("import_task"));
-        fileChooser.getExtensionFilters()
-                .add(new FileChooser.ExtensionFilter(getString("text_document"), "*.txt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(getString("text_document"), "*.txt"));
         return fileChooser;
     }
 
@@ -711,8 +674,7 @@ public class PrimaryController extends AbstractController {
 
     private void setTitle(File file) {
         String applicationName = getString("application_name");
-        getStage().setTitle(
-                file == null ? applicationName : file.getName() + " - " + applicationName);
+        getStage().setTitle(file == null ? applicationName : file.getName() + " - " + applicationName);
     }
 
     private void setTitle() {
@@ -734,8 +696,7 @@ public class PrimaryController extends AbstractController {
         mTaskSettings.put(Task.Keys.STEPS_COUNT, String.valueOf(stepsCount));
         mTaskSettings.put(Task.Keys.PARALLEL, String.valueOf(mParallel.isSelected()));
         mTaskSettings.put(Task.Keys.HIGHER_ACCURACY, String.valueOf(mHigherAccuracy.isSelected()));
-        mTaskSettings
-                .put(Task.Keys.ALLOW_NEGATIVE, String.valueOf(mAllowNegativeNumbers.isSelected()));
+        mTaskSettings.put(Task.Keys.ALLOW_NEGATIVE, String.valueOf(mAllowNegativeNumbers.isSelected()));
         return mTaskSettings;
     }
 
@@ -751,17 +712,14 @@ public class PrimaryController extends AbstractController {
             mParallel.setSelected(Boolean.parseBoolean(settings.get(Task.Keys.PARALLEL)));
         }
         if (settings.containsKey(Task.Keys.HIGHER_ACCURACY)) {
-            mHigherAccuracy
-                    .setSelected(Boolean.parseBoolean(settings.get(Task.Keys.HIGHER_ACCURACY)));
+            mHigherAccuracy.setSelected(Boolean.parseBoolean(settings.get(Task.Keys.HIGHER_ACCURACY)));
         }
         if (settings.containsKey(Task.Keys.ALLOW_NEGATIVE)) {
-            mAllowNegativeNumbers
-                    .setSelected(Boolean.parseBoolean(settings.get(Task.Keys.ALLOW_NEGATIVE)));
+            mAllowNegativeNumbers.setSelected(Boolean.parseBoolean(settings.get(Task.Keys.ALLOW_NEGATIVE)));
         }
     }
 
-    private ObservableList<XYChart.Series<Number, Number>> buildChart(int start, int end,
-            int width) {
+    private ObservableList<XYChart.Series<Number, Number>> buildChart(int start, int end, int width) {
         if (start > end) {
             int tmp = start;
             start = end;
@@ -807,15 +765,13 @@ public class PrimaryController extends AbstractController {
         }
         float fraction = dataWidth / (float) width;
         if (fraction <= 1) {
-            ArrayList<XYChart.Series<Number, Number>> chart =
-                    new ArrayList<>(mResultsChartData.size());
+            ArrayList<XYChart.Series<Number, Number>> chart = new ArrayList<>(mResultsChartData.size());
             for (ChartSeries chartSeries : mResultsChartData) {
                 if (!chartSeries.getVisibility()) {
                     continue;
                 }
                 XYChart.Series<Number, Number> originalSeries = chartSeries.getData();
-                ObservableList<XYChart.Data<Number, Number>> originalData =
-                        originalSeries.getData();
+                ObservableList<XYChart.Data<Number, Number>> originalData = originalSeries.getData();
                 ArrayList<XYChart.Data<Number, Number>> data = new ArrayList<>();
                 int localStart = chartSeries.getStartPoint();
                 for (int j = start; j < end; j++) {
@@ -824,21 +780,18 @@ public class PrimaryController extends AbstractController {
                         data.add(originalData.get(localIndex));
                     }
                 }
-                chart.add(new XYChart.Series<>(originalSeries.getName(),
-                        FXCollections.observableList(data)));
+                chart.add(new XYChart.Series<>(originalSeries.getName(), FXCollections.observableList(data)));
             }
             return FXCollections.observableList(chart);
         } else {
-            ArrayList<XYChart.Series<Number, Number>> chart =
-                    new ArrayList<>(mResultsChartData.size());
+            ArrayList<XYChart.Series<Number, Number>> chart = new ArrayList<>(mResultsChartData.size());
             int[] indexes = Calculator.interpolateIndexes(start, end, width);
             for (ChartSeries chartSeries : mResultsChartData) {
                 if (!chartSeries.getVisibility()) {
                     continue;
                 }
                 XYChart.Series<Number, Number> originalSeries = chartSeries.getData();
-                ObservableList<XYChart.Data<Number, Number>> originalData =
-                        originalSeries.getData();
+                ObservableList<XYChart.Data<Number, Number>> originalData = originalSeries.getData();
                 ArrayList<XYChart.Data<Number, Number>> data = new ArrayList<>(indexes.length);
                 int localStart = chartSeries.getStartPoint();
                 for (int index : indexes) {
@@ -847,8 +800,7 @@ public class PrimaryController extends AbstractController {
                         data.add(originalData.get(localIndex));
                     }
                 }
-                chart.add(new XYChart.Series<>(originalSeries.getName(),
-                        FXCollections.observableList(data)));
+                chart.add(new XYChart.Series<>(originalSeries.getName(), FXCollections.observableList(data)));
             }
             return FXCollections.observableList(chart);
         }
@@ -862,8 +814,8 @@ public class PrimaryController extends AbstractController {
             chartSeries.setLinePath(null);
             chartSeries.setLegendLabel(null);
         }
-        List<ChartSeries> visible = mResultsChartData.stream().filter(ChartSeries::getVisibility)
-                .collect(Collectors.toList());
+        List<ChartSeries> visible =
+                mResultsChartData.stream().filter(ChartSeries::getVisibility).collect(Collectors.toList());
         for (int i = 0; i < visible.size(); i++) {
             ChartSeries chartSeries = visible.get(i);
             if (iterator.hasNext()) {
@@ -1071,11 +1023,8 @@ public class PrimaryController extends AbstractController {
                 int color = size % colorsCount;
                 int dash = (size / colorsCount) % dashesCount;
                 int thickness = (size / (colorsCount * dashesCount)) % thicknessesCount;
-                ChartSeries chartSeries =
-                        new ChartSeries(series, result.getStartPoint(), color, dash, thickness,
-                                true);
-                chartSeries.visibilityProperty()
-                        .addListener((observable, oldValue, newValue) -> refreshResultsChart());
+                ChartSeries chartSeries = new ChartSeries(series, result.getStartPoint(), color, dash, thickness, true);
+                chartSeries.visibilityProperty().addListener((observable, oldValue, newValue) -> refreshResultsChart());
                 mResultsChartData.add(chartSeries);
             }
             refreshResultsChart();
@@ -1143,22 +1092,20 @@ public class PrimaryController extends AbstractController {
 
     public void calculate() {
         if (mStates.size() == 0) {
-            getApplication().showAlert(getString("alert_error"), null, getString("states_missing"),
-                    Alert.AlertType.WARNING);
+            getApplication()
+                    .showAlert(getString("alert_error"), null, getString("states_missing"), Alert.AlertType.WARNING);
             return;
         }
         if (mTransitions.size() == 0) {
-            getApplication()
-                    .showAlert(getString("alert_error"), null, getString("transitions_missing"),
-                            Alert.AlertType.WARNING);
+            getApplication().showAlert(getString("alert_error"), null, getString("transitions_missing"),
+                    Alert.AlertType.WARNING);
             return;
         }
         for (Transition transition : mTransitions) {
-            if (transition.getSourceState() == State.UNDEFINED ||
-                    transition.getOperandState() == State.UNDEFINED ||
+            if (transition.getSourceState() == State.UNDEFINED || transition.getOperandState() == State.UNDEFINED ||
                     transition.getResultState() == State.UNDEFINED) {
-                getApplication().showAlert(getString("alert_error"), null,
-                        getString("transitions_incorrect"), Alert.AlertType.WARNING);
+                getApplication().showAlert(getString("alert_error"), null, getString("transitions_incorrect"),
+                        Alert.AlertType.WARNING);
                 return;
             }
         }
@@ -1166,24 +1113,21 @@ public class PrimaryController extends AbstractController {
         try {
             startPoint = Integer.parseInt(mStartPointField.getText());
         } catch (NumberFormatException e) {
-            getApplication()
-                    .showAlert(getString("alert_error"), null, getString("start_point_invalid"),
-                            Alert.AlertType.WARNING);
+            getApplication().showAlert(getString("alert_error"), null, getString("start_point_invalid"),
+                    Alert.AlertType.WARNING);
             return;
         }
         int stepsCount;
         try {
             stepsCount = Integer.parseInt(mStepsCountField.getText());
             if (stepsCount < 1 || stepsCount == Integer.MAX_VALUE) {
-                getApplication()
-                        .showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
-                                Alert.AlertType.WARNING);
+                getApplication().showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
+                        Alert.AlertType.WARNING);
                 return;
             }
         } catch (NumberFormatException e) {
-            getApplication()
-                    .showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
-                            Alert.AlertType.WARNING);
+            getApplication().showAlert(getString("alert_error"), null, getString("steps_count_invalid"),
+                    Alert.AlertType.WARNING);
             return;
         }
         mCalculating = true;
@@ -1205,8 +1149,7 @@ public class PrimaryController extends AbstractController {
                     mCalculationProgressBar.setVisible(false);
                     setControlsDisable(false);
                     mCalculating = false;
-                }),
-                progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)),
+                }), progress -> Platform.runLater(() -> mCalculationProgressBar.setProgress(progress)),
                 getApplication().getThreadFactory());
     }
 
@@ -1292,8 +1235,7 @@ public class PrimaryController extends AbstractController {
         if (mCalculating) {
             return;
         }
-        File file = getTaskFileChooser(getString("open_task"))
-                .showOpenDialog(mStatesTable.getScene().getWindow());
+        File file = getTaskFileChooser(getString("open_task")).showOpenDialog(mStatesTable.getScene().getWindow());
         if (file == null) {
             return;
         }
@@ -1365,8 +1307,7 @@ public class PrimaryController extends AbstractController {
     }
 
     public void saveTaskAs() {
-        File file = getTaskFileChooser(getString("save_task"))
-                .showSaveDialog(mStatesTable.getScene().getWindow());
+        File file = getTaskFileChooser(getString("save_task")).showSaveDialog(mStatesTable.getScene().getWindow());
         if (file == null) {
             return;
         }
@@ -1449,8 +1390,8 @@ public class PrimaryController extends AbstractController {
         PopulationApplication application = getApplication();
         if (application.selectLanguage(langTag)) {
             ResourceBundle resources = getResources();
-            application.showAlert(resources.getString("lang"), null,
-                    resources.getString("lang_change"), Alert.AlertType.INFORMATION);
+            application.showAlert(resources.getString("lang"), null, resources.getString("lang_change"),
+                    Alert.AlertType.INFORMATION);
         }
     }
 }

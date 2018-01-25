@@ -52,16 +52,12 @@ public final class CsvParser {
      * @param charset      Charset name
      * @return true if success, false otherwise
      */
-    public static boolean encode(StringTable table, OutputStream outputStream, char separator,
-            String charset) {
-        try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, charset))) {
+    public static boolean encode(StringTable table, OutputStream outputStream, char separator, String charset) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, charset))) {
             for (StringRow row : table) {
                 int size = row.size();
                 for (int i = 0; i < size; i++) {
-                    writer.append(QUOTE)
-                            .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
-                            .append(QUOTE);
+                    writer.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING)).append(QUOTE);
                     if (i != size - 1) {
                         writer.append(separator);
                     }
@@ -86,8 +82,7 @@ public final class CsvParser {
         for (StringRow row : table) {
             int size = row.size();
             for (int i = 0; i < size; i++) {
-                stringBuilder.append(QUOTE)
-                        .append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
+                stringBuilder.append(QUOTE).append(row.cell(i).replace(QUOTE_STRING, DOUBLE_QUOTE_STRING))
                         .append(QUOTE);
                 if (i != size - 1) {
                     stringBuilder.append(separator);
@@ -183,8 +178,7 @@ public final class CsvParser {
                 int p = i - 1;
                 if ((p > -1 && rowString.charAt(p) == separator || i == 0) && !inElementQuotes) {
                     inElementQuotes = true;
-                } else if ((n < length && rowString.charAt(n) == separator || n == length) &&
-                        inElementQuotes) {
+                } else if ((n < length && rowString.charAt(n) == separator || n == length) && inElementQuotes) {
                     inElementQuotes = false;
                 } else if (n < length && rowString.charAt(n) == CsvParser.QUOTE) {
                     cell.append(current);

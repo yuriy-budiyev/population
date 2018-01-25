@@ -41,8 +41,8 @@ public class Result {
      * @param prepareResultsTableData подготовить результат в табличном виде
      * @param prepareResultsChartData подготовить результат в графическом виде
      */
-    public Result(int startPoint, double[][] states, List<State> initialStates,
-            boolean prepareResultsTableData, boolean prepareResultsChartData) {
+    public Result(int startPoint, double[][] states, List<State> initialStates, boolean prepareResultsTableData,
+            boolean prepareResultsChartData) {
         mStartPoint = startPoint;
         mDataNames = new ArrayList<>(initialStates.size());
         mDataNames.addAll(initialStates.stream().map(State::getName).collect(Collectors.toList()));
@@ -62,8 +62,7 @@ public class Result {
                 for (int j = 0; j < states.length; j++) {
                     data.add(new XYChart.Data<>(j + mStartPoint, states[j][i]));
                 }
-                XYChart.Series<Number, Number> series =
-                        new XYChart.Series<>(mDataNames.get(i), data);
+                XYChart.Series<Number, Number> series = new XYChart.Series<>(mDataNames.get(i), data);
                 mChartData.add(series);
             }
         } else {

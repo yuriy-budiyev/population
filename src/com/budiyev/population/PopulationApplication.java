@@ -17,16 +17,6 @@
  */
 package com.budiyev.population;
 
-import com.budiyev.population.controller.base.AbstractAboutController;
-import com.budiyev.population.controller.base.AbstractController;
-import com.budiyev.population.controller.base.AbstractExportController;
-import com.budiyev.population.model.Result;
-import com.budiyev.population.util.CsvParser;
-import com.budiyev.population.util.PopulationThreadFactory;
-import com.budiyev.population.util.StringRow;
-import com.budiyev.population.util.StringTable;
-import com.budiyev.population.util.Utils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +30,15 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.ThreadFactory;
 
+import com.budiyev.population.controller.base.AbstractAboutController;
+import com.budiyev.population.controller.base.AbstractController;
+import com.budiyev.population.controller.base.AbstractExportController;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.util.CsvParser;
+import com.budiyev.population.util.PopulationThreadFactory;
+import com.budiyev.population.util.StringRow;
+import com.budiyev.population.util.StringTable;
+import com.budiyev.population.util.Utils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -60,18 +59,14 @@ public final class PopulationApplication extends Application {
     private Stage mPrimaryStage;
     private ResourceBundle mResources;
 
-    private final Thread.UncaughtExceptionHandler mUncaughtExceptionHandler =
-            (thread, throwable) -> {
-                throwable.printStackTrace();
-                ResourceBundle resources = getResources();
-                showAlert(resources.getString("alert_error"),
-                        resources.getString("alert_unexpected_error"),
-                        Utils.buildErrorText(throwable, 10, resources.getString("stack_trace")),
-                        Alert.AlertType.ERROR);
-            };
+    private final Thread.UncaughtExceptionHandler mUncaughtExceptionHandler = (thread, throwable) -> {
+        throwable.printStackTrace();
+        ResourceBundle resources = getResources();
+        showAlert(resources.getString("alert_error"), resources.getString("alert_unexpected_error"),
+                Utils.buildErrorText(throwable, 10, resources.getString("stack_trace")), Alert.AlertType.ERROR);
+    };
 
-    private final ThreadFactory mThreadFactory =
-            new PopulationThreadFactory(mUncaughtExceptionHandler);
+    private final ThreadFactory mThreadFactory = new PopulationThreadFactory(mUncaughtExceptionHandler);
 
     private void loadSettings() {
         File settingsFile = new File(System.getProperty("user.home"), Settings.FILE);
@@ -147,11 +142,8 @@ public final class PopulationApplication extends Application {
         mPrimaryStage.setTitle(mResources.getString("application_name"));
         mPrimaryStage.setMinWidth(PRIMARY_STAGE_MIN_WIDTH);
         mPrimaryStage.setMinHeight(PRIMARY_STAGE_MIN_HEIGHT);
-        mPrimaryStage.getIcons()
-                .add(new Image(getClass().getResourceAsStream("resource/icon.png")));
-        FXMLLoader sceneLoader =
-                new FXMLLoader(getClass().getResource("resource/view/PrimaryView.fxml"),
-                        mResources);
+        mPrimaryStage.getIcons().add(new Image(getClass().getResourceAsStream("resource/icon.png")));
+        FXMLLoader sceneLoader = new FXMLLoader(getClass().getResource("resource/view/PrimaryView.fxml"), mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
                 Object controller = controllerClass.newInstance();
@@ -198,7 +190,7 @@ public final class PopulationApplication extends Application {
             mPrimaryStage.setMaximized(Boolean.parseBoolean(setting));
         }
         try {
-            Scene primaryScene = new Scene(sceneLoader.load(), 1, 1);
+            Scene primaryScene = new Scene(sceneLoader.load());
             primaryScene.getStylesheets().add("com/budiyev/population/resource/style/primary.css");
             mPrimaryStage.setScene(primaryScene);
             mPrimaryStage.show();
@@ -228,15 +220,13 @@ public final class PopulationApplication extends Application {
         exportStage.initOwner(primaryStage.getOwner());
         exportStage.setResizable(false);
         exportStage.setTitle(mResources.getString("export"));
-        FXMLLoader sceneLoader =
-                new FXMLLoader(getClass().getResource("resource/view/ExportView.fxml"));
+        FXMLLoader sceneLoader = new FXMLLoader(getClass().getResource("resource/view/ExportView.fxml"));
         sceneLoader.setResources(mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
                 Object controller = controllerClass.newInstance();
                 if (controller instanceof AbstractExportController) {
-                    AbstractExportController exportController =
-                            (AbstractExportController) controller;
+                    AbstractExportController exportController = (AbstractExportController) controller;
                     exportController.setApplication(PopulationApplication.this);
                     exportController.setStage(exportStage);
                     exportController.setResults(results);
@@ -266,8 +256,7 @@ public final class PopulationApplication extends Application {
         aboutStage.initOwner(primaryStage.getOwner());
         aboutStage.setResizable(false);
         aboutStage.setTitle(mResources.getString("about"));
-        FXMLLoader sceneLoader =
-                new FXMLLoader(getClass().getResource("resource/view/AboutView.fxml"));
+        FXMLLoader sceneLoader = new FXMLLoader(getClass().getResource("resource/view/AboutView.fxml"));
         sceneLoader.setResources(mResources);
         sceneLoader.setControllerFactory(controllerClass -> {
             try {
@@ -276,8 +265,7 @@ public final class PopulationApplication extends Application {
                     AbstractAboutController aboutController = (AbstractAboutController) controller;
                     aboutController.setApplication(PopulationApplication.this);
                     aboutController.setStage(aboutStage);
-                    aboutController.setImage(
-                            new Image(getClass().getResourceAsStream("resource/icon.png")));
+                    aboutController.setImage(new Image(getClass().getResourceAsStream("resource/icon.png")));
                 }
                 return controller;
             } catch (InstantiationException | IllegalAccessException e) {
@@ -320,8 +308,7 @@ public final class PopulationApplication extends Application {
         Stage primaryStage = mPrimaryStage;
         Platform.runLater(() -> {
             Alert alert = new Alert(type);
-            alert.getDialogPane().getStylesheets()
-                    .add("com/budiyev/population/resource/style/alert.css");
+            alert.getDialogPane().getStylesheets().add("com/budiyev/population/resource/style/alert.css");
             alert.setX(primaryStage.getX() + WINDOW_OFFSET);
             alert.setY(primaryStage.getY() + WINDOW_OFFSET);
             alert.initStyle(StageStyle.UTILITY);
@@ -329,8 +316,8 @@ public final class PopulationApplication extends Application {
             alert.setHeaderText(header);
             alert.setContentText(content);
             alert.getButtonTypes().clear();
-            alert.getButtonTypes().add(new ButtonType(getResources().getString("alert_close"),
-                    ButtonBar.ButtonData.OK_DONE));
+            alert.getButtonTypes()
+                    .add(new ButtonType(getResources().getString("alert_close"), ButtonBar.ButtonData.OK_DONE));
             alert.showAndWait();
         });
     }

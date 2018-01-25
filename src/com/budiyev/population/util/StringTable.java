@@ -278,8 +278,7 @@ public class StringTable implements Iterable<StringRow> {
 
     @Override
     public boolean equals(Object o) {
-        return o == this ||
-                o instanceof StringTable && Objects.equals(((StringTable) o).mRows, mRows);
+        return o == this || o instanceof StringTable && Objects.equals(((StringTable) o).mRows, mRows);
     }
 
     @Override

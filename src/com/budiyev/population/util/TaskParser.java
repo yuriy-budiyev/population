@@ -17,12 +17,6 @@
  */
 package com.budiyev.population.util;
 
-import com.budiyev.population.model.State;
-import com.budiyev.population.model.Task;
-import com.budiyev.population.model.Transition;
-import com.budiyev.population.model.TransitionMode;
-import com.budiyev.population.model.TransitionType;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +27,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.budiyev.population.model.State;
+import com.budiyev.population.model.Task;
+import com.budiyev.population.model.Transition;
+import com.budiyev.population.model.TransitionMode;
+import com.budiyev.population.model.TransitionType;
 
 public final class TaskParser {
     private static final String FORMAT_NAME = "PopulationModelingTask";
@@ -61,16 +61,14 @@ public final class TaskParser {
         table.add(new StringRow(Task.Keys.ENCODING, task.getEncoding()));
         table.add(new StringRow(KEY_STATES_OPEN));
         for (State state : task.getStates()) {
-            table.add(new StringRow(state.getId(), state.getName(), state.getCount(),
-                    state.getDescription()));
+            table.add(new StringRow(state.getId(), state.getName(), state.getCount(), state.getDescription()));
         }
         table.add(new StringRow(KEY_STATES_CLOSE));
         table.add(new StringRow(KEY_TRANSITIONS_OPEN));
         for (Transition transition : task.getTransitions()) {
             table.add(new StringRow(transition.getSourceState(), transition.getSourceCoefficient(),
-                    transition.getSourceDelay(), transition.getOperandState(),
-                    transition.getOperandCoefficient(), transition.getOperandDelay(),
-                    transition.getResultState(), transition.getResultCoefficient(),
+                    transition.getSourceDelay(), transition.getOperandState(), transition.getOperandCoefficient(),
+                    transition.getOperandDelay(), transition.getResultState(), transition.getResultCoefficient(),
                     transition.getProbability(), transition.getType(), transition.getMode(),
                     transition.getDescription()));
         }
@@ -143,16 +141,15 @@ public final class TaskParser {
                 continue;
             }
             if (readingStates) {
-                task.getStates().add(new State(Integer.parseInt(row.cell(0)), row.cell(1),
-                        Double.parseDouble(row.cell(2)), row.cell(3)));
+                task.getStates()
+                        .add(new State(Integer.parseInt(row.cell(0)), row.cell(1), Double.parseDouble(row.cell(2)),
+                                row.cell(3)));
             }
             if (readingTransitions) {
-                task.getTransitions().add(new Transition(Integer.parseInt(row.cell(0)),
-                        Double.parseDouble(row.cell(1)), Integer.parseInt(row.cell(2)),
-                        Integer.parseInt(row.cell(3)), Double.parseDouble(row.cell(4)),
-                        Integer.parseInt(row.cell(5)), Integer.parseInt(row.cell(6)),
-                        Double.parseDouble(row.cell(7)), Double.parseDouble(row.cell(8)),
-                        Integer.parseInt(row.cell(9)), Integer.parseInt(row.cell(10)),
+                task.getTransitions().add(new Transition(Integer.parseInt(row.cell(0)), Double.parseDouble(row.cell(1)),
+                        Integer.parseInt(row.cell(2)), Integer.parseInt(row.cell(3)), Double.parseDouble(row.cell(4)),
+                        Integer.parseInt(row.cell(5)), Integer.parseInt(row.cell(6)), Double.parseDouble(row.cell(7)),
+                        Double.parseDouble(row.cell(8)), Integer.parseInt(row.cell(9)), Integer.parseInt(row.cell(10)),
                         row.cell(11)));
             }
         }

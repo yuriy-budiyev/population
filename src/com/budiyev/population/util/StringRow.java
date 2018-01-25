@@ -188,8 +188,7 @@ public class StringRow implements Iterable<String> {
 
     @Override
     public boolean equals(Object o) {
-        return o == this ||
-                o instanceof StringRow && Objects.equals(((StringRow) o).mCells, mCells);
+        return o == this || o instanceof StringRow && Objects.equals(((StringRow) o).mCells, mCells);
     }
 
     @Override

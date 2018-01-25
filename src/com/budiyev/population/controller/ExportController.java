@@ -17,17 +17,16 @@
  */
 package com.budiyev.population.controller;
 
-import com.budiyev.population.controller.base.AbstractExportController;
-import com.budiyev.population.model.Result;
-import com.budiyev.population.model.Task;
-import com.budiyev.population.util.Utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import com.budiyev.population.controller.base.AbstractExportController;
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.Task;
+import com.budiyev.population.util.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -37,12 +36,9 @@ import javafx.util.Pair;
 import javafx.util.StringConverter;
 
 public class ExportController extends AbstractExportController {
-    private ObservableList<Pair<Character, String>> mColumnSeparators =
-            FXCollections.observableArrayList();
-    private ObservableList<Pair<Character, String>> mDecimalSeparators =
-            FXCollections.observableArrayList();
-    private ObservableList<Pair<String, String>> mLineSeparators =
-            FXCollections.observableArrayList();
+    private ObservableList<Pair<Character, String>> mColumnSeparators = FXCollections.observableArrayList();
+    private ObservableList<Pair<Character, String>> mDecimalSeparators = FXCollections.observableArrayList();
+    private ObservableList<Pair<String, String>> mLineSeparators = FXCollections.observableArrayList();
     private ObservableList<String> mEncodings = FXCollections.observableArrayList();
     public ChoiceBox<Pair<Character, String>> mColumnSeparatorChoiceBox;
     public ChoiceBox<Pair<Character, String>> mDecimalSeparatorChoiceBox;
@@ -59,8 +55,7 @@ public class ExportController extends AbstractExportController {
                 fileChooser.setInitialDirectory(file);
             }
         }
-        fileChooser.getExtensionFilters()
-                .add(new FileChooser.ExtensionFilter(getString("csv_format"), "*.csv"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(getString("csv_format"), "*.csv"));
         fileChooser.setTitle(getString("save_results"));
         return fileChooser;
     }
@@ -118,18 +113,17 @@ public class ExportController extends AbstractExportController {
                 mEncodings.add(string);
             }
         });
-        StringConverter<Pair<Character, String>> converter =
-                new StringConverter<Pair<Character, String>>() {
-                    @Override
-                    public String toString(Pair<Character, String> object) {
-                        return object.getValue();
-                    }
+        StringConverter<Pair<Character, String>> converter = new StringConverter<Pair<Character, String>>() {
+            @Override
+            public String toString(Pair<Character, String> object) {
+                return object.getValue();
+            }
 
-                    @Override
-                    public Pair<Character, String> fromString(String string) {
-                        return null;
-                    }
-                };
+            @Override
+            public Pair<Character, String> fromString(String string) {
+                return null;
+            }
+        };
         mColumnSeparatorChoiceBox.setConverter(converter);
         mDecimalSeparatorChoiceBox.setConverter(converter);
         mLineSeparatorChoiceBox.setConverter(new StringConverter<Pair<String, String>>() {
@@ -148,18 +142,14 @@ public class ExportController extends AbstractExportController {
         mLineSeparatorChoiceBox.setItems(mLineSeparators);
         mEncodingChoiceBox.setItems(mEncodings);
         readSelectionFromSettings();
-        mColumnSeparatorChoiceBox.valueProperty().addListener(
-                (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(Task.Keys.COLUMN_SEPARATOR, String.valueOf(newValue.getKey())));
-        mDecimalSeparatorChoiceBox.valueProperty().addListener(
-                (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(Task.Keys.DECIMAL_SEPARATOR, String.valueOf(newValue.getKey())));
+        mColumnSeparatorChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> getTaskSettings()
+                .put(Task.Keys.COLUMN_SEPARATOR, String.valueOf(newValue.getKey())));
+        mDecimalSeparatorChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> getTaskSettings()
+                .put(Task.Keys.DECIMAL_SEPARATOR, String.valueOf(newValue.getKey())));
         mLineSeparatorChoiceBox.valueProperty().addListener(
-                (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(Task.Keys.LINE_SEPARATOR, newValue.getKey()));
-        mEncodingChoiceBox.valueProperty().addListener(
-                (observable, oldValue, newValue) -> getTaskSettings()
-                        .put(Task.Keys.ENCODING, newValue));
+                (observable, oldValue, newValue) -> getTaskSettings().put(Task.Keys.LINE_SEPARATOR, newValue.getKey()));
+        mEncodingChoiceBox.valueProperty()
+                .addListener((observable, oldValue, newValue) -> getTaskSettings().put(Task.Keys.ENCODING, newValue));
         ArrayList<Result> results = getResults();
         mSaveButton.setDisable(results == null || results.size() == 0);
     }

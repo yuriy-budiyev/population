@@ -31,8 +31,7 @@ public class PopulationThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable runnable) {
         THREAD_COUNTER.compareAndSet(Integer.MAX_VALUE, 0);
-        Thread thread = new Thread(runnable,
-                "Population-background-thread-" + THREAD_COUNTER.incrementAndGet());
+        Thread thread = new Thread(runnable, "Population-background-thread-" + THREAD_COUNTER.incrementAndGet());
         thread.setUncaughtExceptionHandler(mUncaughtExceptionHandler);
         if (!thread.isDaemon()) {
             thread.setDaemon(true);

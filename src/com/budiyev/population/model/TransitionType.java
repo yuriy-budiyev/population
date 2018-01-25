@@ -27,7 +27,7 @@ public final class TransitionType {
     public static final int SOLUTE = 1;
     public static final int BLEND = 2;
     public static final ObservableList<Number> TYPES =
-            FXCollections.observableArrayList(new Number[]{LINEAR, SOLUTE, BLEND});
+            FXCollections.observableArrayList(new Number[] {LINEAR, SOLUTE, BLEND});
 
     private TransitionType() {
     }

@@ -28,8 +28,8 @@ public final class TransitionMode {
     public static final int REMOVING = 2;
     public static final int RESIDUAL = 3;
     public static final int INHIBITOR = 4;
-    public static final ObservableList<Number> MODES = FXCollections
-            .observableArrayList(new Number[]{SIMPLE, RETAINING, REMOVING, RESIDUAL, INHIBITOR});
+    public static final ObservableList<Number> MODES =
+            FXCollections.observableArrayList(new Number[] {SIMPLE, RETAINING, REMOVING, RESIDUAL, INHIBITOR});
 
     private TransitionMode() {
     }

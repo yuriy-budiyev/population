@@ -17,10 +17,6 @@
  */
 package com.budiyev.population.util;
 
-import com.budiyev.population.model.Result;
-import com.budiyev.population.model.TableResult;
-import com.budiyev.population.model.Task;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +35,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.budiyev.population.model.Result;
+import com.budiyev.population.model.TableResult;
+import com.budiyev.population.model.Task;
 import javafx.collections.ObservableList;
 
 public final class Utils {
@@ -52,16 +51,15 @@ public final class Utils {
 
     public static ExecutorService newExecutor(ThreadFactory threadFactory) {
         int processors = Runtime.getRuntime().availableProcessors();
-        return new ThreadPoolExecutor(processors, processors, 0, TimeUnit.NANOSECONDS,
-                new LinkedBlockingQueue<>(), threadFactory);
+        return new ThreadPoolExecutor(processors, processors, 0, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<>(),
+                threadFactory);
     }
 
     public static String buildErrorText(Throwable throwable) {
         return buildErrorText(throwable, Integer.MAX_VALUE, "Stack trace:");
     }
 
-    public static String buildErrorText(Throwable throwable, int maxStackTraceSize,
-            String localizedStackTraceMessage) {
+    public static String buildErrorText(Throwable throwable, int maxStackTraceSize, String localizedStackTraceMessage) {
         for (; ; ) {
             Throwable cause = throwable.getCause();
             if (cause == null) {
@@ -70,9 +68,8 @@ public final class Utils {
             throwable = cause;
         }
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(throwable.getClass().getSimpleName()).append(": ")
-                .append(throwable.getLocalizedMessage()).append(System.lineSeparator())
-                .append(System.lineSeparator()).append(localizedStackTraceMessage)
+        stringBuilder.append(throwable.getClass().getSimpleName()).append(": ").append(throwable.getLocalizedMessage())
+                .append(System.lineSeparator()).append(System.lineSeparator()).append(localizedStackTraceMessage)
                 .append(System.lineSeparator());
         StackTraceElement[] stackTrace = throwable.getStackTrace();
         for (int i = 0; i < stackTrace.length && i < maxStackTraceSize; i++) {
@@ -113,11 +110,9 @@ public final class Utils {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void exportResults(ArrayList<Result> results, File file, char columnSeparator,
-            char decimalSeparator, String lineSeparator, String encoding,
-            ResourceBundle resources) throws IOException {
-        if (results == null || file == null || lineSeparator == null || encoding == null ||
-                resources == null) {
+    public static void exportResults(ArrayList<Result> results, File file, char columnSeparator, char decimalSeparator,
+            String lineSeparator, String encoding, ResourceBundle resources) throws IOException {
+        if (results == null || file == null || lineSeparator == null || encoding == null || resources == null) {
             return;
         }
         int start = Integer.MAX_VALUE;
@@ -138,15 +133,12 @@ public final class Utils {
         file.createNewFile();
         DecimalFormat formatter = new DecimalFormat(Utils.DECIMAL_FORMAT_COMMON);
         formatter.getDecimalFormatSymbols().setDecimalSeparator(decimalSeparator);
-        try (BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(file), encoding))) {
-            writer.append(QUOTE).append(resources.getString("step")).append(QUOTE)
-                    .append(columnSeparator);
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding))) {
+            writer.append(QUOTE).append(resources.getString("step")).append(QUOTE).append(columnSeparator);
             for (int i = 0; i < results.size(); i++) {
                 ArrayList<String> headers = results.get(i).getDataNames();
                 for (int j = 0; j < headers.size(); j++) {
-                    writer.append(QUOTE).append(headers.get(j).replace(QUOTE, DOUBLE_QUOTE))
-                            .append(QUOTE);
+                    writer.append(QUOTE).append(headers.get(j).replace(QUOTE, DOUBLE_QUOTE)).append(QUOTE);
                     if (i != results.size() - 1 || j != headers.size() - 1) {
                         writer.append(columnSeparator);
                     }
@@ -164,9 +156,7 @@ public final class Utils {
                     if (localIndex >= 0 && localIndex < data.size()) {
                         TableResult localResult = data.get(localIndex);
                         for (int k = 0; k < localResult.valueCount(); k++) {
-                            rowBuilder.append(QUOTE)
-                                    .append(formatter.format(localResult.getValue(k)))
-                                    .append(QUOTE);
+                            rowBuilder.append(QUOTE).append(formatter.format(localResult.getValue(k))).append(QUOTE);
                             if (j != results.size() - 1 || k != localResult.valueCount() - 1) {
                                 rowBuilder.append(columnSeparator);
                             }
@@ -186,21 +176,18 @@ public final class Utils {
                     }
                 }
                 if (!empty) {
-                    writer.append(QUOTE).append(String.valueOf(firstExistent.getNumber()))
-                            .append(QUOTE).append(columnSeparator).append(rowBuilder.toString())
-                            .append(lineSeparator);
+                    writer.append(QUOTE).append(String.valueOf(firstExistent.getNumber())).append(QUOTE)
+                            .append(columnSeparator).append(rowBuilder.toString()).append(lineSeparator);
                 }
             }
         }
     }
 
-    public static void exportResults(File file, Result result, char columnSeparator,
-            char decimalSeparator, String lineSeparator, String encoding,
-            ResourceBundle resources) throws IOException {
+    public static void exportResults(File file, Result result, char columnSeparator, char decimalSeparator,
+            String lineSeparator, String encoding, ResourceBundle resources) throws IOException {
         ArrayList<Result> resultList = new ArrayList<>(1);
         resultList.add(result);
-        exportResults(resultList, file, columnSeparator, decimalSeparator, lineSeparator, encoding,
-                resources);
+        exportResults(resultList, file, columnSeparator, decimalSeparator, lineSeparator, encoding, resources);
     }
 
     public static void setDefaultTaskSettings(HashMap<String, String> taskSettings) {

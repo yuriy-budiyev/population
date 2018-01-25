@@ -54,8 +54,8 @@ public class Transition {
     }
 
     public Transition(int sourceState, double sourceCoefficient, int sourceDelay, int operandState,
-            double operandCoefficient, int operandDelay, int resultState, double resultCoefficient,
-            double probability, int type, int mode, String description) {
+            double operandCoefficient, int operandDelay, int resultState, double resultCoefficient, double probability,
+            int type, int mode, String description) {
         mSourceState = new SimpleIntegerProperty(sourceState);
         mSourceCoefficient = new SimpleDoubleProperty(sourceCoefficient);
         mSourceDelay = new SimpleIntegerProperty(sourceDelay);
