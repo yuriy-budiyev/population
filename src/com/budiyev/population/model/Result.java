@@ -45,8 +45,9 @@ public class Result {
     public Result(int startPoint, double[][] states, List<State> initialStates, boolean prepareResultsTableData,
             boolean prepareResultsChartData, boolean filterNegativeValues) {
         if (filterNegativeValues) {
-            for (double[] step : states) {
-                for (int i = 0; i < step.length; i++) {
+            for (int i = 0; i < states.length; i++) {
+                double[] step = states[i];
+                for (int j = 0; j < step.length; j++) {
                     if (step[i] < 0) {
                         step[i] = 0;
                     }
