@@ -18,20 +18,13 @@
 package com.budiyev.population;
 
 public final class Launcher {
-    public static final String VERSION = "3.1.2";
-    private static volatile boolean sConsoleMode;
+    public static final String VERSION = "3.1.3";
 
     public static void main(String[] args) {
         if (args.length > 0) {
-            sConsoleMode = true;
             Console.main(args);
         } else {
-            sConsoleMode = false;
             PopulationApplication.main(args);
         }
-    }
-
-    public static boolean isConsoleMode() {
-        return sConsoleMode;
     }
 }

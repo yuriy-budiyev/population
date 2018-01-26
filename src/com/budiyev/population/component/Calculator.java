@@ -170,42 +170,6 @@ public class Calculator {
     }
 
     /**
-     * Проверка состояния на отрицательность и корректировка значения, если это необходимо
-     *
-     * @param step  номер шага
-     * @param state идентификатор состояния
-     */
-    private void checkStateNegativeness(int step, int state) {
-        if (!mTask.isAllowNegative()) {
-            mStatesLock.lock();
-            try {
-                if (mStates[step][state] < 0) {
-                    mStates[step][state] = 0;
-                }
-            } finally {
-                mStatesLock.unlock();
-            }
-        }
-    }
-
-    private void checkStateNegativenessBig(int step, int currentStep, int state) {
-        if (!mTask.isAllowNegative()) {
-            mStatesLock.lock();
-            try {
-                int index = currentStep - step;
-                if (mStatesBig[index][state].compareTo(BigDecimal.ZERO) < 0) {
-                    mStatesBig[index][state] = BigDecimal.ZERO;
-                }
-                if (mStates[step][state] < 0) {
-                    mStates[step][state] = 0;
-                }
-            } finally {
-                mStatesLock.unlock();
-            }
-        }
-    }
-
-    /**
      * Увеличение значения заданного состояния на заданном шаге на заданное значение
      *
      * @param step  номер шага
@@ -355,7 +319,7 @@ public class Calculator {
             }
         }
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(), mPrepareResultsTableData,
-                mPrepareResultsChartData);
+                mPrepareResultsChartData, !mTask.isAllowNegative());
     }
 
     /**
@@ -391,7 +355,7 @@ public class Calculator {
         }
         clearBigStates();
         return new Result(mTask.getStartPoint(), mStates, mTask.getStates(), mPrepareResultsTableData,
-                mPrepareResultsChartData);
+                mPrepareResultsChartData, !mTask.isAllowNegative());
     }
 
     /**
@@ -510,7 +474,6 @@ public class Calculator {
         }
         if (!sourceExternal && transitionMode == TransitionMode.REMOVING) {
             decrementState(step, sourceState, value * sourceCoefficient);
-            checkStateNegativeness(step, sourceState);
         }
         if (!operandExternal) {
             if (transitionMode == TransitionMode.INHIBITOR || transitionMode == TransitionMode.RESIDUAL) {
@@ -518,11 +481,9 @@ public class Calculator {
             } else if (transitionMode != TransitionMode.RETAINING) {
                 decrementState(step, operandState, value * operandCoefficient);
             }
-            checkStateNegativeness(step, operandState);
         }
         if (!resultExternal) {
             incrementState(step, resultState, value * transition.getResultCoefficient());
-            checkStateNegativeness(step, resultState);
         }
     }
 
@@ -646,7 +607,6 @@ public class Calculator {
         }
         if (!sourceExternal && transitionMode == TransitionMode.REMOVING) {
             decrementStateBig(step, step, sourceState, multiply(value, decimalValue(sourceCoefficient)));
-            checkStateNegativenessBig(step, step, sourceState);
         }
         if (!operandExternal) {
             if (transitionMode == TransitionMode.INHIBITOR || transitionMode == TransitionMode.RESIDUAL) {
@@ -654,12 +614,10 @@ public class Calculator {
             } else if (transitionMode != TransitionMode.RETAINING) {
                 decrementStateBig(step, step, operandState, multiply(value, decimalValue(operandCoefficient)));
             }
-            checkStateNegativenessBig(step, step, operandState);
         }
         if (!resultExternal) {
             incrementStateBig(step, step, resultState,
                     multiply(value, decimalValue(transition.getResultCoefficient())));
-            checkStateNegativenessBig(step, step, resultState);
         }
     }
 

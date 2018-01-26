@@ -40,9 +40,19 @@ public class Result {
      * @param initialStates           начальные состояния
      * @param prepareResultsTableData подготовить результат в табличном виде
      * @param prepareResultsChartData подготовить результат в графическом виде
+     * @param filterNegativeValues    отфильтровать отрицательные значения
      */
     public Result(int startPoint, double[][] states, List<State> initialStates, boolean prepareResultsTableData,
-            boolean prepareResultsChartData) {
+            boolean prepareResultsChartData, boolean filterNegativeValues) {
+        if (filterNegativeValues) {
+            for (double[] step : states) {
+                for (int i = 0; i < step.length; i++) {
+                    if (step[i] < 0) {
+                        step[i] = 0;
+                    }
+                }
+            }
+        }
         mStartPoint = startPoint;
         mDataNames = new ArrayList<>(initialStates.size());
         mDataNames.addAll(initialStates.stream().map(State::getName).collect(Collectors.toList()));
